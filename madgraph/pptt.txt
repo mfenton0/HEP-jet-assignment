@@ -1,0 +1,9 @@
+generate p p > t t~
+output pptt
+launch pptt
+shower=Pythia8
+detector=Delphes
+analysis=OFF
+done
+done
+exit
