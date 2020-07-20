@@ -30,20 +30,21 @@ class parse_function():
         self.count = len(self.new_array)
         return self.count
 
-    def check_state(self):
+    def in_and_out_finder(self):
 
         print("Work in progress")
 
     def save_parsed_file(self):
 
         with open(self.path, "w") as f:
-            f.write("Index,status,M1,M2,D1,D2,PID,PT,ETA,PHI,MASS")
+            f.write("Index\tstatus\tM1\tM2\tD1\tD2\tPID\tPT\tETA\tPHI\tMASS")
             f.write("\n")
             for j in range(len(self.event[0][0])):
-                f.write("{0},{1},{2},{3},{4},{5},{6:.3f},{7:.3f},{8:.3f},{9:.3f}".format( 
+                f.write("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7:.3f}\t{8:.3f}\t{9:.3f}\t{10:.3f}".format( 
                         j, 
                         self.event[0][self._Status][j], 
-                        self.event[0][self._M1][j], 
+                        self.event[0][self._M1][j],
+                        self.event[0][self._M2][j], 
                         self.event[0][self._D1][j],  
                         self.event[0][self._D2][j], 
                         self.event[0][self._PID][j], 
@@ -64,7 +65,7 @@ def main():
     parsed_event = parse_function(root_file, PATH)
     particle_numbers = parsed_event.count_particles()
     saved_path = parsed_event.save_parsed_file()
-    print("The data has been parsed! There are {0} particles in this events. \n The result has been store in '{1}'.".format(particle_numbers, saved_path))
+    print("The data has been parsed! There are {0} particles in this events.\nThe result has been store in '{1}'.".format(particle_numbers, saved_path))
 
 
 if __name__ == "__main__": 
