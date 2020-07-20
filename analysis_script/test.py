@@ -47,8 +47,7 @@ class parse_function():
             time_tag =  time.strftime("%Y_%m_%d_%H_%M", time.localtime())
             FILENAME = ""
             seq = ("parsed_", time_tag, "_event_", i, ".txt")
-            os.system("mkdir {0}/parsed_event_{1}".format(self.path, time_tag))
-            store_path = os.join.path(self.path, "parsed_event_{0}".format(time_tag),FILENAME.join(seq))
+            store_path = os.join.path(self.path, "parsed_event",FILENAME.join(seq))
 
             idx = np.linspace(0, len( self.event[0][0])-1, num = len( self.event[0][0]) )
             patron_dict = {
