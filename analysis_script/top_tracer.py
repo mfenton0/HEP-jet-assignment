@@ -34,7 +34,7 @@ def particle_tracing(dataset, PID):
             init_shifted_particle_index = shifted_particle_index
             shifted_particle_index = shift_particle_tracing(dataset, PID, init_shifted_particle_index)       
             #print("next_daughter_index: {0}".format(next_daughter_index))
-    return init_shifted_particle_index
+    return init_shifted_particle_index, shifted_particle_index
 
 def deltaPhi(phi1,phi2):
     x = phi1-phi2
