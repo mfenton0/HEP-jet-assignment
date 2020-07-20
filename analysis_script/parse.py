@@ -41,12 +41,9 @@ class parse_function():
 
     def save_parsed_file(self):
 
-        FILENAME = ""
-        seq = ("parsed_", time_tag, ".txt")
+        
 
-        store_path = os.join.path(self.path, FILENAME.join(seq))
-
-        with open(store_path, "w") as f:
+        with open(self.path, "w") as f:
             f.write("Index,status,M1,M2,D1,D2,PID,PT,ETA,PHI,MASS")
             f.write("\n")
             for j in range(len(self.event[0][0])):
@@ -70,14 +67,15 @@ def main():
     root_file = sys.argv[1]  #your root file path
     time_tag = time.strftime("%Y_%m_%d_%H_%M", time.localtime())
     
-    PATH = os.getcwd(), FILENAME.join(seq)
+    FILENAME = ""
+    seq = ("parsed_", time_tag, ".txt")
+    PATH = os.path.join(os.getcwd(), FILENAME.join(seq))
     parsed_event = parse_function(root_file, PATH)
     event_log = parsed_event.parse_event()
     jet_log = parsed_event.parse_jet()
     particle_numbers = parsed_event.count_particles()
     
     #print(jet_log)
-
     saved_path = parsed_event.save_parsed_file()
     print("The data has been parsed! There are {0} particles in this events.\nThe result has been store in '{1}'.".format(particle_numbers, saved_path))
 
