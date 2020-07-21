@@ -2,6 +2,9 @@ import uproot
 import pandas as pd 
 import numpy as np 
 
+data  = uproot.open('./tag_1_delphes_events.root')['Delphes']
+data.show()
+
 class particle_properties():
     def __init__(self, data):
         self.event = data.array('Event')
