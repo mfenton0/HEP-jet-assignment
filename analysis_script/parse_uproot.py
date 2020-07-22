@@ -1,62 +1,20 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[27]:
 
 
 import uproot
 import pandas as pd 
 import numpy as np 
+from particle_properties import particle_properties
+from jet_properties import jet_properties
 
-
-# In[28]:
 
 
 data  = uproot.open('./tag_1_delphes_events.root')['Delphes']
 data.show()
 
 
-# In[29]:
-
-
-class particle_properties():
-    def __init__(self, data):
-        self.event = data.array('Event')
-        self.pt = data.array('Particle.PT')
-        self.eta = data.array('Particle.Eta')
-        self.phi = data.array('Particle.Phi')
-        self.pid = data.array('Particle.PID')
-        self.M1 = data.array('Particle.M1')
-        self.M2 = data.array('Particle.M2')
-        self.D1 = data.array('Particle.D1')
-        self.D2 = data.array('Particle.D2')
-        self.status = data.array('Particle.Status')
-        self.rapidity = data.array('Particle.Rapidity')
-        self.mass = data.array('Particle.Mass')
-        self.charge = data.array('Particle.Charge')
-        print(len(self.pt[0]), len(self.eta[0]), len(self.M1[0]))
-    def dataframelize(self, index):
-
-        idx = np.linspace(0, len( self.pt[index])-1, num = len( self.pt[index]) )
-
-        patron_dict = {
-                "Index": idx,
-                "Status":  self.status[index],
-                "Mother_1":  self.M1[index],
-                "Mother_2":  self.M2[index],
-                "Daughter_1":  self.D1[index],
-                "Daughter_2":  self.D2[index],
-                "PID":  self.pid[index],
-                "PT":  self.pt[index],
-                "Eta":  self.eta[index],
-                "Phi":  self.phi[index],
-                "Mass":  self.mass[index]
-            }
-        patron_df = pd.DataFrame(patron_dict)
-        return patron_df
-
-
-# In[30]:
 
 
 particle = particle_properties(data)
@@ -68,7 +26,6 @@ test_length = 10
 #df2 = particle.dataframelize(2)
 
 
-# In[31]:
 
 
 def shift_particle_tracing(dataset, PID_d, idx):
@@ -97,7 +54,6 @@ def particle_tracing(dataset, PID, STATUS):
     return init_shifted_particle_index, dauthter_idx_1, daughter_pid_1, dauthter_idx_2, daughter_pid_2
 
 
-# In[32]:
 
 
 PID_W_plus = 24 
@@ -140,7 +96,6 @@ quark_idx_5 = np.zeros(len(particle.event))
 quark_idx_6 = np.zeros(len(particle.event))
 
 
-# In[33]:
 
 
 for i in range(0,10):
@@ -148,7 +103,6 @@ for i in range(0,10):
     top_bar_idx[i], top_bar_daughter_idx_1[i], top_bar_daughter_pid_1[i], top_bar_daughter_idx_2[i], top_bar_daughter_pid_2[i] = particle_tracing(particle.dataframelize(i), PID_TOP_BAR, 22)
 
 
-# In[34]:
 
 
 def quark_finder(dataset, mother_idx):
@@ -197,7 +151,6 @@ def quark_finder(dataset, mother_idx):
     return int(daught_b_idx), int(daughter_idx_1_1), int(daughter_idx_1_2)
 
 
-# In[ ]:
 
 
 for i in range(0,10):
@@ -205,14 +158,12 @@ for i in range(0,10):
     quark_idx_4[i], quark_idx_5[i], quark_idx_6[i] = quark_finder(particle.dataframelize(i), top_bar_daughter_idx_1[i])
 
 
-# In[ ]:
 
 
 quark_in_each_event = np.zeros([len(particle.event), 6, 6])
 print(quark_in_each_event.shape)
 
 
-# In[ ]:
 
 
 for i in range(0,10):
@@ -261,31 +212,11 @@ for i in range(0,10):
     quark_in_each_event[i][5][5] = int(dataframe.iloc[int(quark_idx_6[i]),10])  #Mass
 
 
-# In[ ]:
-
-
-class jet_properties():
-    def __init__(self, data):
-        self.event = data.array('Event')
-        self.pt = data.array('Jet.PT')
-        self.eta = data.array('Jet.Eta')
-        self.phi = data.array('Jet.Phi')
-        self.btag = data.array('Jet.BTag')
-        self.area = data.array('Jet.Area')
-        self.mass = data.array('Jet.Mass')
-        self.charge = data.array('Jet.Charge')
-        
-
-
-# In[ ]:
-
-
 jet = jet_properties(data)
 
 print(len(jet.event), len(jet.pt), len(jet.pt[0]))
 
 
-# In[ ]:
 
 
 def deltaPhi(phi1,phi2):
@@ -298,14 +229,12 @@ def delta_R(eta1, phi1, eta2, phi2):
     return np.sqrt(deltaPhi(phi1,phi2)**2+(eta1-eta2)**2)
 
 
-# In[ ]:
 
 
 dR_patron_jet = np.zeros([len(particle.event), 4])
 dR_patron_patron = np.zeros([len(particle.event), 6])
 
 
-# In[ ]:
 
 
 for i in range(0,10):
@@ -317,7 +246,6 @@ for i in range(0,10):
     dR_patron_patron[i][5] = delta_R(quark_in_each_event[i][2][3], quark_in_each_event[i][2][4], quark_in_each_event[i][3][3], quark_in_each_event[i][3][4] #dR(q3,q4)
 
 
-# In[ ]:
 
 
 for i in range(0,10):
@@ -327,15 +255,11 @@ for i in range(0,10):
     dR_patron_jet[i][3] = delta_R(quark_in_each_event[i][3][3], quark_in_each_event[i][3][4], jet.eta[i][0], jet.phi[i][0] )
 
 
-# In[ ]:
-
-
 for i in range(0,10):
     for j in range(0,6):
         print(dR_patron_patron[i][j])
 
 
-# In[ ]:
 
 
 for i in range(0,10):
@@ -343,7 +267,6 @@ for i in range(0,10):
         print(dR_patron_jet[i][j])
 
 
-# In[ ]:
 
 
 def min_delta_R(target_1, target_2):
