@@ -12,10 +12,7 @@ from jet_properties import jet_properties
 
 
 data  = uproot.open('./tag_1_delphes_events.root')['Delphes']
-data.show()
-
-
-
+#data.show()
 
 particle = particle_properties(data)
 
@@ -24,9 +21,6 @@ test_length = 10
 #df0 = particle.dataframelize(0)
 #df1 = particle.dataframelize(1)
 #df2 = particle.dataframelize(2)
-
-
-
 
 def shift_particle_tracing(dataset, PID_d, idx):
     if (dataset.iloc[idx,6] == PID_d):
@@ -52,9 +46,6 @@ def particle_tracing(dataset, PID, STATUS):
     daughter_pid_2 = dataset.iloc[dauthter_idx_2, 6]
 
     return init_shifted_particle_index, dauthter_idx_1, daughter_pid_1, dauthter_idx_2, daughter_pid_2
-
-
-
 
 PID_W_plus = 24 
 PID_W_minus = -24
@@ -109,14 +100,18 @@ def quark_finder(dataset, mother_idx):
 
     def switcher(input_1, input_2, m_id):
         if m_id == 6:
-            if input_1 == 24 :
+            if dataset.iloc[int(input_1),6] == 24 :
+                print(input_1, input_2)
                 return  input_1, input_2
             else :
+                print(input_1, input_2)
                 return  input_2, input_1
         else :
-            if input_1 == -24 :
+            if dataset.iloc[int(input_1),6]  == -24 :
+                print(input_1, input_2)
                 return  input_1, input_2
             else :
+                print(input_1, input_2)
                 return  input_2, input_1
 
     print("Mother index: {0}".format(mother_idx))
@@ -126,19 +121,20 @@ def quark_finder(dataset, mother_idx):
     daughter_idx_1 = dataset.iloc[int(mother_idx), 4]
     daughter_idx_2 = dataset.iloc[int(mother_idx), 5]
 
-    branch_daughter_W_idx, daught_b_idx = switcher(dataset.iloc[int(daughter_idx_1), 6], dataset.iloc[int(daughter_idx_2), 6],  mother_pid)
+    branch_daughter_W_idx, daught_b_idx = switcher(daughter_idx_1, daughter_idx_2,  mother_pid)
 
     status = dataset.iloc[int(branch_daughter_W_idx),1]
     print("Daughter's of t/t~'s status code: {0}".format(status))
-
+    
+    init_mother_idx = branch_daughter_W_idx
     #find daughter of daughter 1
     while status != 23 :
-        mother_idx = branch_daughter_W_idx
-        daughter_idx_1_1 = dataset.iloc[int(mother_idx), 4]
-        daughter_idx_1_2 = dataset.iloc[int(mother_idx), 5]
+        
+        daughter_idx_1_1 = dataset.iloc[int(init_mother_idx), 4]
+        daughter_idx_1_2 = dataset.iloc[int(init_mother_idx), 5]
         status = dataset.iloc[int(daughter_idx_1), 1]
         print("2nd stage daughter status code: {0}".format(status))
-
+        init_mother_idx = daughter_idx_1_1
     
     daughter_pid_1_1 = dataset.iloc[daughter_idx_1_1, 6]
     daughter_pid_1_2 = dataset.iloc[daughter_idx_1_2, 6]
@@ -159,7 +155,7 @@ for i in range(0,10):
 
 
 
-
+"""
 quark_in_each_event = np.zeros([len(particle.event), 6, 6])
 print(quark_in_each_event.shape)
 
@@ -271,4 +267,5 @@ for i in range(0,10):
 
 def min_delta_R(target_1, target_2):
     pass
+"""
 
