@@ -3,3 +3,6 @@ tag_1_delphes_events.root
 unweighted_events.lhe
 .idea/
 __pycache__/
+parse_uproot_backup.py
+parse_HEAH.py
+parse_uproot_backup.ipynb
