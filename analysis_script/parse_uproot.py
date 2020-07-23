@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+# In[53]:
 
 
 import uproot
@@ -74,6 +75,14 @@ top_bar_daughter_pid_1 = np.zeros(len(particle.event))
 top_bar_daughter_idx_2 = np.zeros(len(particle.event))
 top_bar_daughter_pid_2 = np.zeros(len(particle.event))
 
+W_plus_idx = np.zeros(len(particle.event))
+
+W_minus_idx = np.zeros(len(particle.event))
+
+b_quark = np.zeros(len(particle.event))
+
+b_bar_quark = np.zeros(len(particle.event))
+
 quark_idx_1 = np.zeros(len(particle.event))
 
 quark_idx_2 = np.zeros(len(particle.event))
@@ -82,12 +91,6 @@ quark_idx_3 = np.zeros(len(particle.event))
 
 quark_idx_4 = np.zeros(len(particle.event))
 
-quark_idx_5 = np.zeros(len(particle.event))
-
-quark_idx_6 = np.zeros(len(particle.event))
-
-
-
 
 for i in range(0,10):
     top_idx[i], top_daughter_idx_1[i], top_daughter_pid_1[i], top_daughter_idx_2[i], top_daughter_pid_2[i] = particle_tracing(particle.dataframelize(i), PID_TOP, 22)
@@ -95,177 +98,94 @@ for i in range(0,10):
 
 
 
-
-def quark_finder(dataset, mother_idx):
-
-    def switcher(input_1, input_2, m_id):
-        if m_id == 6:
-            if dataset.iloc[int(input_1),6] == 24 :
-                print(input_1, input_2)
-                return  input_1, input_2
-            else :
-                print(input_1, input_2)
-                return  input_2, input_1
+#Input two daughter of top/top_bar and find their daughter
+def quark_finder(dataset, mother_idx_1, mother_idx_2):
+    
+    #Specific two daughter of top
+    def W_b_specifier(dataset, input_1_idx, input_2_idx):
+        if dataset.iloc[int(input_1_idx),6] == PID_W_plus or dataset.iloc[int(input_1_idx),6] == PID_W_minus :
+            return int(input_1_idx), int(dataset.iloc[int(input_1_idx),6]), int(input_2_idx)
+        elif dataset.iloc[int(input_1_idx),6] == PID_BOTTOM or dataset.iloc[int(input_1_idx),6] == PID_BOTTOM_BAR :
+            return  int(input_2_idx), int(dataset.iloc[int(input_1_idx),6]), int(input_1_idx)
         else :
-            if dataset.iloc[int(input_1),6]  == -24 :
-                print(input_1, input_2)
-                return  input_1, input_2
-            else :
-                print(input_1, input_2)
-                return  input_2, input_1
-
-    print("Mother index: {0}".format(mother_idx))
-
-    mother_pid = dataset.iloc[int(mother_idx), 6]
-
-    daughter_idx_1 = dataset.iloc[int(mother_idx), 4]
-    daughter_idx_2 = dataset.iloc[int(mother_idx), 5]
-
-    branch_daughter_W_idx, daught_b_idx = switcher(daughter_idx_1, daughter_idx_2,  mother_pid)
-
-    status = dataset.iloc[int(branch_daughter_W_idx),1]
-    print("Daughter's of t/t~'s status code: {0}".format(status))
+            print("Please check your data.")
     
-    init_mother_idx = branch_daughter_W_idx
-    #find daughter of daughter 1
-    while status != 23 :
-        
-        daughter_idx_1_1 = dataset.iloc[int(init_mother_idx), 4]
-        daughter_idx_1_2 = dataset.iloc[int(init_mother_idx), 5]
-        status = dataset.iloc[int(daughter_idx_1), 1]
-        print("2nd stage daughter status code: {0}".format(status))
-        init_mother_idx = daughter_idx_1_1
+    W_boson_idx, mother_pid, b_quark_idx = W_b_specifier(dataset, mother_idx_1, mother_idx_2)
     
-    daughter_pid_1_1 = dataset.iloc[daughter_idx_1_1, 6]
-    daughter_pid_1_2 = dataset.iloc[daughter_idx_1_2, 6]
+    #Find the two daughters of boson
     
-    print("Daughter 1 index: {0}, daughter 2 index: {1}".format(daughter_idx_1_1, daughter_idx_1_2))
-    print("Daughter 1 PID: {0}, daughter 2 PID: {1}".format(daughter_pid_1_1, daughter_pid_1_2))
+    daughter_1_idx = dataset.iloc[W_boson_idx, 4]
+    daughter_1_pid = dataset.iloc[daughter_1_idx, 6]
+    daughter_2_idx = dataset.iloc[W_boson_idx, 5]
+    daughter_2_pid = dataset.iloc[daughter_2_idx, 6]
 
-
-    print( int(daught_b_idx), int(daughter_idx_1_1), int(daughter_idx_1_2))
-    return int(daught_b_idx), int(daughter_idx_1_1), int(daughter_idx_1_2)
-
-
-
-
-for i in range(0,10):
-    quark_idx_1[i], quark_idx_2[i], quark_idx_3[i] = quark_finder(particle.dataframelize(i), top_daughter_idx_1[i])
-    quark_idx_4[i], quark_idx_5[i], quark_idx_6[i] = quark_finder(particle.dataframelize(i), top_bar_daughter_idx_1[i])
-
-
-
-"""
-quark_in_each_event = np.zeros([len(particle.event), 6, 6])
-print(quark_in_each_event.shape)
-
-
-
-
-for i in range(0,10):
-    dataframe = particle.dataframelize(i)
-
-    quark_in_each_event[i][0][0] = int(dataframe.iloc[int(quark_idx_1[i]),0])  #Index
-    quark_in_each_event[i][0][1] = int(dataframe.iloc[int(quark_idx_1[i]),6])  #PID
-    quark_in_each_event[i][0][2] = int(dataframe.iloc[int(quark_idx_1[i]),7])  #PT
-    quark_in_each_event[i][0][3] = int(dataframe.iloc[int(quark_idx_1[i]),8])  #Eta
-    quark_in_each_event[i][0][4] = int(dataframe.iloc[int(quark_idx_1[i]),9])  #Phi
-    quark_in_each_event[i][0][5] = int(dataframe.iloc[int(quark_idx_1[i]),10])  #Mass
-
-    quark_in_each_event[i][1][0] = int(dataframe.iloc[int(quark_idx_2[i]),0])  #Index
-    quark_in_each_event[i][1][1] = int(dataframe.iloc[int(quark_idx_2[i]),6])  #PID
-    quark_in_each_event[i][1][2] = int(dataframe.iloc[int(quark_idx_2[i]),7])  #PT
-    quark_in_each_event[i][1][3] = int(dataframe.iloc[int(quark_idx_2[i]),8])  #Eta
-    quark_in_each_event[i][1][4] = int(dataframe.iloc[int(quark_idx_2[i]),9])  #Phi
-    quark_in_each_event[i][1][5] = int(dataframe.iloc[int(quark_idx_2[i]),10])  #Mass
-
-    quark_in_each_event[i][2][0] = int(dataframe.iloc[int(quark_idx_3[i]),0])  #Index
-    quark_in_each_event[i][2][1] = int(dataframe.iloc[int(quark_idx_3[i]),6])  #PID
-    quark_in_each_event[i][2][2] = int(dataframe.iloc[int(quark_idx_3[i]),7])  #PT
-    quark_in_each_event[i][2][3] = int(dataframe.iloc[int(quark_idx_3[i]),8])  #Eta
-    quark_in_each_event[i][2][4] = int(dataframe.iloc[int(quark_idx_3[i]),9])  #Phi
-    quark_in_each_event[i][2][5] = int(dataframe.iloc[int(quark_idx_3[i]),10])  #Mass
-
-    quark_in_each_event[i][3][0] = int(dataframe.iloc[int(quark_idx_4[i]),0])  #Index
-    quark_in_each_event[i][3][1] = int(dataframe.iloc[int(quark_idx_4[i]),6])  #PID
-    quark_in_each_event[i][3][2] = int(dataframe.iloc[int(quark_idx_4[i]),7])  #PT
-    quark_in_each_event[i][3][3] = int(dataframe.iloc[int(quark_idx_4[i]),8])  #Eta
-    quark_in_each_event[i][3][4] = int(dataframe.iloc[int(quark_idx_4[i]),9])  #Phi
-    quark_in_each_event[i][3][5] = int(dataframe.iloc[int(quark_idx_4[i]),10])  #Mass
-
-    quark_in_each_event[i][4][0] = int(dataframe.iloc[int(quark_idx_5[i]),0])  #Index
-    quark_in_each_event[i][4][1] = int(dataframe.iloc[int(quark_idx_5[i]),6])  #PID
-    quark_in_each_event[i][4][2] = int(dataframe.iloc[int(quark_idx_5[i]),7])  #PT
-    quark_in_each_event[i][4][3] = int(dataframe.iloc[int(quark_idx_5[i]),8])  #Eta
-    quark_in_each_event[i][4][4] = int(dataframe.iloc[int(quark_idx_5[i]),9])  #Phi
-    quark_in_each_event[i][4][5] = int(dataframe.iloc[int(quark_idx_5[i]),10])  #Mass
-
-    quark_in_each_event[i][5][0] = int(dataframe.iloc[int(quark_idx_6[i]),0])  #Index
-    quark_in_each_event[i][5][1] = int(dataframe.iloc[int(quark_idx_6[i]),6])  #PID
-    quark_in_each_event[i][5][2] = int(dataframe.iloc[int(quark_idx_6[i]),7])  #PT
-    quark_in_each_event[i][5][3] = int(dataframe.iloc[int(quark_idx_6[i]),8])  #Eta
-    quark_in_each_event[i][5][4] = int(dataframe.iloc[int(quark_idx_6[i]),9])  #Phi
-    quark_in_each_event[i][5][5] = int(dataframe.iloc[int(quark_idx_6[i]),10])  #Mass
-
-
-jet = jet_properties(data)
-
-print(len(jet.event), len(jet.pt), len(jet.pt[0]))
+    
+    if daughter_1_pid == mother_pid and daughter_2_pid == mother_pid:
+        init_idx = W_boson_idx
+        while daughter_1_pid == mother_pid:
+            daughter_1_idx = dataset.iloc[int(init_idx), 4]
+            daughter_1_pid = dataset.iloc[int(daughter_1_idx), 6]
+            init_idx = daughter_1_idx
+            print("Temporary daughter 1 indxe: {0}, PID: {1}".format(daughter_1_idx, daughter_1_pid))
+        init_idx = W_boson_idx
+        while daughter_2_pid == mother_pid:
+            daughter_2_idx = dataset.iloc[int(init_idx), 5]
+            daughter_2_pid = dataset.iloc[int(daughter_2_idx), 6]
+            init_idx = daughter_2_idx
+            print("Temporary daughter 2 indxe: {0}, PID: {1}".format(daughter_2_idx, daughter_2_pid))
+    
+    print("Found daughter 1 index: {0}, PID: {1}.\nFound daughter 2 index: {2}, PID: {3}".format(daughter_1_idx, daughter_1_pid, daughter_2_idx, daughter_2_pid))
+    return W_boson_idx, b_quark_idx, daughter_1_idx, daughter_2_idx
 
 
 
 
-def deltaPhi(phi1,phi2):
-    phi = phi1-phi2
-    while phi >= np.pi: phi -= np.pi*2.
-    while phi < -np.pi: phi += np.pi*2.
-    return phi
-
-def delta_R(eta1, phi1, eta2, phi2):
-    return np.sqrt(deltaPhi(phi1,phi2)**2+(eta1-eta2)**2)
-
-
-
-
-dR_patron_jet = np.zeros([len(particle.event), 4])
-dR_patron_patron = np.zeros([len(particle.event), 6])
-
-
+# In[54]:
 
 
 for i in range(0,10):
-    dR_patron_patron[i][0] = delta_R(quark_in_each_event[i][0][3], quark_in_each_event[i][0][4], quark_in_each_event[i][1][3], quark_in_each_event[i][1][4] ) #dR(q1,q2)
-    #dR_patron_patron[i][1] = delta_R(quark_in_each_event[i][0][3], quark_in_each_event[i][0][4], quark_in_each_event[i][2][3], quark_in_each_event[i][2][4] ) #dR(q1,q3)
-    #dR_patron_patron[i][2] = delta_R(quark_in_each_event[i][0][3], quark_in_each_event[i][0][4], quark_in_each_event[i][3][3], quark_in_each_event[i][3][4] ) #dR(q1,q4)
-    #dR_patron_patron[i][3] = delta_R(quark_in_each_event[i][1][3], quark_in_each_event[i][1][4], quark_in_each_event[i][2][3], quark_in_each_event[i][2][4] ) #dR(q2,q3)
-    #dR_patron_patron[i][4] = delta_R(quark_in_each_event[i][1][3], quark_in_each_event[i][1][4], quark_in_each_event[i][3][3], quark_in_each_event[i][3][4] ) #dR(q2,q4)
-    dR_patron_patron[i][5] = delta_R(quark_in_each_event[i][2][3], quark_in_each_event[i][2][4], quark_in_each_event[i][3][3], quark_in_each_event[i][3][4] #dR(q3,q4)
+    print("+-----------------------------------------------------------------------------------------------------+")
+    print("Start parsing event : {0}\nStart to find top quark's daughters.")
+    W_plus_idx[i], b_quark[i], quark_idx_1[i], quark_idx_2[i] = quark_finder(particle.dataframelize(i), top_daughter_idx_1[i], top_daughter_idx_2[i])
+    print("+-----------------------------------------------------------------------------------------------------+")
+    print("Start to find top_bar quark's daughters.")
+    W_minus_idx[i], b_bar_quark[i], quark_idx_3[i], quark_idx_4[i] = quark_finder(particle.dataframelize(i), top_bar_daughter_idx_1[i], top_bar_daughter_idx_2[i])
+    print("+-----------------------------------------------------------------------------------------------------+")
+
+
+# In[ ]:
+
+
+df9 = particle.dataframelize(9)
+df9.iloc[841,:]
+
+
+# In[6]:
+
+
+df9.iloc[855,:]
+
+
+# In[34]:
+
+
+df9.iloc[854,:]
+
+
+# In[19]:
+
+
+df9.iloc[856,:]
+
+
+# In[32]:
+
+
+df9.iloc[857,:]
+
+
+# In[ ]:
 
 
 
-
-for i in range(0,10):
-    dR_patron_jet[i][0] = delta_R(quark_in_each_event[i][0][3], quark_in_each_event[i][0][4], jet.eta[i][0], jet.phi[i][0] )
-    dR_patron_jet[i][1] = delta_R(quark_in_each_event[i][1][3], quark_in_each_event[i][1][4], jet.eta[i][0], jet.phi[i][0] )
-    dR_patron_jet[i][2] = delta_R(quark_in_each_event[i][2][3], quark_in_each_event[i][2][4], jet.eta[i][0], jet.phi[i][0] )
-    dR_patron_jet[i][3] = delta_R(quark_in_each_event[i][3][3], quark_in_each_event[i][3][4], jet.eta[i][0], jet.phi[i][0] )
-
-
-for i in range(0,10):
-    for j in range(0,6):
-        print(dR_patron_patron[i][j])
-
-
-
-
-for i in range(0,10):
-    for j in range(0,4):
-        print(dR_patron_jet[i][j])
-
-
-
-
-def min_delta_R(target_1, target_2):
-    pass
-"""
 
