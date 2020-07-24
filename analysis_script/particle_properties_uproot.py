@@ -17,7 +17,7 @@ class particle_properties():
         self.rapidity = data.array('Particle.Rapidity')
         self.mass = data.array('Particle.Mass')
         self.charge = data.array('Particle.Charge')
-        print(len(self.pt[0]), len(self.eta[0]), len(self.M1[0]))
+        
     def dataframelize(self, index):
 
         idx = np.linspace(0, len( self.pt[index])-1, num = len( self.pt[index]) )
