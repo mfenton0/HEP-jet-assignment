@@ -5,6 +5,8 @@ shower=Pythia8
 detector=Delphes
 analysis=OFF
 done
+set nevents = 100000
+set iseed = 100
 Delphes/cards/delphes_card_ATLAS.tcl
 done
 exit
