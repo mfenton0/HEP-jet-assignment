@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np 
 from particle_properties_uproot import particle_properties  #import particle properties helper function from particle_properties.py
 from jet_properties_uproot import jet_properties  #import jet properties helper function from jet_properties.py
-import h5py, glob, time 
+import h5py, glob, time, os
 
 PID_W_plus = 24 
 PID_W_minus = -24
@@ -140,11 +140,14 @@ def parse_section(filename, output_file):
     marker_event = np.asanyarray(marker_event)
     marker_jet = np.asanyarray(marker_jet)
 
+    print("length of jet.pt is {0}".format(len(jet.pt[0])))
+    print("The min pt of jet.pt[0] is {0}".format(np.min(jet.pt[0])))
+    print(len(jet.event))
     #Mark which event pass the selection
     print("+-----------------------------------------------------------------------------------------------------+")
     print("Start event selection.")
-    for i in range(length):
-        min_pt = np.min(jet.pt[i])
+    for i in range(len(jet.event)):
+        min_pt = jet.pt[i].min()
         num_of_eta_in_range = np.sum(jet.eta[i] < 2.4 ) 
         num_of_jet = len(jet.pt[i])
         num_of_btagged = np.sum(jet.btag[i] == 1)
@@ -152,13 +155,14 @@ def parse_section(filename, output_file):
             marker_event[i] = 1
         else :
             pass
+
     print("Event selection doen.")
     print("+-----------------------------------------------------------------------------------------------------+")
 
     #Mark which jet in each event pass the selection.
     print("+-----------------------------------------------------------------------------------------------------+")
     print("Start jet selection.")
-    for i in range(length):
+    for i in range(len(jet.event)):
         if marker_event[i] == 1:
             for j in range(len(jet.pt[i])):
                 if jet.btag[i][j] == 1 and jet.pt[i][j] > 20 and jet.eta[i][j] < 2.4:
@@ -173,7 +177,7 @@ def parse_section(filename, output_file):
     print("+-----------------------------------------------------------------------------------------------------+")
     
 
-    for i in range(length):
+    for i in range(len(jet.event)):
         print("+------------------------------------------------------------------------------------------------------+")
         print("Start parsing event : {0}\nStart to trace top quark and find its daughters.".format(i))
         top_idx[i], top_daughter_idx_1[i], top_daughter_pid_1[i], top_daughter_idx_2[i], top_daughter_pid_2[i] = particle_chasing(particle.dataframelize(i), PID_TOP, 22)
@@ -182,21 +186,21 @@ def parse_section(filename, output_file):
         top_bar_idx[i], top_bar_daughter_idx_1[i], top_bar_daughter_pid_1[i], top_bar_daughter_idx_2[i], top_bar_daughter_pid_2[i] = particle_chasing(particle.dataframelize(i), PID_TOP_BAR, 22)
         print("+------------------------------------------------------------------------------------------------------+")
 
-    for i in range(length):
-    if marker_event[i] == 1 :
-        print("+------------------------------------------------------------------------------------------------------+")
-        print("Start parsing event : {0}\nStart to find top quark's daughters.".format(i))
-        parton_array[i][0][0], parton_array[i][1][0], parton_array[i][2][0] = quark_finder(particle.dataframelize(i), top_daughter_idx_1[i], top_daughter_idx_2[i])
-        print("+------------------------------------------------------~-----------------------------------------------+")
-        print("Start to find top_bar quark's daughters.")
-        parton_array[i][3][0], parton_array[i][4][0], parton_array[i][5][0], = quark_finder(particle.dataframelize(i), top_bar_daughter_idx_1[i], top_bar_daughter_idx_2[i])
-        print("+------------------------------------------------------------------------------------------------------+")
-    elif marker_event[i] == 0 :
-        parton_array[i] = 'Nan'
-    else: pass
+    for i in range(len(jet.event)):
+        if marker_event[i] == 1 :
+            print("+------------------------------------------------------------------------------------------------------+")
+            print("Start parsing event : {0}\nStart to find top quark's daughters.".format(i))
+            parton_array[i][0][0], parton_array[i][1][0], parton_array[i][2][0] = quark_finder(particle.dataframelize(i), top_daughter_idx_1[i], top_daughter_idx_2[i])
+            print("+------------------------------------------------------~-----------------------------------------------+")
+            print("Start to find top_bar quark's daughters.")
+            parton_array[i][3][0], parton_array[i][4][0], parton_array[i][5][0], = quark_finder(particle.dataframelize(i), top_bar_daughter_idx_1[i], top_bar_daughter_idx_2[i])
+            print("+------------------------------------------------------------------------------------------------------+")
+        elif marker_event[i] == 0 :
+            parton_array[i] = 'Nan'
+        else: pass
 
     barcode = np.array([34, 40, 40, 17, 20, 20])
-    for i in range(length):
+    for i in range(len(jet.event)):
         if marker_event[i] == 1:
             for j in range(0,6):
                 dataset = particle.dataframelize(i)
@@ -210,7 +214,7 @@ def parse_section(filename, output_file):
     dR_between_parton_jet = []
     dR_between_parton_parton = []
 
-    for i in range(length):
+    for i in range(len(jet.event)):
         dR_between_parton_jet.append(np.zeros([len(jet.pt[i]) * 6])) # # of connection = num of jet * num of parton
         dR_between_parton_parton.append(np.zeros([15])) # C^{6}_{2} = 15
 
@@ -218,7 +222,7 @@ def parse_section(filename, output_file):
     dR_between_parton_parton = np.asanyarray(dR_between_parton_parton)
 
     max_num_of_jet_cand = []
-    for i in range(length):
+    for i in range(len(jet.event)):
         max_num_of_jet_cand.append(len(jet.pt[i]))
     max_num_of_jet_cand = np.asanyarray(max_num_of_jet_cand)
     max_num_of_jet = max_num_of_jet_cand.max()
@@ -227,14 +231,14 @@ def parse_section(filename, output_file):
     #parton_jet_matching = np.zeros([len(jet.event), 6, 2])
     matching_jet = []
     matching_parton = []
-    for i in range(length):
+    for i in range(len(jet.event)):
         matching_jet.append(np.zeros([len(jet.pt[i])]))
         matching_parton.append(np.zeros([6]))
 
     matching_jet = np.array(matching_jet)
     matching_parton = np.array(matching_parton)
 
-    for i in range(length):
+    for i in range(len(jet.event)):
         if marker_event[i] == 1:
             j = 0
             a = 0
@@ -249,7 +253,7 @@ def parse_section(filename, output_file):
         else :
             dR_between_parton_jet[i] = 'Nan'
         
-    for i in range(length):
+    for i in range(len(jet.event)):
         if marker_event[i] == 1:
             print("+------------------------------------------------------------------------------------------------------+")
             # print(dR_between_parton_jet.shape)
@@ -292,23 +296,23 @@ def parse_section(filename, output_file):
     parton_index = np.zeros([len(jet.event), 6])
     jet_index = []
     np.zeros([len(jet.event), 6])
-    for i in range(length):
+    for i in range(len(jet.event)):
         jet_index.append(np.zeros([len(jet.pt[i])]))
 
 
-    for i in range(length):
+    for i in range(len(jet.event)):
         if marker_event[i] == 1:
             for j in range(0,6):
                 parton_index[i][j] = matching_parton[i][j]
             for k in range(len(jet.pt[i])):
                 jet_index[i][k] = matching_jet[i][k]
     jet_barcode = []
-    for i in range(length):
+    for i in range(len(jet.event)):
         jet_barcode.append(np.zeros([len(jet.pt[i])]))
 
     jet_barcode = np.array(jet_barcode)
 
-    for i in range(length):
+    for i in range(len(jet.event)):
         if marker_event[i] == 1:
             for j in range(len(jet_index[i])):
                 if jet_index[i][j] == 0:
@@ -332,7 +336,7 @@ def parse_section(filename, output_file):
     jet_btag = []
     jet_mass = []
 
-    for i in range(length):
+    for i in range(len(jet.event)):
         jet_pt.append(np.zeros([len(jet.pt[i])]))
         jet_eta.append(np.zeros([len(jet.pt[i])]))
         jet_phi.append(np.zeros([len(jet.pt[i])]))
@@ -345,7 +349,7 @@ def parse_section(filename, output_file):
     jet_btag = np.array(jet_btag)
     jet_mass = np.array(jet_mass)
 
-    for i in range(length):
+    for i in range(len(jet.event)):
         if marker_event[i] == 1:
             for j in range(len(jet.pt[i])):
                 if marker_jet[i][j] == 1:
@@ -377,7 +381,7 @@ def parse_section(filename, output_file):
     hdf5_parton_phi = []
     hdf5_parton_mass = []
 
-    for i in range(length):
+    for i in range(len(jet.event)):
         if marker_event[i] == 1:
             hdf5_jet_parton_index.append(parton_index[i])
             hdf5_jet_barcode.append(jet_barcode[i])
@@ -390,7 +394,7 @@ def parse_section(filename, output_file):
 
 
 
-    for i in range(length):
+    for i in range(len(jet.event)):
         if marker_event[i] == 1:
             parton_pdgid = []
             parton_pt = []
@@ -429,7 +433,7 @@ def parse_section(filename, output_file):
     hdf5_parton_mass = np.array(hdf5_parton_mass)
 
     #Save the event which pass the selection
-    with h5py.File(output_file",'w') as f:
+    with h5py.File(output_file,'w') as f:
         group_jet = f.create_group('jet')
         group_jet['Parton_Index'] = hdf5_jet_parton_index
         group_jet['Barcode'] = hdf5_jet_barcode
@@ -453,13 +457,13 @@ def main():
     prefix = os.getcwd()
     filename = glob.glob("./root_files/run_*/*.root")
     print(filename)
-    
+    #print(type(prefix))
     i = 1
 
     save_name = ''
-    seq = ("event_record_", i, ".h5")
+    seq = ("event_record_", str(i), ".h5")
     save_path = os.path.join(prefix, save_name.join(seq))
-    parse_section(filename, save_path)
+    parse_section(filename[0], save_path)
     
     # for i in filename:
     #     save_name = ''
