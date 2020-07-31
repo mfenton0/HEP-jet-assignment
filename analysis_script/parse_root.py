@@ -113,8 +113,6 @@ def parse_section(filename, output_file):
     particle = particle_properties(data)
     jet = jet_properties(data)
 
-    length = len(particle.event)
-
     top_idx = np.zeros(len(particle.event))
     top_idx = np.zeros(len(particle.event))
     top_daughter_idx_1 = np.zeros(len(particle.event))
@@ -133,28 +131,35 @@ def parse_section(filename, output_file):
     marker_event = []
     marker_jet = []
 
-    for i in range(length):
+    for i in range(len(jet.event)):
         marker_event.append(0)
         marker_jet.append(np.zeros([len(jet.pt[i])]))
     
     marker_event = np.asanyarray(marker_event)
     marker_jet = np.asanyarray(marker_jet)
 
-    print("length of jet.pt is {0}".format(len(jet.pt[0])))
-    print("The min pt of jet.pt[0] is {0}".format(np.min(jet.pt[0])))
-    print(len(jet.event))
+
     #Mark which event pass the selection
     print("+-----------------------------------------------------------------------------------------------------+")
     print("Start event selection.")
     for i in range(len(jet.event)):
-        min_pt = jet.pt[i].min()
-        num_of_eta_in_range = np.sum(jet.eta[i] < 2.4 ) 
-        num_of_jet = len(jet.pt[i])
-        num_of_btagged = np.sum(jet.btag[i] == 1)
-        if min_pt > 20 and num_of_eta_in_range >= 6 and num_of_jet >=6 and num_of_btagged >= 2: 
+        pt_min = np.min(jet.pt[i])
+        eta_in_range = np.sum( jet.eta[i] < 2.4 )
+        n_of_jet = len(jet.pt[i])
+        n_of_btagged = np.sum(jet.btag[i] == 1)
+        
+        if pt_min > 20 and eta_in_range >= 6 and n_of_jet >= 6 and n_of_btagged >= 2:
             marker_event[i] = 1
         else :
             pass
+        # min_pt = np.min(jet.pt[i])
+        # num_of_eta_in_range = np.sum(jet.eta[i] < 2.4 )
+        # num_of_jet = len(jet.pt[i]) 
+        # num_of_btagged = np.sum( jet.btag[i] == 1)
+        # if min_pt > 20 and num_of_eta_in_range >= 6 and num_of_jet >=6 and num_of_btagged >= 2: 
+        #     marker_event[i] = 1
+        # else :
+        #    pass
 
     print("Event selection doen.")
     print("+-----------------------------------------------------------------------------------------------------+")
@@ -458,10 +463,9 @@ def main():
     filename = glob.glob("./root_files/run_*/*.root")
     print(filename)
     #print(type(prefix))
-    i = 1
 
     save_name = ''
-    seq = ("event_record_", str(i), ".h5")
+    seq = ("event_record_", "0", ".h5")
     save_path = os.path.join(prefix, save_name.join(seq))
     parse_section(filename[0], save_path)
     
