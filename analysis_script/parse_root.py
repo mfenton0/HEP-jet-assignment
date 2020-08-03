@@ -14,8 +14,8 @@ data  = uproot.open(FILE_PATH)['Delphes']
 particle = particle_properties(data)
 jet = jet_properties(data)
 
-Length = len(particle.event)
-test_length = 10
+#Length = len(particle.event)
+#test_length = 10
 
 PID_W_plus = 24 
 PID_W_minus = -24
@@ -51,7 +51,7 @@ parton_array = np.zeros([ len(particle.event) , 6, 7])
 marker_event = []
 marker_jet = []
 
-for i in range(test_length):
+for i in range(len(particle.event)):
     marker_event.append(0)
     marker_jet.append(np.zeros([len(jet.pt[i])]))
 
@@ -67,7 +67,7 @@ print(marker_event.shape, marker_jet.shape)
 #Mark which event pass the selection
 print("+-----------------------------------------------------------------------------------------------------+")
 print("Start event selection.")
-for i in range(test_length):
+for i in range(len(particle.event)):
     min_pt = np.min(jet.pt[i])
     num_of_eta_in_range = np.sum(jet.eta[i] < 2.4 ) 
     num_of_jet = len(jet.pt[i])
@@ -82,7 +82,7 @@ print("+------------------------------------------------------------------------
 #Mark which jet in each event pass the selection.
 print("+-----------------------------------------------------------------------------------------------------+")
 print("Start jet selection.")
-for i in range(test_length):
+for i in range(len(particle.event)):
     if marker_event[i] == 1:
         for j in range(len(jet.pt[i])):
             if jet.btag[i][j] == 1 and jet.pt[i][j] > 20 and jet.eta[i][j] < 2.4:
@@ -122,7 +122,7 @@ def particle_tracing(dataset, PID, STATUS):
     return init_shifted_particle_index, dauthter_idx_1, daughter_pid_1, dauthter_idx_2, daughter_pid_2
 
 
-for i in range(test_length):
+for i in range(len(particle.event)):
     print("+------------------------------------------------------------------------------------------------------+")
     print("Start parsing event : {0}\nStart to trace top quark and find its daughters.".format(i))
     top_idx[i], top_daughter_idx_1[i], top_daughter_pid_1[i], top_daughter_idx_2[i], top_daughter_pid_2[i] = particle_tracing(particle.dataframelize(i), PID_TOP, 22)
@@ -183,7 +183,7 @@ def quark_finder(dataset, mother_idx_1, mother_idx_2):
     return  b_quark_idx, daughter_1_idx, daughter_2_idx
 
 
-for i in range(test_length):
+for i in range(len(particle.event)):
     if marker_event[i] == 1 :
         print("+------------------------------------------------------------------------------------------------------+")
         print("Start parsing event : {0}\nStart to find top quark's daughters.".format(i))
@@ -197,7 +197,7 @@ for i in range(test_length):
     else: pass
 
 barcode = np.array([34, 40, 40, 17, 20, 20])
-for i in range(test_length):
+for i in range(len(particle.event)):
     if marker_event[i] == 1:
         for j in range(0,6):
             dataset = particle.dataframelize(i)
@@ -223,7 +223,7 @@ def min_delta_R(target_1, target_2):
 dR_between_parton_jet = []
 dR_between_parton_parton = []
 
-for i in range(test_length):
+for i in range(len(particle.event)):
     dR_between_parton_jet.append(np.zeros([len(jet.pt[i]) * 6])) # # of connection = num of jet * num of parton
     dR_between_parton_parton.append(np.zeros([15])) # C^{6}_{2} = 15
 
@@ -232,7 +232,7 @@ dR_between_parton_parton = np.asanyarray(dR_between_parton_parton)
 
 
 max_num_of_jet_cand = []
-for i in range(test_length):
+for i in range(len(particle.event)):
     max_num_of_jet_cand.append(len(jet.pt[i]))
 max_num_of_jet_cand = np.asanyarray(max_num_of_jet_cand)
 max_num_of_jet = max_num_of_jet_cand.max()
@@ -241,7 +241,7 @@ print(max_num_of_jet)
 #parton_jet_matching = np.zeros([len(jet.event), 6, 2])
 matching_jet = []
 matching_parton = []
-for i in range(test_length):
+for i in range(len(particle.event)):
     matching_jet.append(np.zeros([len(jet.pt[i])]))
     matching_parton.append(np.zeros([6]))
 
@@ -249,7 +249,7 @@ matching_jet = np.array(matching_jet)
 matching_parton = np.array(matching_parton)
 
 
-for i in range(test_length):
+for i in range(len(particle.event)):
     if marker_event[i] == 1:
         j = 0
         a = 0
@@ -264,7 +264,7 @@ for i in range(test_length):
     else :
         dR_between_parton_jet[i] = 'Nan'
 
-for i in range(test_length):
+for i in range(len(particle.event)):
     if marker_event[i] == 1:
         print("+------------------------------------------------------------------------------------------------------+")
         # print(dR_between_parton_jet.shape)
@@ -311,7 +311,7 @@ for i in range(test_length):
     jet_index.append(np.zeros([len(jet.pt[i])]))
 
 
-for i in range(test_length):
+for i in range(len(particle.event)):
     if marker_event[i] == 1:
         for j in range(0,6):
             parton_index[i][j] = matching_parton[i][j]
@@ -319,12 +319,12 @@ for i in range(test_length):
             jet_index[i][k] = matching_jet[i][k]
 
 jet_barcode = []
-for i in range(test_length):
+for i in range(len(particle.event)):
     jet_barcode.append(np.zeros([len(jet.pt[i])]))
 
 jet_barcode = np.array(jet_barcode)
 
-for i in range(test_length):
+for i in range(len(particle.event)):
     if marker_event[i] == 1:
         for j in range(len(jet_index[i])):
             if jet_index[i][j] == 0:
@@ -348,7 +348,7 @@ jet_phi = []
 jet_btag = []
 jet_mass = []
 
-for i in range(test_length):
+for i in range(len(particle.event)):
     jet_pt.append(np.zeros([len(jet.pt[i])]))
     jet_eta.append(np.zeros([len(jet.pt[i])]))
     jet_phi.append(np.zeros([len(jet.pt[i])]))
@@ -361,7 +361,7 @@ jet_phi = np.array(jet_phi)
 jet_btag = np.array(jet_btag)
 jet_mass = np.array(jet_mass)
 
-for i in range(test_length):
+for i in range(len(particle.event)):
     if marker_event[i] == 1:
         for j in range(len(jet.pt[i])):
             if marker_jet[i][j] == 1:
@@ -394,7 +394,7 @@ hdf5_parton_phi = []
 hdf5_parton_mass = []
 
 
-for i in range(test_length):
+for i in range(len(particle.event)):
     if marker_event[i] == 1:
         hdf5_jet_parton_index.append(parton_index[i])
         hdf5_jet_barcode.append(jet_barcode[i])
@@ -407,7 +407,7 @@ for i in range(test_length):
 
 
 
-for i in range(test_length):
+for i in range(len(particle.event)):
     if marker_event[i] == 1:
         parton_pdgid = []
         parton_pt = []
@@ -446,9 +446,8 @@ hdf5_parton_eta = np.array(hdf5_parton_eta)
 hdf5_parton_phi = np.array(hdf5_parton_phi)
 hdf5_parton_mass = np.array(hdf5_parton_mass)
 
-
 #Save the event which pass the selection
-with h5py.File("event_record.h5",'w') as f:
+with h5py.File("./hdf5_files/event_record_01.h5",'w') as f:
     group_jet = f.create_group('jet')
     group_jet['Parton_Index'] = hdf5_jet_parton_index
     group_jet['Barcode'] = hdf5_jet_barcode
