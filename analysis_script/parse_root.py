@@ -1,4 +1,4 @@
-import uproot, sys, hdf5plugin, tables
+import uproot, sys, hdf5plugin
 import pandas as pd 
 import numpy as np 
 from particle_properties_uproot import particle_properties  #import particle properties helper function from particle_properties.py
@@ -477,7 +477,7 @@ with h5py.File(STORE_PATH,'w') as f:
     f.attrs.create("parton_eta", hdf5_parton_eta)
     f.attrs.create("parton_phi", hdf5_parton_phi)
     f.attrs.create("parton_mass", hdf5_parton_mass)
-    
+
     # group_jet = f.create_group('jet')
     # group_jet['Parton_Index'] = hdf5_jet_parton_index
     # #group_jet['Barcode'] = hdf5_jet_barcode
