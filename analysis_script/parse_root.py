@@ -7,6 +7,7 @@ import h5py
 
 
 FILE_PATH = sys.argv[1]
+STORE_PATH = sys.argv[2]
 
 data  = uproot.open(FILE_PATH)['Delphes']
 #data.show()
@@ -196,7 +197,19 @@ for i in range(len(particle.event)):
         parton_array[i] = 'Nan'
     else: pass
 
-barcode = np.array([34, 40, 40, 17, 20, 20])
+ 
+# t t~ W+ W- b b~ 
+# 0 0  0  0  0 0
+
+# i.e.
+# col 3 = 100010 
+# col 5 = 101000
+# col 6 = 101000
+# col 8 = 010100
+# col 10= 010001
+# col 11= 010001
+
+barcode = np.array([0b100010, 0b101000, 0b101000, 0b010001, 0b010100, 0b010100])
 for i in range(len(particle.event)):
     if marker_event[i] == 1:
         for j in range(0,6):
@@ -307,7 +320,7 @@ for i in range(len(particle.event)):
 parton_index = np.zeros([len(jet.event), 6])
 jet_index = []
 np.zeros([len(jet.event), 6])
-for i in range(test_length):
+for i in range(len(particle.event)):
     jet_index.append(np.zeros([len(jet.pt[i])]))
 
 
@@ -447,7 +460,7 @@ hdf5_parton_phi = np.array(hdf5_parton_phi)
 hdf5_parton_mass = np.array(hdf5_parton_mass)
 
 #Save the event which pass the selection
-with h5py.File("./hdf5_files/event_record_01.h5",'w') as f:
+with h5py.File(STORE_PATH,'w') as f:
     group_jet = f.create_group('jet')
     group_jet['Parton_Index'] = hdf5_jet_parton_index
     group_jet['Barcode'] = hdf5_jet_barcode
