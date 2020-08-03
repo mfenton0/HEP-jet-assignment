@@ -7,3 +7,5 @@ parse_uproot_backup.py
 parse_HEAH.py
 parse_uproot_backup.ipynb
 parse_root_1.py
+hdf5_files/
+
