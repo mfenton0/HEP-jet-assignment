@@ -1,4 +1,4 @@
-import uproot, sys
+import uproot, sys, hdf5plugin, tables
 import pandas as pd 
 import numpy as np 
 from particle_properties_uproot import particle_properties  #import particle properties helper function from particle_properties.py
@@ -209,7 +209,7 @@ for i in range(len(particle.event)):
 # col 10= 010001
 # col 11= 010001
 
-barcode = np.array([0b100010, 0b101000, 0b101000, 0b010001, 0b010100, 0b010100])
+barcode = np.array([34, 40, 40, 17, 20, 20])
 for i in range(len(particle.event)):
     if marker_event[i] == 1:
         for j in range(0,6):
@@ -461,20 +461,43 @@ hdf5_parton_mass = np.array(hdf5_parton_mass)
 
 #Save the event which pass the selection
 with h5py.File(STORE_PATH,'w') as f:
-    group_jet = f.create_group('jet')
-    group_jet['Parton_Index'] = hdf5_jet_parton_index
-    group_jet['Barcode'] = hdf5_jet_barcode
-    group_jet['Pt'] = hdf5_jet_pt
-    group_jet['Eta'] = hdf5_jet_eta
-    group_jet['Phi'] = hdf5_jet_phi
-    group_jet['Mass'] = hdf5_jet_mass
-    group_jet['BTag'] = hdf5_jet_btagged
+
+    f.attrs.create("jet_parton_index", hdf5_jet_parton_index)
+    f.attrs.create("jet_barcode", hdf5_jet_barcode)
+    f.attrs.create("jet_pt", hdf5_jet_pt)
+    f.attrs.create("jet_eta", hdf5_jet_eta)
+    f.attrs.create("jet_phi", hdf5_jet_phi)
+    f.attrs.create("jet_mass", hdf5_jet_mass)
+    f.attrs.create("jet_btag", hdf5_jet_btagged)
+
+    f.attrs.create("parton_jet_index", hdf5_parton_jet_index)
+    f.attrs.create("parton_pdgid", hdf5_parton_pdgid)
+    f.attrs.create("parton_barcode", hdf5_parton_barcode)
+    f.attrs.create("parton_pt", hdf5_parton_pt)
+    f.attrs.create("parton_eta", hdf5_parton_eta)
+    f.attrs.create("parton_phi", hdf5_parton_phi)
+    f.attrs.create("parton_mass", hdf5_parton_mass)
     
-    group_parton = f.create_group('parton')
-    group_parton['Jet_Index'] = hdf5_parton_jet_index
-    group_parton['Pdgid'] = hdf5_parton_pdgid
-    group_parton['Barcode'] = hdf5_parton_barcode
-    group_parton['Pt'] = hdf5_parton_pt
-    group_parton['Eta'] = hdf5_parton_eta
-    group_parton['Phi'] = hdf5_parton_phi
-    group_parton['Mass'] = hdf5_parton_mass
+    # group_jet = f.create_group('jet')
+    # group_jet['Parton_Index'] = hdf5_jet_parton_index
+    # #group_jet['Barcode'] = hdf5_jet_barcode
+    # group_jet['Pt'] = hdf5_jet_pt
+    # group_jet['Eta'] = hdf5_jet_eta
+    # group_jet['Phi'] = hdf5_jet_phi
+    # group_jet['Mass'] = hdf5_jet_mass
+    # group_jet['BTag'] = hdf5_jet_btagged
+
+    # jet_barcode = f.create_dataset('jet_barcode')
+    # jet_barcode = hdf5_jet_barcode
+    
+    # group_parton = f.create_group('parton')
+    # group_parton['Jet_Index'] = hdf5_parton_jet_index
+    # group_parton['Pdgid'] = hdf5_parton_pdgid
+    # #group_parton['Barcode'] = hdf5_parton_barcode
+    # group_parton['Pt'] = hdf5_parton_pt
+    # group_parton['Eta'] = hdf5_parton_eta
+    # group_parton['Phi'] = hdf5_parton_phi
+    # group_parton['Mass'] = hdf5_parton_mass
+
+    # parton_barcode = f.create_dataset('parton_barcode')
+    # parton_barcode = hdf5_parton_barcode
