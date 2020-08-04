@@ -202,14 +202,14 @@ for i in range(len(particle.event)):
 # 0 0  0  0  0 0
 
 # i.e.
-# col 3 = 100010 
-# col 5 = 101000
-# col 6 = 101000
-# col 8 = 010100
-# col 10= 010001
-# col 11= 010001
+# col 3 = 100010  ---> 34
+# col 5 = 101000  ---> 40
+# col 6 = 101000  ---> 40
+# col 8 = 010100  ---> 17
+# col 10= 010001  ---> 20
+# col 11= 010001  ---> 20
 
-barcode = np.array([[1,0,0,0,1,0], [1,0,1,0,0,0], [1,0,1,0,0,0], [0,1,0,1,0,0], [0,1,0,0,0,1], [0,1,0,0,0,1]])
+barcode = np.array([34, 40, 40, 17, 20, 20])
 for i in range(len(particle.event)):
     if marker_event[i] == 1:
         for j in range(0,6):
@@ -299,8 +299,8 @@ for i in range(len(particle.event)):
             if min_val < 0.4:
                 print("Min val: {0}".format(min_val))
                 min_idx, min_col = dataset.stack().idxmin()
-                matching_parton[i][j] = int(min_idx)
-                matching_jet[i][j] = int(min_col)
+                matching_parton[i][j] = int(min_col)
+                matching_jet[i][j] = int(min_idx)
                 #parton_jet_matching[i][j][0] = int(min_idx)
                 #parton_jet_matching[i][j][1] = int(min_col)
                 print("The position of minimun appears. Raw: {0}, Colume: {1}".format(min_idx, min_col))
@@ -317,12 +317,18 @@ for i in range(len(particle.event)):
             matching_jet[i][k] = 'Nan'
     else : pass
 
+for i in range(len(particle.event)):
+    if marker_event[i] == 1:
+        if np.sum(matching_jet[i] <= 6) <= 6:
+            marker_event[i] = 0
+
 parton_index = np.zeros([len(jet.event), 6])
 jet_index = []
-np.zeros([len(jet.event), 6])
+
 for i in range(len(particle.event)):
     jet_index.append(np.zeros([len(jet.pt[i])]))
 
+jet_index = np.array(jet_index)
 
 for i in range(len(particle.event)):
     if marker_event[i] == 1:
@@ -331,29 +337,31 @@ for i in range(len(particle.event)):
         for k in range(len(jet.pt[i])):
             jet_index[i][k] = matching_jet[i][k]
 
-# jet_barcode = []
-# for i in range(len(particle.event)):
-#     jet_barcode.append(np.zeros([len(jet.pt[i])]))
 
-# jet_barcode = np.array(jet_barcode)
+jet_barcode = []
+for i in range(len(particle.event)):
+    jet_barcode.append(np.zeros([len(jet.pt[i])]))
 
-# for i in range(len(particle.event)):
-#     if marker_event[i] == 1:
-#         for j in range(len(jet_index[i])):
-#             if jet_index[i][j] == 0:
-#                 jet_barcode[i][j] = barcode[0]
-#             elif jet_index[i][j] == 1: 
-#                 jet_barcode[i][j] = barcode[1]
-#             elif jet_index[i][j] == 2: 
-#                 jet_barcode[i][j] = barcode[2]
-#             elif jet_index[i][j] == 3: 
-#                 jet_barcode[i][j] = barcode[3]
-#             elif jet_index[i][j] == 4: 
-#                 jet_barcode[i][j] = barcode[4]
-#             elif jet_index[i][j] == 5: 
-#                 jet_barcode[i][j] = barcode[5]
-#             else :
-#                 jet_barcode[i][j] = 'Nan'
+
+jet_barcode = np.array(jet_barcode)
+
+for i in range(len(particle.event)):
+    if marker_event[i] == 1:
+        for j in range(len(jet_index[i])):
+            if jet_index[i][j] == 0:
+                jet_barcode[i][j] = barcode[0]
+            elif jet_index[i][j] == 1: 
+                jet_barcode[i][j] = barcode[1]
+            elif jet_index[i][j] == 2: 
+                jet_barcode[i][j] = barcode[2]
+            elif jet_index[i][j] == 3: 
+                jet_barcode[i][j] = barcode[3]
+            elif jet_index[i][j] == 4: 
+                jet_barcode[i][j] = barcode[4]
+            elif jet_index[i][j] == 5: 
+                jet_barcode[i][j] = barcode[5]
+            else :
+                jet_barcode[i][j] = 'Nan'
 
 jet_pt = []
 jet_eta = []
@@ -409,25 +417,9 @@ hdf5_parton_mass = []
 
 for i in range(len(particle.event)):
     if marker_event[i] == 1:
-        jet_barcode = []
-        for j in range(0,6): 
-            if jet_index[i][j] == 0:
-                jet_barcode.append(barcode[0])
-            elif jet_index[i][j] == 1: 
-                jet_barcode.append(barcode[1])
-            elif jet_index[i][j] == 2: 
-                jet_barcode.append(barcode[2])
-            elif jet_index[i][j] == 3: 
-                jet_barcode.append(barcode[3])
-            elif jet_index[i][j] == 4: 
-                jet_barcode.append(barcode[4])
-            elif jet_index[i][j] == 5: 
-                jet_barcode.append(barcode[5])
-            else :
-                jet_barcode.append('Nan')
 
         hdf5_jet_parton_index.append(parton_index[i])
-        hdf5_jet_barcode.append(jet_barcode)
+        hdf5_jet_barcode.append(jet_barcode[i])
         hdf5_jet_pt.append(jet_pt[i])
         hdf5_jet_eta.append(jet_eta[i])
         hdf5_jet_phi.append(jet_phi[i])
@@ -463,8 +455,7 @@ for i in range(len(particle.event)):
 
 
 hdf5_jet_parton_index = np.array(hdf5_jet_parton_index)
-hdf5_parton_pdgid.append(parton_pdgid)
-hdf5_jet_barcode = np.array(parton_barcode)
+hdf5_jet_barcode = np.array(hdf5_jet_barcode)
 hdf5_jet_pt = np.array(hdf5_jet_pt)
 hdf5_jet_eta = np.array(hdf5_jet_eta)
 hdf5_jet_phi = np.array(hdf5_jet_phi)
@@ -488,7 +479,7 @@ with h5py.File(STORE_PATH,'w') as f:
     dt = h5py.vlen_dtype(np.dtype('int32'))
 
     jet_parton_index = f.create_dataset('jet_parton_index', (lene, ), dtype=dt)
-    jet_barcode = f.create_dataset('jet_barcode', (lene, ), dtype=dt)
+    jet_barcode = f.create_dataset('jet_barcode', (lene, ),  dtype=dt)
     jet_pt = f.create_dataset('jet_pt', (lene, ), dtype=dt)
     jet_eta = f.create_dataset('jet_eta', (lene, ), dtype=dt)
     jet_phi = f.create_dataset('jet_phi', (lene, ), dtype=dt)
@@ -497,7 +488,7 @@ with h5py.File(STORE_PATH,'w') as f:
 
     for i in range(lene):
         jet_parton_index[i] = hdf5_jet_parton_index[i]
-        jet_barcode[i] = hdf5_jet_parton_index[i]
+        jet_barcode[i] = hdf5_jet_barcode[i]
         jet_pt[i] = hdf5_jet_pt[i]
         jet_eta[i] = hdf5_jet_eta[i]
         jet_phi[i] = hdf5_jet_phi[i]
