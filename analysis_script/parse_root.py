@@ -435,7 +435,7 @@ for i in range(len(particle.event)):
             parton_mass.append(parton_array[i][j][6])
 
         hdf5_parton_jet_index.append(jet_index[i])
-        hdf5_parton_pdgid.append(parton_array[i])
+        hdf5_parton_pdgid.append(parton_pdgid)
         hdf5_parton_barcode.append(barcode)
         hdf5_parton_pt.append(parton_pt)
         hdf5_parton_eta.append(parton_eta)
@@ -459,45 +459,44 @@ hdf5_parton_eta = np.array(hdf5_parton_eta)
 hdf5_parton_phi = np.array(hdf5_parton_phi)
 hdf5_parton_mass = np.array(hdf5_parton_mass)
 
+lene = len(hdf5_jet_parton_index)
+
+
 #Save the event which pass the selection
 with h5py.File(STORE_PATH,'w') as f:
 
-    f.attrs.create("jet_parton_index", hdf5_jet_parton_index)
-    f.attrs.create("jet_barcode", hdf5_jet_barcode)
-    f.attrs.create("jet_pt", hdf5_jet_pt)
-    f.attrs.create("jet_eta", hdf5_jet_eta)
-    f.attrs.create("jet_phi", hdf5_jet_phi)
-    f.attrs.create("jet_mass", hdf5_jet_mass)
-    f.attrs.create("jet_btag", hdf5_jet_btagged)
+    dt = h5py.vlen_dtype(np.dtype('int32'))
 
-    f.attrs.create("parton_jet_index", hdf5_parton_jet_index)
-    f.attrs.create("parton_pdgid", hdf5_parton_pdgid)
-    f.attrs.create("parton_barcode", hdf5_parton_barcode)
-    f.attrs.create("parton_pt", hdf5_parton_pt)
-    f.attrs.create("parton_eta", hdf5_parton_eta)
-    f.attrs.create("parton_phi", hdf5_parton_phi)
-    f.attrs.create("parton_mass", hdf5_parton_mass)
+    jet_parton_index = f.create_dataset('jet_parton_index', (lene, ), dtype=dt)
+    jet_barcode = f.create_dataset('jet_barcode', (lene, ), dtype=dt)
+    jet_pt = f.create_dataset('jet_pt', (lene, ), dtype=dt)
+    jet_eta = f.create_dataset('jet_eta', (lene, ), dtype=dt)
+    jet_phi = f.create_dataset('jet_phi', (lene, ), dtype=dt)
+    jet_mass = f.create_dataset('jet_mass', (lene, ), dtype=dt)
+    jet_btag = f.create_dataset('jet_btag', (lene, ), dtype=dt)
 
-    # group_jet = f.create_group('jet')
-    # group_jet['Parton_Index'] = hdf5_jet_parton_index
-    # #group_jet['Barcode'] = hdf5_jet_barcode
-    # group_jet['Pt'] = hdf5_jet_pt
-    # group_jet['Eta'] = hdf5_jet_eta
-    # group_jet['Phi'] = hdf5_jet_phi
-    # group_jet['Mass'] = hdf5_jet_mass
-    # group_jet['BTag'] = hdf5_jet_btagged
+    for i in range(lene):
+        jet_parton_index[i] = hdf5_jet_parton_index[i]
+        jet_barcode[i] = hdf5_jet_parton_index[i]
+        jet_pt[i] = hdf5_jet_pt[i]
+        jet_eta[i] = hdf5_jet_eta[i]
+        jet_phi[i] = hdf5_jet_phi[i]
+        jet_mass[i] = hdf5_jet_mass[i]
+        jet_btag[i] = hdf5_jet_btagged[i]
 
-    # jet_barcode = f.create_dataset('jet_barcode')
-    # jet_barcode = hdf5_jet_barcode
-    
-    # group_parton = f.create_group('parton')
-    # group_parton['Jet_Index'] = hdf5_parton_jet_index
-    # group_parton['Pdgid'] = hdf5_parton_pdgid
-    # #group_parton['Barcode'] = hdf5_parton_barcode
-    # group_parton['Pt'] = hdf5_parton_pt
-    # group_parton['Eta'] = hdf5_parton_eta
-    # group_parton['Phi'] = hdf5_parton_phi
-    # group_parton['Mass'] = hdf5_parton_mass
+    parton_jet_index = f.create_dataset('hdf5_parton_jet_index', (lene, ), dtype=dt)
+    parton_pdgid = f.create_dataset('hdf5_parton_pdgid', (lene, ), dtype=dt)
+    parton_barcode = f.create_dataset('hdf5_parton_barcode', (lene, ), dtype=dt)
+    parton_pt = f.create_dataset('hdf5_parton_pt', (lene, ), dtype=dt)
+    parton_eta = f.create_dataset('hdf5_parton_eta', (lene, ), dtype=dt)
+    parton_phi = f.create_dataset('hdf5_parton_phi', (lene, ), dtype=dt)
+    parton_mass = f.create_dataset('hdf5_parton_mass', (lene, ), dtype=dt)
 
-    # parton_barcode = f.create_dataset('parton_barcode')
-    # parton_barcode = hdf5_parton_barcode
+    for i in range(lene):
+        parton_jet_index[i] = hdf5_parton_jet_index[i]
+        parton_pdgid[i] = hdf5_parton_pdgid[i]
+        parton_barcode[i] = hdf5_parton_barcode[i]
+        parton_pt[i] = np.array(hdf5_parton_pt[i])
+        parton_eta[i] = np.array(hdf5_parton_eta[i])
+        parton_phi[i] = np.array(hdf5_parton_phi[i])
+        parton_mass[i] = np.array(hdf5_parton_mass[i])
