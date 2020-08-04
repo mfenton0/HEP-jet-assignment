@@ -9,3 +9,4 @@ parse_uproot_backup.ipynb
 parse_root_1.py
 hdf5_files/
 parse_uproot_v1.ipynb
+parse_root_1k.py
