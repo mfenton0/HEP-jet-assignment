@@ -476,7 +476,7 @@ lene = len(hdf5_jet_parton_index)
 #Save the event which pass the selection
 with h5py.File(STORE_PATH,'w') as f:
 
-    dt = h5py.vlen_dtype(np.dtype('int32'))
+    dt = h5py.vlen_dtype(np.dtype('float16'))
 
     jet_parton_index = f.create_dataset('jet_parton_index', (lene, ), dtype=dt)
     jet_barcode = f.create_dataset('jet_barcode', (lene, ),  dtype=dt)
