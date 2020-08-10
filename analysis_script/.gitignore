@@ -1,4 +1,5 @@
 tag_1_delphes_events.root
+parse_uproot_S1_sch.ipynb
 tag_1_delphes_events_1k.root
 .ipynb_checkpoints/
 unweighted_events.lhe
