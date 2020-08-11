@@ -70,7 +70,7 @@ marker_jet = np.asanyarray(marker_jet)
 marker_bjet = np.asanyarray(marker_bjet)
 
 #Mark which jet in each event pass the selection.
-print("+-----------------------------------------------------------------------------------------------------+")
+print("+------------------------------------------------------------------------------------------------------+")
 print("Start jet selection.")
 print("+-----------------------------------------------------------------------------------------------------+")
 for i in range(len(particle.event)):
@@ -86,7 +86,7 @@ for i in range(len(particle.event)):
 for i in range(len(particle.event)):
     if np.sum(marker_jet[i] == 1) >= 6 and np.sum(marker_bjet[i] == 1) >= 2 :
         marker_event[i] = 1 
-print("+-----------------------------------------------------------------------------------------------------+")
+print("+------------------------------------------------------------------------------------------------------+")
 print("Jet selection doen. {0} events has been selected.".format(np.sum(marker_event == 1)))
 print("+------------------------------------------------------------------------------------------------------+")
 
