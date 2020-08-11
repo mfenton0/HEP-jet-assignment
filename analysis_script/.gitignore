@@ -15,3 +15,4 @@ parse_uproot_test.ipynb
 parse_uproot_dev.ipynb
 data/delphes_events_100k.root
 data/schsu_100k/
+data/1M_events/
