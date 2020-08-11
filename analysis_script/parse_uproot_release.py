@@ -72,6 +72,7 @@ marker_bjet = np.asanyarray(marker_bjet)
 #Mark which jet in each event pass the selection.
 print("+-----------------------------------------------------------------------------------------------------+")
 print("Start jet selection.")
+print("+-----------------------------------------------------------------------------------------------------+")
 for i in range(len(particle.event)):
     for j in range(len(jet.pt[i])):
         if jet.btag[i][j] == 1 and jet.pt[i][j] > 25 and np.abs(jet.eta[i][j]) < 2.5:
@@ -85,6 +86,7 @@ for i in range(len(particle.event)):
 for i in range(len(particle.event)):
     if np.sum(marker_jet[i] == 1) >= 6 and np.sum(marker_bjet[i] == 1) >= 2 :
         marker_event[i] = 1 
+print("+-----------------------------------------------------------------------------------------------------+")
 print("Jet selection doen. {0} events has been selected.".format(np.sum(marker_event == 1)))
 print("+------------------------------------------------------------------------------------------------------+")
 
@@ -122,7 +124,7 @@ print("Finished to record the kinematics variables of jets in the selected event
 print("+------------------------------------------------------------------------------------------------------+")
 
 print("+------------------------------------------------------------------------------------------------------+")
-print("Starting parton tracing and looking for its aughter.")
+print("Starting parton tracing and looking for its daughter.")
 print("+------------------------------------------------------------------------------------------------------+")
 #Particle tracing and daughter finding section
 def shift_particle_tracing(dataset, PID_d, idx):
