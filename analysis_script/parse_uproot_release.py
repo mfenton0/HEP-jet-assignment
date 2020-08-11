@@ -86,8 +86,11 @@ for i in range(len(particle.event)):
     if np.sum(marker_jet[i] == 1) >= 6 and np.sum(marker_bjet[i] == 1) >= 2 :
         marker_event[i] = 1 
 print("Jet selection doen. {0} events has been selected.".format(np.sum(marker_event == 1)))
-print("+-----------------------------------------------------------------------------------------------------+")
+print("+------------------------------------------------------------------------------------------------------+")
 
+print("+------------------------------------------------------------------------------------------------------+")
+print("Recording the kinematics variables of jets in the selected event.")
+print("+------------------------------------------------------------------------------------------------------+")
 #Record the kinematical variables of jet in the selected event.
 jet_pt = []
 jet_eta = []
@@ -114,7 +117,13 @@ for i in range(len(jet.event)):
         jet_phi.append(jet_phi_tmp)
         jet_mass.append(jet_mass_tmp)
         jet_btag.append(jet_btag_tmp)
+print("+------------------------------------------------------------------------------------------------------+")
+print("Finished to record the kinematics variables of jets in the selected event.")
+print("+------------------------------------------------------------------------------------------------------+")
 
+print("+------------------------------------------------------------------------------------------------------+")
+print("Starting parton tracing and looking for its aughter.")
+print("+------------------------------------------------------------------------------------------------------+")
 #Particle tracing and daughter finding section
 def shift_particle_tracing(dataset, PID_d, idx):
     if (dataset.iloc[idx,6] == PID_d):
@@ -209,7 +218,9 @@ for i in range(len(particle.event)):
     elif marker_event[i] == 0 :
         parton_array[i] = 'Nan'
     else: pass
-
+print("+------------------------------------------------------------------------------------------------------+")
+print("Parton tracing section complete. The daughter of W+/W- and bbbar has been found.")
+print("+------------------------------------------------------------------------------------------------------+")
 # Barcode system
 # t t~ W+ W- b b~ 
 # 0 0  0  0  0 0
@@ -222,6 +233,9 @@ for i in range(len(particle.event)):
 # col 10= 010001
 # col 11= 010001
 
+print("+------------------------------------------------------------------------------------------------------+")
+print("Recording the kinematics variables of partons in the selected event.")
+print("+------------------------------------------------------------------------------------------------------+")
 parton_pdgid = []
 parton_barcode = []
 parton_pt = []
@@ -255,7 +269,13 @@ for i in range(len(particle.event)):
         parton_eta.append(_parton_eta)
         parton_phi.append(_parton_phi)
         parton_mass.append(_parton_mass)
+print("+------------------------------------------------------------------------------------------------------+")
+print("Finished to record the kinematics variables of partons in the selected event.")
+print("+------------------------------------------------------------------------------------------------------+")
 
+print("+------------------------------------------------------------------------------------------------------+")
+print("Computing delta_R between each jets and partons.")
+print("+------------------------------------------------------------------------------------------------------+")
 #Parton-jet matching section
 def deltaPhi(phi1,phi2):
     phi = phi1-phi2
@@ -305,9 +325,14 @@ for i in range(len(parton_pdgid)):
             dR_between_parton_jet[i][j] = delta_R( parton_eta[i][a], parton_phi[i][a], jet_eta[i][b], jet_phi[i][b])
             j +=1
         a += 1 
+print("+------------------------------------------------------------------------------------------------------+")
+print("Finished to compute delta_R between each jets and partons.")
+print("+------------------------------------------------------------------------------------------------------+")
 
 #Matching jet and parton by finding the Min(dR(parton, jet))
-
+print("+------------------------------------------------------------------------------------------------------+")
+print("Starting parton-jet matching.")
+print("+------------------------------------------------------------------------------------------------------+")
 for i in range(len(parton_pt)):
 #for i in range(0,10):
 
@@ -389,7 +414,7 @@ for i in range(len(jet_parton_index)):
         if jet_parton_index[i][j] <= 5:
             count_match_jet +=1
         else : pass
-print(count_jet, count_match_jet)
+#print(count_jet, count_match_jet)
 
 
 N_match_top_in_event = np.zeros([len(jet_pt)])
@@ -403,6 +428,9 @@ for i in range(len(jet_parton_index)):
             pass 
         if np.sum(jet_parton_index[i] <= 5) == 6:
             N_match_top_in_event[i] = 2
+print("+------------------------------------------------------------------------------------------------------+")
+print("Jet-parton matching section complete.\n Found {0} events with 1 ttbat candidate exist.\n Found {1} events with 2 ttbar candidate exist.".format( np.sum(N_match_top_in_event == 1), np.sum(N_match_top_in_event == 2)  ))
+print("+------------------------------------------------------------------------------------------------------+")
 
 """
 Validation Plot 
@@ -619,6 +647,10 @@ plt.show()
 
 lene = len(parton_pdgid)
 
+print("+------------------------------------------------------------------------------------------------------+")
+print("Writing event record to the hdf5 file.")
+print("+------------------------------------------------------------------------------------------------------+")
+
 #Save the event which pass the selection
 with h5py.File(OUTPUT_FILE,'w') as f:
     dt = h5py.vlen_dtype(np.dtype('float16'))
@@ -658,4 +690,6 @@ with h5py.File(OUTPUT_FILE,'w') as f:
         hdf5_parton_phi[i] = parton_phi[i]
         hdf5_parton_mass[i] = parton_mass[i]
 
-    
+print("+------------------------------------------------------------------------------------------------------+")
+print("Event record has been send to {0}.".format(OUTPUT_FILE))
+print("+------------------------------------------------------------------------------------------------------+")
