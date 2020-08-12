@@ -9,15 +9,18 @@ import pandas as pd
 import numpy as np 
 from particle_properties_uproot import particle_properties  #import particle properties helper function from particle_properties.py
 from jet_properties_uproot import jet_properties  #import jet properties helper function from jet_properties.py
-import h5py, sys
+import h5py, sys, traceback
 import matplotlib.pyplot as plt 
 
 #Define variable for input/output files
 INPUT_FILE = sys.argv[1]
 OUTPUT_FILE = sys.argv[2]
 
-data  = uproot.open(INPUT_FILE)['Delphes']
-#data.show()
+try:
+    data  = uproot.open(INPUT_FILE)['Delphes']
+except:
+    print('Please check input file path.')
+
 
 particle = particle_properties(data)
 jet = jet_properties(data)
@@ -434,216 +437,6 @@ print("+------------------------------------------------------------------------
 print("Jet-parton matching section complete.\n Found {0} events with 1 ttbat candidate exist.\n Found {1} events with 2 ttbar candidate exist.".format( np.sum(N_match_top_in_event == 1), np.sum(N_match_top_in_event == 2)  ))
 print("+------------------------------------------------------------------------------------------------------+")
 
-"""
-Validation Plot 
-
-plt.figure(figsize=(8,6))
-plt.hist(N_match_top_in_event, bins=3, histtype='step')
-plt.xlabel('Matched top')
-plt.ylabel('# of events')
-plt.show()
-
-W_plus_inv = []
-W_minus_inv = []
-tmp = 0
-tmp_p = 0
-for i in range(len(parton_eta)):
-    tmp = np.sqrt( 2*parton_pt[i][1]*parton_pt[i][2]*( np.cosh(parton_eta[i][1] - parton_eta[i][2])  - np.cos( parton_phi[i][1] - parton_phi[i][2] )) )
-    W_plus_inv.append(tmp)
-    tmp_p = np.sqrt( 2*parton_pt[i][4]*parton_pt[i][5]*( np.cosh(parton_eta[i][4] - parton_eta[i][5])  - np.cos( parton_phi[i][4] - parton_phi[i][5] )) )
-    W_minus_inv.append(tmp)
-
-plt.figure(figsize=(8,6))
-plt.hist(W_plus_inv, bins = 50 ,histtype='step', label='mean: {0:.2f} GeV'.format(np.mean(W_plus_inv)))
-plt.xlabel(r'invariant mass of $W^{+}$')
-plt.ylabel(r'$\frac{dN}{dm}$')
-plt.legend(loc='upper right')
-plt.show()
-
-plt.figure(figsize=(8,6))
-plt.hist(W_minus_inv,  bins = 50 ,histtype='step', label='mean: {0:.2f} GeV'.format(np.mean(W_minus_inv)))
-plt.xlabel(r'invariant mass of $W^{-}$')
-plt.ylabel(r'$\frac{dN}{dm}$')
-plt.legend(loc='upper right')
-plt.show()
-
-top_inv = []
-top_bar_inv = []
-tmp = 0
-tmp_p = 0
-for i in range(len(N_match_top_in_event)):
-    if N_match_top_in_event[i] == 2:
-        pt_1 = parton_pt[i][0]
-        pt_2 = parton_pt[i][1]
-        pt_3 = parton_pt[i][2]
-
-        px_1 = pt_1 * np.cos(parton_phi[i][0])
-        px_2 = pt_2 * np.cos(parton_phi[i][1])
-        px_3 = pt_3 * np.cos(parton_phi[i][2])
-
-        py_1 = pt_1 * np.sin(parton_phi[i][0])
-        py_2 = pt_2 * np.sin(parton_phi[i][1])
-        py_3 = pt_3 * np.sin(parton_phi[i][2])
-
-        pz_1 = pt_1 * np.sinh(parton_eta[i][0])
-        pz_2 = pt_2 * np.sinh(parton_eta[i][1])
-        pz_3 = pt_3 * np.sinh(parton_eta[i][2])
-
-        e_1 = np.sqrt( (px_1**2 + py_1**2 + pz_1**2 ) + parton_mass[i][0]**2 )
-        e_2 = np.sqrt( (px_2**2 + py_2**2 + pz_2**2 ) + parton_mass[i][1]**2 )
-        e_3 = np.sqrt( (px_3**2 + py_3**2 + pz_3**2 ) + parton_mass[i][2]**2 )
-        tmp = np.sqrt( (e_1 + e_2 + e_3)**2 - (px_1 + px_2 + px_3)**2 - (py_1 + py_2 + py_3)**2 - (pz_1 + pz_2 + pz_3)**2  )
-        top_inv.append(tmp)
-        # tmp_p = np.sqrt( 2*parton_pt[i][4]*parton_pt[i][5]*( np.cosh(parton_eta[i][4] - parton_eta[i][5])  - np.cos( parton_phi[i][4] - parton_phi[i][5] )) )
-        # top_bar_inv.append(tmp)
-
-plt.figure(figsize=(8,6))
-plt.hist(top_inv,  bins = 60 ,histtype='step', label='mean: {0:.2f} GeV'.format(np.mean(top_inv)))
-plt.xlabel(r'invariant mass of $t$')
-plt.ylabel(r'$\frac{dN}{dm}$')
-plt.legend(loc='upper right')
-plt.show()
-
-W_plus_inv_jet = []
-W_minus_inv_jet = []
-
-tmp = 0
-tmp_p = 0
-
-for i in range(len(N_match_top_in_event)):
-    if N_match_top_in_event[i] == 2:
-        for j in range(len(jet_parton_index[i])):
-            if jet_parton_index[i][j] == 1:
-                pt_1 = jet_pt[i][j]
-                eta_1 = jet_eta[i][j]
-                phi_1 = jet_phi[i][j]
-                #print(pt_1, eta_1, phi_1)
-            if jet_parton_index[i][j] == 2:
-                pt_2 = jet_pt[i][j]
-                eta_2 = jet_eta[i][j]
-                phi_2 = jet_phi[i][j]
-                #print(pt_2, eta_2, phi_2)
-            
-
-            if jet_parton_index[i][j] == 4:
-                pt_3 = jet_pt[i][j]
-                eta_3 = jet_eta[i][j]
-                phi_3 = jet_phi[i][j]
-
-            if jet_parton_index[i][j] == 5:
-                pt_4 = jet_pt[i][j]
-                eta_4 = jet_eta[i][j]
-                phi_4 = jet_phi[i][j]
-
-        tmp = np.sqrt( 2*pt_1*pt_2*( np.cosh( eta_1 - eta_2 ) - np.cos( phi_1 - phi_2 ) ) )
-        tmp_p = np.sqrt( 2*pt_3*pt_4*( np.cosh( eta_3 - eta_4 ) - np.cos( phi_3 - phi_4 ) ) )
-
-        W_plus_inv_jet.append(tmp)
-        W_minus_inv_jet.append(tmp_p)
-
-plt.figure(figsize=(8,6))
-plt.hist(W_plus_inv_jet, bins = 50 ,histtype='step', label='mean: {0:.2f} GeV'.format(np.mean(W_plus_inv_jet)))
-plt.xlabel(r'invariant mass of $W^{+}$')
-plt.ylabel(r'$\frac{dN}{dm}$')
-plt.legend(loc='upper right')
-plt.show()
-
-plt.figure(figsize=(8,6))
-plt.hist(W_minus_inv_jet, bins = 50 ,histtype='step', label='mean: {0:.2f} GeV'.format(np.mean(W_minus_inv_jet)))
-plt.xlabel(r'invariant mass of $W^{-}$')
-plt.ylabel(r'$\frac{dN}{dm}$')
-plt.legend(loc='upper right')
-plt.show()
-
-t_inv_jet = []
-t_bar_inv_jet = []
-
-tmp = 0
-tmp_p = 0
-
-for i in range(len(N_match_top_in_event)):
-    if N_match_top_in_event[i] == 2:
-        for j in range(len(jet_parton_index[i])):
-            if jet_parton_index[i][j] == 0:
-                pt_0 = jet_pt[i][j]
-                eta_0 = jet_eta[i][j]
-                phi_0 = jet_phi[i][j]
-                px_0 = pt_0*np.cos( phi_0 )
-                py_0 = pt_0*np.sin( phi_0 )
-                pz_0 = pt_0*np.sinh( eta_0 )
-                mass_0 = jet_mass[i][j]
-                e_0 = np.sqrt( (px_0**2 + py_0**2 + pz_0**2 ) + mass_0**2 ) 
-
-            if jet_parton_index[i][j] == 1:
-                pt_1 = jet_pt[i][j]
-                eta_1 = jet_eta[i][j]
-                phi_1 = jet_phi[i][j]
-                px_1 = pt_1*np.cos( phi_1 )
-                py_1 = pt_1*np.sin( phi_1 )
-                pz_1 = pt_1*np.sinh( eta_1 )
-                mass_1 = jet_mass[i][j]
-                e_1 = np.sqrt( (px_1**2 + py_1**2 + pz_1**2 ) + mass_1**2 ) 
-
-            if jet_parton_index[i][j] == 2:
-                pt_2 = jet_pt[i][j]
-                eta_2 = jet_eta[i][j]
-                phi_2 = jet_phi[i][j]
-                px_2 = pt_2*np.cos( phi_2 )
-                py_2 = pt_2*np.sin( phi_2 )
-                pz_2 = pt_2*np.sinh( eta_2 )
-                mass_2 = jet_mass[i][j]
-                e_2 = np.sqrt( (px_2**2 + py_2**2 + pz_2**2 ) + mass_2**2 )
-
-            if jet_parton_index[i][j] == 3:
-                pt_3 = jet_pt[i][j]
-                eta_3 = jet_eta[i][j]
-                phi_3 = jet_phi[i][j]
-                px_3 = pt_3*np.cos( phi_3 )
-                py_3 = pt_3*np.sin( phi_3 )
-                pz_3 = pt_3*np.sinh( eta_3 )
-                mass_3 = jet_mass[i][j]
-                e_3 = np.sqrt( (px_3**2 + py_3**2 + pz_3**2 ) + mass_3**2 )
-
-            if jet_parton_index[i][j] == 4:
-                pt_4 = jet_pt[i][j]
-                eta_4 = jet_eta[i][j]
-                phi_4 = jet_phi[i][j]
-                px_4 = pt_4*np.cos( phi_4 )
-                py_4 = pt_4*np.sin( phi_4 )
-                pz_4 = pt_4*np.sinh( eta_4 )
-                mass_4 = jet_mass[i][j]
-                e_4 = np.sqrt( (px_4**2 + py_4**2 + pz_4**2 ) + mass_4**2 )
-
-            if jet_parton_index[i][j] == 5:
-                pt_5 = jet_pt[i][j]
-                eta_5 = jet_eta[i][j]
-                phi_5 = jet_phi[i][j]
-                px_5 = pt_5*np.cos( phi_5 )
-                py_5 = pt_5*np.sin( phi_5 )
-                pz_5 = pt_5*np.sinh( eta_5 )
-                mass_5 = jet_mass[i][j]
-                e_5 = np.sqrt( (px_5**2 + py_5**2 + pz_5**2 ) + mass_5**2 )
-
-        tmp = np.sqrt( (e_0 + e_1 + e_2)**2 - (px_0 + px_1 + px_2)**2 - (py_0 + py_1 + py_2)**2 - (pz_0 + pz_1 + pz_2)**2 )
-        tmp_p = np.sqrt( (e_3 + e_4 + e_5)**2 - (px_3 + px_4 + px_5)**2 - (py_3 + py_4 + py_5)**2 - (pz_3 + pz_4 + pz_5)**2 )
-
-        t_inv_jet.append(tmp)
-        t_bar_inv_jet.append(tmp_p)
-
-plt.figure(figsize=(8,6))
-plt.hist(t_inv_jet, bins = 50 ,histtype='step', label='mean: {0:.2f} GeV'.format(np.mean(t_inv_jet)))
-plt.xlabel(r'invariant mass of $t$')
-plt.ylabel(r'$\frac{dN}{dm}$')
-plt.legend(loc='upper right')
-plt.show()
-
-plt.figure(figsize=(8,6))
-plt.hist(t_bar_inv_jet, bins = 50 ,histtype='step', label='mean: {0:.2f} GeV'.format(np.mean(t_bar_inv_jet)))
-plt.xlabel(r'invariant mass of $\bar{t}$')
-plt.ylabel(r'$\frac{dN}{dm}$')
-plt.legend(loc='upper right')
-plt.show()
-"""
 
 #Save selected events
 
