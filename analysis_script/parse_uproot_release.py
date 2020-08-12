@@ -9,7 +9,7 @@ import pandas as pd
 import numpy as np 
 from particle_properties_uproot import particle_properties  #import particle properties helper function from particle_properties.py
 from jet_properties_uproot import jet_properties  #import jet properties helper function from jet_properties.py
-import h5py, sys, traceback
+import h5py, sys, traceback, os
 import matplotlib.pyplot as plt 
 
 #Define variable for input/output files
@@ -447,6 +447,7 @@ print("Writing event record to the hdf5 file.")
 print("+------------------------------------------------------------------------------------------------------+")
 
 #Save the event which pass the selection
+
 with h5py.File(OUTPUT_FILE,'w') as f:
     dt = h5py.vlen_dtype(np.dtype('float16'))
 
