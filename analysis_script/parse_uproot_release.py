@@ -338,6 +338,7 @@ print("+------------------------------------------------------------------------
 print("+------------------------------------------------------------------------------------------------------+")
 print("Starting parton-jet matching.")
 print("+------------------------------------------------------------------------------------------------------+")
+reference_array = []
 for i in range(len(parton_pt)):
 #for i in range(0,10):
 
@@ -359,6 +360,7 @@ for i in range(len(parton_pt)):
     for j in range(0,6):
         #print("+------------------------------------------------------------------------------------------------------+")
         min_val = dataset.stack().min()
+        ref_array = []
         if min_val < 0.4:
             #print("Min val: {0}".format(min_val))
             min_idx, min_col = dataset.stack().idxmin()
@@ -377,16 +379,53 @@ for i in range(len(parton_pt)):
 
 parton_jet_index = np.zeros([len(parton_pdgid), 6])
 jet_parton_index = []
-np.zeros([len(parton_pdgid), 6])
-for i in range(len(parton_pdgid)):
-    jet_parton_index.append(np.zeros([len(jet_pt[i])]))
-
 
 for i in range(len(parton_pdgid)):
-    for j in range(0,6):
-        parton_jet_index[i][j] = matching_parton[i][j]
-    for k in range(len(jet_pt[i])):
-        jet_parton_index[i][k] = matching_jet[i][k]
+    tmp = np.array([len(jet_pt[i])])
+    tmp.fill(9999999)
+    jet_parton_index.append(tmp)
+
+
+jet_parton_index = np.array(jet_parton_index)
+print(jet_parton_index.shape)
+
+for i in range(len(parton_pdgid)):
+    for j in range(len(jet_pt[i])):
+        if matching_jet[i][j] == 0 :
+            parton_jet_index[i][0] = matching_parton[i][j]
+        else: pass 
+
+        if matching_jet[i][j] == 1 :
+            parton_jet_index[i][1] = matching_parton[i][j]
+        else: pass 
+
+        if matching_jet[i][j] == 2 :
+            parton_jet_index[i][2] = matching_parton[i][j]
+        else: pass 
+
+        if matching_jet[i][j] == 3 :
+            parton_jet_index[i][3] = matching_parton[i][j]
+        else: pass 
+
+        if matching_jet[i][j] == 4 :
+            parton_jet_index[i][4] = matching_parton[i][j]
+        else: pass 
+
+        if matching_jet[i][j] == 5 :
+            parton_jet_index[i][5] = matching_parton[i][j]
+        else: pass 
+    ll = len(jet_pt[i])
+    for k in range(0,6):
+        for m in range(ll):
+            if matching_parton[i][k] == int(m):
+                jet_parton_index[i][int(m)] = matching_jet[i][k]
+            else: pass
+
+    for l in range(len(jet_pt[i])):
+        if jet_parton_index[i][l] > 5:
+            jet_parton_index[i][l] = 'Nan'
+
+
 
 jet_barcode = []
 for i in range(len(parton_pdgid)):
