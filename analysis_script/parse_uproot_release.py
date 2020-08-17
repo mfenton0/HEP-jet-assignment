@@ -385,7 +385,9 @@ for i in range(len(parton_pdgid)):
     tmp.fill(9999999)
     jet_parton_index.append(tmp)
 
-
+print("+------------------------------------------------------------------------------------------------------+")
+print("Rearranging pair information to consist sequence.")
+print("+------------------------------------------------------------------------------------------------------+")
 jet_parton_index = np.array(jet_parton_index)
 print(jet_parton_index.shape)
 
@@ -424,9 +426,14 @@ for i in range(len(parton_pdgid)):
     for l in range(len(jet_pt[i])):
         if jet_parton_index[i][l] > 5:
             jet_parton_index[i][l] = 'Nan'
+print("+------------------------------------------------------------------------------------------------------+")
+print("Rearranging finished")
+print("+------------------------------------------------------------------------------------------------------+")
 
 
-
+print("+------------------------------------------------------------------------------------------------------+")
+print("Recording barcode information.")
+print("+------------------------------------------------------------------------------------------------------+")
 jet_barcode = []
 for i in range(len(parton_pdgid)):
     jet_barcode.append(np.zeros([len(jet_pt[i])]))
@@ -449,15 +456,18 @@ for i in range(len(parton_pdgid)):
             jet_barcode[i][j] = barcode[5]
         else :
             jet_barcode[i][j] = 'Nan'
+print("+------------------------------------------------------------------------------------------------------+")
+print("Barcode information has beed record.")
+print("+------------------------------------------------------------------------------------------------------+")
 
-count_jet = 0
-count_match_jet = 0
-for i in range(len(jet_parton_index)):
-    for j in range(len(jet_parton_index[i])):
-        count_jet += 1
-        if jet_parton_index[i][j] <= 5:
-            count_match_jet +=1
-        else : pass
+# count_jet = 0
+# count_match_jet = 0
+# for i in range(len(jet_parton_index)):
+#     for j in range(len(jet_parton_index[i])):
+#         count_jet += 1
+#         if jet_parton_index[i][j] <= 5:
+#             count_match_jet +=1
+#         else : pass
 #print(count_jet, count_match_jet)
 
 
