@@ -12,6 +12,10 @@ class jet_properties():
         self.area = data.array('Jet.Area')
         self.mass = data.array('Jet.Mass')
         self.charge = data.array('Jet.Charge')
+        self.flavor = data.array('Jet.Flavor')
+        self.pcb = data.array('Jet.FlavorAlgo') # this is just a dummy for 0s per jet
+
+        
     def dataframelize(self, index):
 
         idx = np.linspace(0, len( self.pt[index])-1, num = len( self.pt[index]) )
@@ -23,7 +27,8 @@ class jet_properties():
                 "Phi":  self.phi[index],
                 "Mass":  self.mass[index],
                 "Btag": self.btag[index],
-                "Area": self.area[index]
+                "Area": self.area[index],
+                "Flavor" : self.flavor[index]
             }
         patron_df = pd.DataFrame(patron_dict)
         return jet_df
