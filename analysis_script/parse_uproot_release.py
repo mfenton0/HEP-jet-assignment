@@ -10,7 +10,7 @@ import numpy as np
 from particle_properties_uproot import particle_properties  #import particle properties helper function from particle_properties.py
 from jet_properties_uproot import jet_properties  #import jet properties helper function from jet_properties.py
 import h5py, sys, traceback, os
-import matplotlib.pyplot as plt 
+#import matplotlib.pyplot as plt 
 
 #Define variable for input/output files
 INPUT_FILE = sys.argv[1]
@@ -68,14 +68,14 @@ for i in range(len(particle.event)):
     marker_bjet.append(np.zeros([len(jet.pt[i])]))
 
 
-marker_event = np.asanyarray(marker_event)
-marker_jet = np.asanyarray(marker_jet)
-marker_bjet = np.asanyarray(marker_bjet)
+marker_event = np.asanyarray(marker_event, dtype=object)
+marker_jet = np.asanyarray(marker_jet, dtype=object)
+marker_bjet = np.asanyarray(marker_bjet, dtype=object)
 
 #Mark which jet in each event pass the selection.
 print("+------------------------------------------------------------------------------------------------------+")
 print("Start jet selection.")
-print("+-----------------------------------------------------------------------------------------------------+")
+print("+------------------------------------------------------------------------------------------------------+")
 for i in range(len(particle.event)):
     for j in range(len(jet.pt[i])):
         if jet.btag[i][j] == 1 and jet.pt[i][j] > 25 and np.abs(jet.eta[i][j]) < 2.5:
@@ -314,8 +314,8 @@ for i in range(len(parton_pdgid)):
     matching_jet.append(np.zeros([len(jet_pt[i])]))
     matching_parton.append(np.zeros([6]))
 
-matching_jet = np.array(matching_jet)
-matching_parton = np.array(matching_parton)
+matching_jet = np.array(matching_jet, dtype=object)
+matching_parton = np.array(matching_parton, dtype=object)
 
 #Computing delta_R between each parton and jet
 for i in range(len(parton_pdgid)):
@@ -338,7 +338,7 @@ print("+------------------------------------------------------------------------
 print("+------------------------------------------------------------------------------------------------------+")
 print("Starting parton-jet matching.")
 print("+------------------------------------------------------------------------------------------------------+")
-reference_array = []
+
 for i in range(len(parton_pt)):
 #for i in range(0,10):
 
@@ -360,7 +360,6 @@ for i in range(len(parton_pt)):
     for j in range(0,6):
         #print("+------------------------------------------------------------------------------------------------------+")
         min_val = dataset.stack().min()
-        ref_array = []
         if min_val < 0.4:
             #print("Min val: {0}".format(min_val))
             min_idx, min_col = dataset.stack().idxmin()
@@ -381,16 +380,16 @@ parton_jet_index = np.zeros([len(parton_pdgid), 6])
 jet_parton_index = []
 
 for i in range(len(parton_pdgid)):
-    tmp = np.array([len(jet_pt[i])])
-    tmp.fill(9999999)
+    tmp = np.zeros([len(jet_pt[i])])
+    tmp[:] = 9999999
     jet_parton_index.append(tmp)
 
 print("+------------------------------------------------------------------------------------------------------+")
 print("Rearranging pair information to consist sequence.")
 print("+------------------------------------------------------------------------------------------------------+")
 
-jet_parton_index = np.array(jet_parton_index)
-print(jet_parton_index.shape)
+jet_parton_index = np.array(jet_parton_index, dtype=object)
+#print(jet_parton_index.shape)
 
 for i in range(len(parton_pdgid)):
     for j in range(len(jet_pt[i])):
@@ -439,7 +438,7 @@ jet_barcode = []
 for i in range(len(parton_pdgid)):
     jet_barcode.append(np.zeros([len(jet_pt[i])]))
 
-jet_barcode = np.array(jet_barcode)
+jet_barcode = np.array(jet_barcode, dtype=object)
 
 for i in range(len(parton_pdgid)):
     for j in range(len(jet_parton_index[i])):
@@ -461,16 +460,6 @@ print("+------------------------------------------------------------------------
 print("Barcode information has beed record.")
 print("+------------------------------------------------------------------------------------------------------+")
 
-# count_jet = 0
-# count_match_jet = 0
-# for i in range(len(jet_parton_index)):
-#     for j in range(len(jet_parton_index[i])):
-#         count_jet += 1
-#         if jet_parton_index[i][j] <= 5:
-#             count_match_jet +=1
-#         else : pass
-#print(count_jet, count_match_jet)
-
 
 N_match_top_in_event = np.zeros([len(jet_pt)])
 for i in range(len(jet_parton_index)):
@@ -484,7 +473,7 @@ for i in range(len(jet_parton_index)):
         if np.sum(jet_parton_index[i] <= 5) == 6:
             N_match_top_in_event[i] = 2
 print("+------------------------------------------------------------------------------------------------------+")
-print("Jet-parton matching section complete.\n Found {0} events with 1 ttbat candidate exist.\n Found {1} events with 2 ttbar candidate exist.".format( np.sum(N_match_top_in_event == 1), np.sum(N_match_top_in_event == 2)  ))
+print("Jet-parton matching section complete.\nFound {0} events with 1 ttbat candidate exist.\nFound {1} events with 2 ttbar candidate exist.".format( np.sum(N_match_top_in_event == 1), np.sum(N_match_top_in_event == 2)  ))
 print("+------------------------------------------------------------------------------------------------------+")
 
 
