@@ -1,7 +1,7 @@
 # HEP-jet-assignment
 ---
 
-Top jet assignment - Data preparation
+HEP-jet-assignment - Data preparation
 ===
 - [Top jet assignment - Data preparation](#heading)
   * [Generate Monte Carlo data](#heading-1)
