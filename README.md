@@ -3,7 +3,9 @@
 
 Top jet assignment - Data preparation
 ===
-<!---TOC--->
+- [Generate Monte Carlo data ](#Generate Monte Carlo data )
+- [Analysis `.root` file to get the event record](#Analysis `.root` file to get the event record)
+
 
 ## Generate Monte Carlo data 
 To generate MC data, we will follow the following process.
