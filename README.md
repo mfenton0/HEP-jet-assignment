@@ -49,7 +49,7 @@ exit
 ```
 We will seperate 1 million events to ten 100k events to avoid our `.root` become to big, and also prevent to spend too much time for data generation.
 
-## Analysis `.root` file to get the event record
+## Analysis
 
 To parse the data from `.root` file. We will use a powerful python package called: `uproot`.
 >To learn more about `uproot`, please go to:https://github.com/scikit-hep/uproot
