@@ -4,9 +4,9 @@
 HEP-jet-assignment - Data preparation
 ===
 - [Top jet assignment - Data preparation](#Top jet assignment - Data preparation)
-  * [Generate Monte Carlo data](#heading-1)
-  * [Analysis `.root` file to get the event record](#heading-2)
-  * [Output event record](#heading-3)
+  * [Generate Monte Carlo data](#Generate Monte Carlo data)
+  * [Analysis `.root` file to get the event record](#Analysis `.root` file to get the event record)
+  * [Output event record](#Output event record)
   * [Appendix](#Appendix)
 
 
