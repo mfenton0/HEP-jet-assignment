@@ -1,12 +1,12 @@
-# HEP-jet-assignment
+# HEP-jet-assignment 
 
-Data preparation
-===
-- [Data preparation](#Data-preparation)
-  * [Generate Monte Carlo data](#Generate-Monte-Carlo-data)
-  * [Analysis](#Analysis)
-  * [Output event record](#Output-event-record)
-  * [Appendix](#Appendix)
+
+- [HEP-jet-assignment](#HEP-jet-assignment)
+  * [Data preparation](#Data-preparation)
+   + [Generate Monte Carlo data](#Generate-Monte-Carlo-data)
+   + [Analysis](#Analysis)
+   + [Output event record](#Output-event-record)
+   + [Appendix](#Appendix)
 
 
 ## Generate Monte Carlo data 
