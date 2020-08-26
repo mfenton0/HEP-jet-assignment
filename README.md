@@ -11,6 +11,8 @@ Data preparation
 
 ## Generate Monte Carlo data 
 To generate MC data, we will follow the following process.
+![formula](https://render.githubusercontent.com/render/math?math=p%20p%20\to%20t%20\bar{t}%20\to%20W^{+}%20b%20W^{-}\bar{b}%20\to%20q\bar{q}bq\bar{q}\bar{b})
+
 
 * Demand Process: $p p \to t \bar{t} \to W^{+}bW^{-}\bar{b} \to q\bar{q}bq\bar{q}\bar{b}$ (full hadronic channel, 6 jets)
 * Generaing tools: MadGraph@NLO v2.7.3, Pythia 8, Delphes.
