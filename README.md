@@ -3,7 +3,7 @@
 
 Top jet assignment - Data preparation
 ===
-[TOC]
+<!---TOC--->
 
 ## Generate Monte Carlo data 
 To generate MC data, we will follow the following process.
