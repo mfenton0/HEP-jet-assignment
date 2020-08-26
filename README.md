@@ -6,10 +6,11 @@
    + [Generate Monte Carlo data](#Generate-Monte-Carlo-data)
    + [Analysis](#Analysis)
    + [Output event record](#Output-event-record)
-   + [Appendix](#Appendix)
+  * [Appendix](#Appendix)
 
+## Data preparation
 
-## Generate Monte Carlo data 
+### Generate Monte Carlo data 
 To generate MC data, we will follow the following process.
 
 
@@ -50,7 +51,7 @@ exit
 ```
 We will seperate 1 million events to ten 100k events to avoid our `.root` become to big, and also prevent to spend too much time for data generation.
 
-## Analysis
+### Analysis
 
 To parse the data from `.root` file. We will use a powerful python package called: `uproot`.
 >:https://github.com/scikit-hep/uproot
@@ -129,7 +130,7 @@ for i in range(len(parton_pt)):
         matching_jet[i][k] = 'Nan'
 ```
 
-## Output event record
+### Output event record
 The properties we are going to store is:
 1. Kinematics properties ($p_{T}, \eta, \phi$, mass) of jets and partons.
 2. `parton_pdgid`: A variable to specify which parton actually is.
