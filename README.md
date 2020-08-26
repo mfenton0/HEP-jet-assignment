@@ -202,4 +202,4 @@ module JetFlavorAssociation JetFlavorAssociation {
   set PartonEtaMax 2.5
 }
 ```
-###### tags: `Particle Physics`, `Machine Learning`, `Top quark`, `Graph Neuron Network`
+###### tags: `Particle Physics`, `Machine Learning`, `Top quark`, `Graph Neural Network`
