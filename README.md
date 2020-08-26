@@ -1,8 +1,5 @@
 # HEP-jet-assignment
 ---
-title: 'Top jet assignment - Data preparation'
-disqus: hackmd
----
 
 Top jet assignment - Data preparation
 ===
