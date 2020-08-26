@@ -1,14 +1,21 @@
-# HEP-jet-assignment
----
+# HEP-jet-assignment 
 
-Top jet assignment - Data preparation
-===
-[TOC]
 
-## Generate Monte Carlo data 
+- [HEP-jet-assignment](#HEP-jet-assignment)
+  * [Data preparation](#Data-preparation)
+   + [Generate Monte Carlo data](#Generate-Monte-Carlo-data)
+   + [Analysis](#Analysis)
+   + [Output event record](#Output-event-record)
+  * [Appendix](#Appendix)
+
+## Data preparation
+
+### Generate Monte Carlo data 
 To generate MC data, we will follow the following process.
 
-* Demand Process: $p p \to t \bar{t} \to W^{+}bW^{-}\bar{b} \to q\bar{q}bq\bar{q}\bar{b}$ (full hadronic channel, 6 jets)
+
+
+* Demand Process: ![formula](https://render.githubusercontent.com/render/math?math=p%20p%20\to%20t%20\bar{t}%20\to%20W^{%2B}b%20W^{-}\bar{b}%20\to%20q\bar{q}bq\bar{q}\bar{b}) (full hadronic channel, 6 jets)
 * Generaing tools: MadGraph@NLO v2.7.3, Pythia 8, Delphes.
 * Environment: Docker with CentOS 8 image.
 * Event level: Parton level(i.e. w/o consider QED and QCD)
@@ -44,10 +51,10 @@ exit
 ```
 We will seperate 1 million events to ten 100k events to avoid our `.root` become to big, and also prevent to spend too much time for data generation.
 
-## Analysis `.root` file to get the event record
+### Analysis
 
 To parse the data from `.root` file. We will use a powerful python package called: `uproot`.
->To learn more about `uproot`, please go to:https://github.com/scikit-hep/uproot
+>:https://github.com/scikit-hep/uproot
 
 The basic workflow is 
 ```flow
@@ -123,7 +130,7 @@ for i in range(len(parton_pt)):
         matching_jet[i][k] = 'Nan'
 ```
 
-## Output event record
+### Output event record
 The properties we are going to store is:
 1. Kinematics properties ($p_{T}, \eta, \phi$, mass) of jets and partons.
 2. `parton_pdgid`: A variable to specify which parton actually is.
@@ -195,4 +202,4 @@ module JetFlavorAssociation JetFlavorAssociation {
   set PartonEtaMax 2.5
 }
 ```
-###### tags: `Particle Physics`, `Machine Learning`, `Top quark`, `Graph Neuron Network`
+###### tags: `Particle Physics`, `Machine Learning`, `Top quark`, `Graph Neural Network`
