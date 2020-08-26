@@ -4,7 +4,9 @@
 Top jet assignment - Data preparation
 ===
 - [Generate Monte Carlo data ](##heading )
-- [Analysis `.root` file to get the event record](##heading1)
+- [Analysis `.root` file to get the event record](##heading-1)
+- [## Output event record](##heading-2)
+- [Appendix](#Heading-3)
 
 
 ## Generate Monte Carlo data 
