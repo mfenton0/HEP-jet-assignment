@@ -14,7 +14,7 @@ To generate MC data, we will follow the following process.
 
 
 
-* Demand Process: ![formula](https://render.githubusercontent.com/render/math?math=p%20p%20\to%20t%20\bar{t}%20\to%20W^{+}\%20b%20W^{-}\bar{b}%20\to%20q\bar{q}bq\bar{q}\bar{b}) (full hadronic channel, 6 jets)
+* Demand Process: ![formula](https://render.githubusercontent.com/render/math?math=p%20p%20\to%20t%20\bar{t}%20\to%20W+%20b%20W^{-}\bar{b}%20\to%20q\bar{q}bq\bar{q}\bar{b}) (full hadronic channel, 6 jets)
 * Generaing tools: MadGraph@NLO v2.7.3, Pythia 8, Delphes.
 * Environment: Docker with CentOS 8 image.
 * Event level: Parton level(i.e. w/o consider QED and QCD)
