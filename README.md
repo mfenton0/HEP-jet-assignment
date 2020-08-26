@@ -3,10 +3,10 @@
 
 Top jet assignment - Data preparation
 ===
-- [Top jet assignment - Data preparation](##heading)
-  * [Generate Monte Carlo data](##Generate Monte Carlo data)
-  * [Analysis `.root` file to get the event record](##sub-heading-1)
-  * [Output event record](##sub-heading-2)
+- [Top jet assignment - Data preparation](#heading)
+  * [Generate Monte Carlo data](#Generate Monte Carlo data)
+  * [Analysis `.root` file to get the event record](#sub-heading-1)
+  * [Output event record](#sub-heading-2)
   * [Appendix](#sub-heading-3)
 
 
