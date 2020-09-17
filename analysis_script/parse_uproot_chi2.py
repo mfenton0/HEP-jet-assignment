@@ -290,8 +290,8 @@ def main(DATA, OUTPUT_FILE):
                 while b < length_of_btag:
 
                     m_W = 80.9
-                    sigma_W = 7.4
-                    sigma_t = 13.8
+                    sigma_W = 197.4
+                    sigma_t = 1288.28
                     _btag_idx_tmp = []
                     _jet_idx_tmp = []
                     W_inv_cand = []
