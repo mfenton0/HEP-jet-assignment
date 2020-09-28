@@ -290,7 +290,7 @@ def main(DATA, OUTPUT_FILE):
                 while b < length_of_btag:
 
                     m_W = 80.9
-                    sigma_W = 197.4
+                    sigma_W = 9999
                     sigma_t = 1288.28
                     _btag_idx_tmp = []
                     _jet_idx_tmp = []
@@ -300,7 +300,6 @@ def main(DATA, OUTPUT_FILE):
                     top_bar_inv_cand = []
 
                     chi_square_value = []
-                    set_info = []
                     min_chi2 = -1
 
                     jet_idx_list = np.array(['Nan', 'Nan', 'Nan', 'Nan', 'Nan', 'Nan'])
