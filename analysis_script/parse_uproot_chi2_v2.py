@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np 
 from particle_properties_uproot import particle_properties  #import particle properties helper function from particle_properties.py
 from jet_properties_uproot import jet_properties  #import jet properties helper function from jet_properties.py
-import h5py, os, sys
+import h5py, os, sys, itertools, tqdm
 
 #Define variable for input/output files
 
@@ -63,10 +63,10 @@ def main(DATA, OUTPUT_FILE):
     marker_bjet = np.asanyarray(marker_bjet, dtype=object)
 
     #Mark which jet in each event pass the selection.
-    # print("+------------------------------------------------------------------------------------------------------+")
-    # print("Start jet selection.")
-    # print("+------------------------------------------------------------------------------------------------------+")
-    for i in range(len(particle.event)):
+    print("+------------------------------------------------------------------------------------------------------+")
+    print("Start jet selection.")
+    print("+------------------------------------------------------------------------------------------------------+")
+    for i in tqdm.trange(len(particle.event)):
     #for i in range(test_length):
         for j in range(len(jet.pt[i])):
             if jet.btag[i][j] == 1 and jet.pt[i][j] > 25 and np.abs(jet.eta[i][j]) < 2.5:
@@ -77,17 +77,72 @@ def main(DATA, OUTPUT_FILE):
                 marker_jet[i][j] = 1
             else: pass 
 
-    for i in range(len(particle.event)):
+    for i in tqdm.trange(len(particle.event)):
     #for i in range(test_length):
         if np.sum(marker_jet[i] == 1) >= 6 and np.sum(marker_bjet[i] == 1) >= 2 :
             marker_event[i] = 1 
+    print("+------------------------------------------------------------------------------------------------------+")
+    print("Jet selection doen. {0} events has been selected.".format(np.sum(marker_event == 1)))
+    print("+------------------------------------------------------------------------------------------------------+")
+    
+    #SUM_1 += np.sum(marker_event == 1)
+ 
+    # def deltaPhi(phi1,phi2):
+    #     phi = phi1-phi2
+    #     while phi >= np.pi: phi -= np.pi*2.
+    #     while phi < -np.pi: phi += np.pi*2.
+    #     return phi
+
+    # def delta_R(eta1, phi1, eta2, phi2):
+    #     return np.sqrt(deltaPhi(phi1,phi2)**2+(eta1-eta2)**2)
+
     # print("+------------------------------------------------------------------------------------------------------+")
-    # print("Jet selection doen. {0} events has been selected.".format(np.sum(marker_event == 1)))
+    # print("Start jet isolation test.")
     # print("+------------------------------------------------------------------------------------------------------+")
-    SUM_1 += np.sum(marker_event == 1)
+    # for i in range(len(particle.event)):
+    #     if marker_event[i] == 1 :
+            
+    #         _list = []
+            
+    #         for j in range(len(jet.pt[i])):
+    #             _list.append(j)
+    #         _list_permutated = itertools.permutations(_list, 2)
+    #         C2_list_pair_csnd = []
+            
+    #         for a in _list_permutated:
+    #             C2_list_pair_csnd.append(a)
+            
+    #         for k in range(len(C2_list_pair_csnd)):
+    #             cand_1 = C2_list_pair_csnd[k][0]
+    #             cand_2 = C2_list_pair_csnd[k][1]
+
+    #             deltaR = delta_R(jet.eta[i][cand_1], jet.phi[i][cand_1], jet.eta[i][cand_2], jet.phi[i][cand_2])
+
+    #             if deltaR > 0.6: 
+    #                 pass 
+    #             else:
+    #                 marker_event[i] = 0 
     # print("+------------------------------------------------------------------------------------------------------+")
-    # print("Recording the kinematics variables of jets in the selected event.")
+    # print("Jet isolation test doen. {0} events has been selected.".format(np.sum(marker_event == 1)))
     # print("+------------------------------------------------------------------------------------------------------+")
+
+    # print("+------------------------------------------------------------------------------------------------------+")
+    # print("Start 5th jet pT test.")
+    # print("+------------------------------------------------------------------------------------------------------+")
+    # for i in range(len(particle.event)):
+    #     if marker_event[i] == 1 :
+    #         if jet.pt[i][4] > 60: 
+    #             pass 
+    #         else: 
+    #             marker_event[i] = 0
+    # print("+------------------------------------------------------------------------------------------------------+")
+    # print("5th jet pT test doen. {0} events has been selected.".format(np.sum(marker_event == 1)))
+    # print("+------------------------------------------------------------------------------------------------------+")
+
+    print("+------------------------------------------------------------------------------------------------------+")
+    print("Recording the kinematics variables of jets in the selected event.")
+    print("+------------------------------------------------------------------------------------------------------+")
+    
     #Record the kinematical variables of jet in the selected event.
     jet_pt = []
     jet_eta = []
@@ -95,7 +150,7 @@ def main(DATA, OUTPUT_FILE):
     jet_mass = []
     jet_btag = []
 
-    for i in range(len(jet.event)):
+    for i in tqdm.trange(len(jet.event)):
     #for i in range(test_length):
         if marker_event[i] == 1:
             jet_pt_tmp = []
@@ -115,13 +170,13 @@ def main(DATA, OUTPUT_FILE):
             jet_phi.append(jet_phi_tmp)
             jet_mass.append(jet_mass_tmp)
             jet_btag.append(jet_btag_tmp)
-    # print("+------------------------------------------------------------------------------------------------------+")
-    # print("Finished to record the kinematics variables of jets in the selected event.")
-    # print("+------------------------------------------------------------------------------------------------------+")
+    print("+------------------------------------------------------------------------------------------------------+")
+    print("Finished to record the kinematics variables of jets in the selected event.")
+    print("+------------------------------------------------------------------------------------------------------+")
 
-    # print("+------------------------------------------------------------------------------------------------------+")
-    # print("Starting parton tracing and looking for its daughter.")
-    # print("+------------------------------------------------------------------------------------------------------+")
+    print("+------------------------------------------------------------------------------------------------------+")
+    print("Starting parton tracing and looking for its daughter.")
+    print("+------------------------------------------------------------------------------------------------------+")
     #Particle tracing and daughter finding section
     def shift_particle_tracing(dataset, PID_d, idx):
         if (dataset.iloc[idx,6] == PID_d):
@@ -148,7 +203,7 @@ def main(DATA, OUTPUT_FILE):
 
         return init_shifted_particle_index, dauthter_idx_1, daughter_pid_1, dauthter_idx_2, daughter_pid_2
 
-    for i in range(len(particle.event)):
+    for i in tqdm.trange(len(particle.event)):
     #for i in range(test_length):
         if marker_event[i] == 1:
             #print("+------------------------------------------------------------------------------------------------------+")
@@ -205,7 +260,7 @@ def main(DATA, OUTPUT_FILE):
         #print("Found daughter 1 index: {0}, PID: {1}.\nFound daughter 2 index: {2}, PID: {3}".format(daughter_1_idx, daughter_1_pid, daughter_2_idx, daughter_2_pid))
         return  b_quark_idx, daughter_1_idx, daughter_2_idx
 
-    for i in range(len(particle.event)):
+    for i in tqdm.trange(len(particle.event)):
     #for i in range(test_length):
         if marker_event[i] == 1 :
             #print("+------------------------------------------------------------------------------------------------------+")
@@ -218,9 +273,9 @@ def main(DATA, OUTPUT_FILE):
         elif marker_event[i] == 0 :
             parton_array[i] = 'Nan'
         else: pass
-    # print("+------------------------------------------------------------------------------------------------------+")
-    # print("Parton tracing section complete. The daughter of W+/W- and bbbar has been found.")
-    # print("+------------------------------------------------------------------------------------------------------+")
+    print("+------------------------------------------------------------------------------------------------------+")
+    print("Parton tracing section complete. The daughter of W+/W- and bbbar has been found.")
+    print("+------------------------------------------------------------------------------------------------------+")
 
     # Barcode system
     # t t~ W+ W- b b~ 
@@ -234,9 +289,9 @@ def main(DATA, OUTPUT_FILE):
     # col 10= 010001
     # col 11= 010001
 
-    # print("+------------------------------------------------------------------------------------------------------+")
-    # print("Recording the kinematics variables of partons in the selected event.")
-    # print("+------------------------------------------------------------------------------------------------------+")
+    print("+------------------------------------------------------------------------------------------------------+")
+    print("Recording the kinematics variables of partons in the selected event.")
+    print("+------------------------------------------------------------------------------------------------------+")
     parton_pdgid = []
     parton_barcode = []
     parton_pt = []
@@ -245,7 +300,7 @@ def main(DATA, OUTPUT_FILE):
     parton_mass = []
 
     barcode = np.array([34, 40, 40, 17, 20, 20])
-    for i in range(len(particle.event)):
+    for i in tqdm.trange(len(particle.event)):
     #for i in range(test_length):
         if marker_event[i] == 1:
             _parton_pdgid = []
@@ -271,9 +326,9 @@ def main(DATA, OUTPUT_FILE):
             parton_eta.append(_parton_eta)
             parton_phi.append(_parton_phi)
             parton_mass.append(_parton_mass)
-    # print("+------------------------------------------------------------------------------------------------------+")
-    # print("Finished to record the kinematics variables of partons in the selected event.")
-    # print("+------------------------------------------------------------------------------------------------------+")
+    print("+------------------------------------------------------------------------------------------------------+")
+    print("Finished to record the kinematics variables of partons in the selected event.")
+    print("+------------------------------------------------------------------------------------------------------+")
 
     #Define Chi square minimizer
     def chi_square_minimizer( jet_pt_chi2, jet_eta_chi2, jet_phi_chi2, jet_btag_chi2, jet_mass_chi2):
@@ -419,9 +474,9 @@ def main(DATA, OUTPUT_FILE):
             
         return min_chi2, jet_idx_list
 
-    # print("+------------------------------------------------------------------------------------------------------+")
-    # print("Starting chi square matching.")
-    # print("+------------------------------------------------------------------------------------------------------+")
+    print("+------------------------------------------------------------------------------------------------------+")
+    print("Starting chi square matching.")
+    print("+------------------------------------------------------------------------------------------------------+")
     parton_jet_index = np.zeros([len(parton_pdgid), 6])
     jet_parton_index = []
 
@@ -431,23 +486,24 @@ def main(DATA, OUTPUT_FILE):
         tmp[:] = 9999999
         jet_parton_index.append(tmp)
 
-    for i in range(len(jet_pt)):
+    chi2_value = []
+    for i in tqdm.trange(len(jet_pt)):
     #for i in range(test_length):
         #print("Event: {0}".format(i))
         _tmp_jet_parton_idx = []
-        chi2, jet_idx_list_= chi_square_minimizer(jet_pt[i], jet_eta[i], jet_phi[i], jet_btag[i], jet_mass[i])
+        _chi2_value, _tmp_parton_jet_idx = chi_square_minimizer(jet_pt[i], jet_eta[i], jet_phi[i], jet_btag[i], jet_mass[i])
         if _chi2_value == -1 :
             print("+++++++++++++++++++++++++++++++++++++")
             print('An error occur!')
             print("Ebvent number: {0}, chi2 vslue: {1}, candidate: {2}".format(i, _chi2_value, _tmp_parton_jet_idx))
             print("+++++++++++++++++++++++++++++++++++++")
         if _chi2_value != -1 :
-            print(_chi2_value, _tmp_parton_jet_idx, jet_btag[i])
-
+            #print(_chi2_value, _tmp_parton_jet_idx, jet_btag[i])
+            chi2_value.append(_chi2_value)
             for j in range(len(_tmp_parton_jet_idx)):
-                parton_jet_index[i][j] = _tmp_p｀arton_jet_idx[j]
+                parton_jet_index[i][j] = _tmp_parton_jet_idx[j]
             
-            for k in range(len(_tmp_parton_jet_idx)):
+            for k in range(len(jet_pt[i])):
                 for l in range(len(_tmp_parton_jet_idx)):
                     if _tmp_parton_jet_idx[l] == int(k):
                         jet_parton_index[i][k] = int(l)
@@ -463,13 +519,13 @@ def main(DATA, OUTPUT_FILE):
             else : 
                 pass
     #print(jet_parton_index[i])
-    # print("+------------------------------------------------------------------------------------------------------+")
-    # print("chi square matching finished.")
-    # print("+------------------------------------------------------------------------------------------------------+")  
+    print("+------------------------------------------------------------------------------------------------------+")
+    print("chi square matching finished.")
+    print("+------------------------------------------------------------------------------------------------------+")  
 
-    # print("+------------------------------------------------------------------------------------------------------+")
-    # print("Recording barcode information.")
-    # print("+------------------------------------------------------------------------------------------------------+")
+    print("+------------------------------------------------------------------------------------------------------+")
+    print("Recording barcode information.")
+    print("+------------------------------------------------------------------------------------------------------+")
 
     jet_barcode = []
     for i in range(len(parton_pdgid)):
@@ -478,7 +534,7 @@ def main(DATA, OUTPUT_FILE):
 
     jet_barcode = np.array(jet_barcode, dtype=object)
 
-    for i in range(len(parton_pdgid)):
+    for i in tqdm.trange(len(parton_pdgid)):
     #for i in range(test_length):
         for j in range(len(jet_parton_index[i])):
             if jet_parton_index[i][j] == 0:
@@ -496,12 +552,12 @@ def main(DATA, OUTPUT_FILE):
             else :
                 jet_barcode[i][j] = 'Nan'
 
-    # print("+------------------------------------------------------------------------------------------------------+")
-    # print("Barcode information has beed record.")
-    # print("+------------------------------------------------------------------------------------------------------+")
+    print("+------------------------------------------------------------------------------------------------------+")
+    print("Barcode information has beed record.")
+    print("+------------------------------------------------------------------------------------------------------+")
 
     N_match_top_in_event = np.zeros([len(jet_pt)])
-    for i in range(len(jet_parton_index)):
+    for i in tqdm.trange(len(jet_parton_index)):
     #for i in range(test_length):
         for j in range(len(jet_parton_index[i])):
             if np.sum(jet_parton_index[i] <= 2) == 3 and np.sum(jet_parton_index[i] > 2) != 3 and np.sum(jet_parton_index[i] <= 5) != 6:
@@ -515,16 +571,16 @@ def main(DATA, OUTPUT_FILE):
                 N_match_top_in_event[i] = 2
             #print(i, N_match_top_in_event[i])
     #print(len(N_match_top_in_event))
-    # print("+------------------------------------------------------------------------------------------------------+")
-    # print("Jet-parton matching section complete.\n Found {0} events with 1 ttbat candidate exist.\n Found {1} events with 2 ttbar candidate exist.".format( np.sum(N_match_top_in_event == 1), np.sum(N_match_top_in_event == 2)  ))
-    # print("+------------------------------------------------------------------------------------------------------+")
+    print("+------------------------------------------------------------------------------------------------------+")
+    print("Jet-parton matching section complete.\n Found {0} events with 1 ttbat candidate exist.\n Found {1} events with 2 ttbar candidate exist.".format( np.sum(N_match_top_in_event == 1), np.sum(N_match_top_in_event == 2)  ))
+    print("+------------------------------------------------------------------------------------------------------+")
     #Save selected events
 
     lene = len(parton_pdgid)
 
-    # print("+------------------------------------------------------------------------------------------------------+")
-    # print("Writing event record to the hdf5 file.")
-    # print("+------------------------------------------------------------------------------------------------------+")
+    print("+------------------------------------------------------------------------------------------------------+")
+    print("Writing event record to the hdf5 file.")
+    print("+------------------------------------------------------------------------------------------------------+")
 
     # #Save the event which pass the selection
 
@@ -539,7 +595,7 @@ def main(DATA, OUTPUT_FILE):
         hdf5_jet_mass = f.create_dataset('jet_mass', (lene, ), dtype=dt)
         hdf5_jet_btag = f.create_dataset('jet_btag', (lene, ), dtype=dt)
 
-        for i in range(lene):
+        for i in tqdm.trange(lene):
             hdf5_jet_parton_index[i] = jet_parton_index[i]
             hdf5_jet_barcode[i] = jet_barcode[i]
             hdf5_jet_pt[i] = jet_pt[i]
@@ -556,8 +612,9 @@ def main(DATA, OUTPUT_FILE):
         hdf5_parton_phi = f.create_dataset('parton_phi', (lene, ), dtype=dt)
         hdf5_parton_mass = f.create_dataset('parton_mass', (lene, ), dtype=dt)
         hdf5_N_match_top_in_event = f.create_dataset('N_match_top_in_event', data = N_match_top_in_event)
-
-        for i in range(lene):
+        hdf5_chi2_value = f.create_dataset("CHi2_value", data = chi2_value)
+        
+        for i in tqdm.trange(lene):
             hdf5_parton_jet_index[i] = parton_jet_index[i]
             hdf5_parton_pdgid[i] = parton_pdgid[i]
             hdf5_parton_barcode[i] = parton_barcode[i]
