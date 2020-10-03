@@ -9,7 +9,7 @@ import pandas as pd
 import numpy as np 
 from particle_properties_uproot import particle_properties  #import particle properties helper function from particle_properties.py
 from jet_properties_uproot import jet_properties  #import jet properties helper function from jet_properties.py
-import h5py, sys, traceback, os
+import h5py, sys, traceback, os, tqdm
 #import matplotlib.pyplot as plt 
 
 #Define variable for input/output files
@@ -62,7 +62,7 @@ marker_event = []
 marker_jet = []
 marker_bjet = []
 
-for i in range(len(particle.event)):
+for i in tqdm.trange(len(particle.event)):
     marker_event.append(0)
     marker_jet.append(np.zeros([len(jet.pt[i])]))
     marker_bjet.append(np.zeros([len(jet.pt[i])]))
@@ -76,7 +76,7 @@ marker_bjet = np.asanyarray(marker_bjet, dtype=object)
 print("+------------------------------------------------------------------------------------------------------+")
 print("Start jet selection.")
 print("+------------------------------------------------------------------------------------------------------+")
-for i in range(len(particle.event)):
+for i in tqdm.trange(len(particle.event)):
     for j in range(len(jet.pt[i])):
         if jet.btag[i][j] == 1 and jet.pt[i][j] > 25 and np.abs(jet.eta[i][j]) < 2.5:
             marker_bjet[i][j] = 1 
@@ -86,7 +86,7 @@ for i in range(len(particle.event)):
             marker_jet[i][j] = 1
         else: pass 
 
-for i in range(len(particle.event)):
+for i in tqdm.trange(len(particle.event)):
     if np.sum(marker_jet[i] == 1) >= 6 and np.sum(marker_bjet[i] == 1) >= 2 :
         marker_event[i] = 1 
 print("+------------------------------------------------------------------------------------------------------+")
@@ -103,7 +103,7 @@ jet_phi = []
 jet_mass = []
 jet_btag = []
 
-for i in range(len(jet.event)):
+for i in tqdm.trange(len(jet.event)):
     if marker_event[i] == 1:
         jet_pt_tmp = []
         jet_eta_tmp = []
@@ -155,7 +155,7 @@ def particle_tracing(dataset, PID, STATUS):
 
     return init_shifted_particle_index, dauthter_idx_1, daughter_pid_1, dauthter_idx_2, daughter_pid_2
 
-for i in range(len(particle.event)):
+for i in tqdm.trange(len(particle.event)):
     if marker_event[i] == 1:
         #print("+------------------------------------------------------------------------------------------------------+")
         #print("Start parsing event : {0}\nStart to trace top quark and find its daughters.".format(i))
@@ -211,7 +211,7 @@ def quark_finder(dataset, mother_idx_1, mother_idx_2):
     #print("Found daughter 1 index: {0}, PID: {1}.\nFound daughter 2 index: {2}, PID: {3}".format(daughter_1_idx, daughter_1_pid, daughter_2_idx, daughter_2_pid))
     return  b_quark_idx, daughter_1_idx, daughter_2_idx
 
-for i in range(len(particle.event)):
+for i in tqdm.trange(len(particle.event)):
     if marker_event[i] == 1 :
         #print("+------------------------------------------------------------------------------------------------------+")
         #print("Start parsing event : {0}\nStart to find top quark's daughters.".format(i))
@@ -250,7 +250,7 @@ parton_phi = []
 parton_mass = []
 
 barcode = np.array([34, 40, 40, 17, 20, 20])
-for i in range(len(particle.event)):
+for i in tqdm.trange(len(particle.event)):
     if marker_event[i] == 1:
         _parton_pdgid = []
         _parton_barcode = []
@@ -319,7 +319,7 @@ matching_jet = np.array(matching_jet, dtype=object)
 matching_parton = np.array(matching_parton, dtype=object)
 
 #Computing delta_R between each parton and jet
-for i in range(len(parton_pdgid)):
+for i in tqdm.trange(len(parton_pdgid)):
     j = 0
     a = 0
     b = 0
@@ -340,7 +340,7 @@ print("+------------------------------------------------------------------------
 print("Starting parton-jet matching.")
 print("+------------------------------------------------------------------------------------------------------+")
 
-for i in range(len(parton_pt)):
+for i in tqdm.trange(len(parton_pt)):
 #for i in range(0,10):
 
     # print("+------------------------------------------------------------------------------------------------------+")
@@ -392,7 +392,7 @@ print("+------------------------------------------------------------------------
 jet_parton_index = np.array(jet_parton_index, dtype=object)
 #print(jet_parton_index.shape)
 
-for i in range(len(parton_pdgid)):
+for i in tqdm.trange(len(parton_pdgid)):
     for j in range(len(jet_pt[i])):
         if matching_jet[i][j] == 0 :
             parton_jet_index[i][0] = matching_parton[i][j]
@@ -441,7 +441,7 @@ for i in range(len(parton_pdgid)):
 
 jet_barcode = np.array(jet_barcode, dtype=object)
 
-for i in range(len(parton_pdgid)):
+for i in tqdm.trange(len(parton_pdgid)):
     for j in range(len(jet_parton_index[i])):
         if jet_parton_index[i][j] == 0:
             jet_barcode[i][j] = barcode[0]
@@ -463,7 +463,7 @@ print("+------------------------------------------------------------------------
 
 
 N_match_top_in_event = np.zeros([len(jet_pt)])
-for i in range(len(jet_parton_index)):
+for i in tqdm.trange(len(jet_parton_index)):
     for j in range(len(jet_parton_index[i])):
         if np.sum(jet_parton_index[i] <= 2) == 3 and np.sum(jet_parton_index[i] > 2) != 3 and np.sum(jet_parton_index[i] <= 5) != 6:
             N_match_top_in_event[i] = 1
@@ -499,7 +499,7 @@ with h5py.File(OUTPUT_FILE,'w') as f:
     hdf5_jet_mass = f.create_dataset('jet_mass', (lene, ), dtype=dt)
     hdf5_jet_btag = f.create_dataset('jet_btag', (lene, ), dtype=dt)
 
-    for i in range(lene):
+    for i in tqdm.trange(lene):
         hdf5_jet_parton_index[i] = jet_parton_index[i]
         hdf5_jet_barcode[i] = jet_barcode[i]
         hdf5_jet_pt[i] = jet_pt[i]
@@ -517,7 +517,7 @@ with h5py.File(OUTPUT_FILE,'w') as f:
     hdf5_parton_mass = f.create_dataset('parton_mass', (lene, ), dtype=dt)
     hdf5_N_match_top_in_event = f.create_dataset('N_match_top_in_event', data = N_match_top_in_event)
 
-    for i in range(lene):
+    for i in tqdm.trange(lene):
         hdf5_parton_jet_index[i] = parton_jet_index[i]
         hdf5_parton_pdgid[i] = parton_pdgid[i]
         hdf5_parton_barcode[i] = parton_barcode[i]
