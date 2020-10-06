@@ -391,32 +391,41 @@ print("+------------------------------------------------------------------------
 
 jet_parton_index = np.array(jet_parton_index, dtype=object)
 #print(jet_parton_index.shape)
-
+for i in range(len(parton_jet_index)):
+    for j in range(len(parton_jet_index[i])):
+        parton_jet_index[i][j] = 'nan'
 for i in tqdm.trange(len(parton_pdgid)):
+# for i in range(0,10):
     for j in range(len(jet_pt[i])):
         if matching_jet[i][j] == 0 :
             parton_jet_index[i][0] = matching_parton[i][j]
-        else: pass 
+        else: 
+            pass
 
         if matching_jet[i][j] == 1 :
             parton_jet_index[i][1] = matching_parton[i][j]
-        else: pass 
-
+        else: 
+            pass
         if matching_jet[i][j] == 2 :
             parton_jet_index[i][2] = matching_parton[i][j]
-        else: pass 
+        else: 
+            pass
 
         if matching_jet[i][j] == 3 :
             parton_jet_index[i][3] = matching_parton[i][j]
-        else: pass 
+        else:
+            pass
 
         if matching_jet[i][j] == 4 :
             parton_jet_index[i][4] = matching_parton[i][j]
-        else: pass 
+        else:
+            pass
 
         if matching_jet[i][j] == 5 :
             parton_jet_index[i][5] = matching_parton[i][j]
-        else: pass 
+        else: 
+            pass
+
     ll = len(jet_pt[i])
     for k in range(0,6):
         for m in range(ll):
