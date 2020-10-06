@@ -1,3 +1,5 @@
+import numpy as np
+
 def deltaPhi(phi1,phi2):
     phi = phi1-phi2
     while phi >= np.pi: phi -= np.pi*2.
