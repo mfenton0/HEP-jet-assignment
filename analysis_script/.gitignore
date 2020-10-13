@@ -1,6 +1,7 @@
 tag_1_delphes_events.root
 hdf5_read_demo_v3.ipynb
 tag_1_delphes_events_1k.root
+output/
 .ipynb_checkpoints/
 unweighted_events.lhe
 .idea/
