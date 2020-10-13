@@ -612,7 +612,7 @@ def main(DATA, OUTPUT_FILE):
         hdf5_parton_phi = f.create_dataset('parton_phi', (lene, ), dtype=dt)
         hdf5_parton_mass = f.create_dataset('parton_mass', (lene, ), dtype=dt)
         hdf5_N_match_top_in_event = f.create_dataset('N_match_top_in_event', data = N_match_top_in_event)
-        hdf5_chi2_value = f.create_dataset("CHi2_value", data = chi2_value)
+        hdf5_chi2_value = f.create_dataset("Chi2_value", data = chi2_value)
         
         for i in tqdm.trange(lene):
             hdf5_parton_jet_index[i] = parton_jet_index[i]
