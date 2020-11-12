@@ -1,6 +1,7 @@
 """
 Author: David Ho
 Institute: National Tsing Hua university, Department of Physics, Hsinchu, Taiwan 
+Mail: davidho@gapp.nthu.edu.tw
 """
 
 #Import packages
