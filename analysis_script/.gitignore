@@ -1,5 +1,15 @@
 tag_1_delphes_events.root
 hdf5_read_demo_v3.ipynb
+compare.zip
+compare/
+compare_result.ipynb
+demo/Pic/compare_gnn/
+demo/parse_uproot_demo_v3.ipynb
+demo/test_ttH.h5
+event_records_testing.h5
+results_2020_10_15_nofilter.npz
+val.ipynb
+val.py
 tag_1_delphes_events_1k.root
 output/
 Output_purity.h5
