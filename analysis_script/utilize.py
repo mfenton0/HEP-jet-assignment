@@ -44,9 +44,16 @@ def chi_square_minimizer( jet_pt_chi2, jet_eta_chi2, jet_phi_chi2, jet_btag_chi2
             self.eta = jet_eta_chi2[self.idx]
             self.phi = jet_phi_chi2[self.idx]
             self.mass = jet_mass_chi2[self.idx]
-            self.px = self.pt*np.cos(self.phi)
-            self.py = self.pt*np.sin(self.phi)
-            self.pz = self.pt*np.sinh(self.eta)
+            scale = -0.0008228230613626063 * self.pt - 0.051359995969670155
+            scale = 1 - (scale/2)
+
+            tmp_px = self.pt*np.cos(self.phi)
+            tmp_py = self.pt*np.sin(self.phi)
+            tmp_pz = self.pt*np.sinh(self.eta)
+
+            self.px = tmp_px*scale
+            self.py = tmp_py*scale
+            self.pz = tmp_pz*scale
             self.e = np.sqrt( (self.px**2 + self.py**2 + self.pz**2) + self.mass**2 )
 
     def cal_W_inv(jet1, jet2):
@@ -70,9 +77,9 @@ def chi_square_minimizer( jet_pt_chi2, jet_eta_chi2, jet_phi_chi2, jet_btag_chi2
     _jet_list = []
 
     min_chi2 = -1
-    m_W = 80.9
-    sigma_W = 17.77
-    sigma_t = 27.49
+    m_W = 81.3
+    sigma_W = 12.3
+    sigma_t = 26.3
 
     jet_idx_list = np.array(['Nan', 'Nan', 'Nan', 'Nan', 'Nan', 'Nan'])
     
