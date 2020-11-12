@@ -144,8 +144,8 @@ def particle_tracing(dataset, PID, STATUS):
 
 
     while dataset.iloc[shifted_particle_index,6] == PID:
-            init_shifted_particle_index = shifted_particle_index
-            shifted_particle_index = shift_particle_tracing(dataset, PID, init_shifted_particle_index)       
+        init_shifted_particle_index = shifted_particle_index
+        shifted_particle_index = shift_particle_tracing(dataset, PID, init_shifted_particle_index)       
 
     dauthter_idx_1 = dataset.iloc[init_shifted_particle_index, 4]
     daughter_pid_1 = dataset.iloc[dauthter_idx_1, 6]
