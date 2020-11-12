@@ -240,10 +240,10 @@ print("+------------------------------------------------------------------------
 # 0 0  0  0  0 0  0
 
 # i.e.
-# daughter of t and b = 100010
-# daughter of t and W+ = 101000
-# daughter of t~ and W- = 010100
-# daughter of t~ and b~ = 010001
+# daughter of t and b = 1000100
+# daughter of t and W+ = 1010000
+# daughter of t~ and W- = 0101000
+# daughter of t~ and b~ = 0100010
 # daughter of H = 0000001
 
 print("+------------------------------------------------------------------------------------------------------+")
@@ -256,7 +256,7 @@ parton_eta = []
 parton_phi = []
 parton_mass = []
 
-barcode = np.array([34, 40, 40, 17, 20, 20, 1, 1])
+barcode = np.array([68, 80, 80, 34, 40, 40, 1, 1])
 for i in tqdm.trange(len(particle.event)):
     if marker_event[i] == 1:
         _parton_pdgid = []
