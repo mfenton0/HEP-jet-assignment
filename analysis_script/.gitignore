@@ -10,6 +10,7 @@ event_records_testing.h5
 results_2020_10_15_nofilter.npz
 val.ipynb
 val.py
+hdf5_pratice.ipynb
 tag_1_delphes_events_1k.root
 output/
 Output_purity.h5
