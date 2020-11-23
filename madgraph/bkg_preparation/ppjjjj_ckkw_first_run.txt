@@ -1,0 +1,30 @@
+define j =  g u b c d s u~ b~ c~ d~ s~
+generate p p > j j
+add process p p > j j j 
+add process p p > j j j j 
+output /home/david/ppjjjj
+launch /home/david/ppjjjj
+shower=Pythia8
+detector=Delphes
+analysis=OFF
+done
+set pdlabel = lhapdf
+set lhaid = 260000
+set auto_ptj_mjj = False
+set htjmax = 13000
+set htjmin = 0
+set dparameter = 0.4
+set ktdurham = 1
+set Merging:nJetMax = 2
+set JetMatching:nJetMax = 2
+set maxjetflavor = 4
+set drjl = 0.4
+set drjj = 0.0
+set ptj = 0.0
+set ickkw = 0.0
+set Merging:Process = "pp>jj"
+set nevents = 10000
+set iseed = 100
+Delphes/cards/delphes_card_ATLAS.tcl
+done
+exit
