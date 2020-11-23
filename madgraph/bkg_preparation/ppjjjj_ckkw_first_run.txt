@@ -1,4 +1,5 @@
 define j =  g u b c d s u~ b~ c~ d~ s~
+define p = g u c d s u~ c~ d~ s~ b b~
 generate p p > j j
 add process p p > j j j 
 add process p p > j j j j 

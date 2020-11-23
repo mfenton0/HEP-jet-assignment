@@ -1,12 +1,14 @@
-define j = g u c d s u~ c~ d~ s~ b b~
-generate p p > j j j j j j
-output bkg
-launch bkg
+define j =  g u b c d s u~ b~ c~ d~ s~
+define p = g u c d s u~ c~ d~ s~ b b~
+generate p p > j j j j 
+output /home/david/bkg
+launch /home/david/bkg
 shower=Pythia8
 detector=Delphes
 analysis=OFF
 done
-set nevents = 100000
+set pdlabel = lhapdf
+set nevents = 10000
 set iseed = 100
 Delphes/cards/delphes_card_ATLAS.tcl
 done
