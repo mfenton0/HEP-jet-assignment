@@ -25,6 +25,6 @@ class jet_properties():
                 "Btag": self.btag[index],
                 "Area": self.area[index]
             }
-        patron_df = pd.DataFrame(patron_dict)
+        jet_df = pd.DataFrame(patron_dict)
         return jet_df
 
