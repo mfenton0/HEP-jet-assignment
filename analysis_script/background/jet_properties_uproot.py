@@ -21,7 +21,7 @@ class jet_properties():
 
         idx = np.linspace(0, len( self.pt[index])-1, num = len( self.pt[index]) )
 
-        patron_dict = {
+        jet_dict = {
                 "Index": idx,
                 "PT":  self.pt[index],
                 "Eta":  self.eta[index],
@@ -30,6 +30,6 @@ class jet_properties():
                 "Btag": self.btag[index],
                 "Area": self.area[index]
             }
-        patron_df = pd.DataFrame(patron_dict)
+        jet_df = pd.DataFrame(jet_dict)
         return jet_df
 
