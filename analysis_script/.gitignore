@@ -1,2 +1,3 @@
 backup/
 data/
+demo/hdf5_read_demo_v3.ipynb demo/parse_uproot_demo_v3.ipynb
