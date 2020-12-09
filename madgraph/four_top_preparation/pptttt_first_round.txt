@@ -1,0 +1,12 @@
+generate p p > t t~ t t~ QED=0, (t > W+ b, W+ > j j), (t~ > w- b~, w- > j j )
+output /home/david/pptttt
+launch /home/david/pptttt
+shower=Pythia8
+detector=Delphes
+analysis=OFF
+done
+set nevents = 100
+set iseed = 100
+Delphes/cards/delphes_card_ATLAS.tcl
+done
+exit
