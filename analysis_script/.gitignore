@@ -2,3 +2,9 @@ backup/
 data/
 demo/hdf5_read_demo_v3.ipynb 
 demo/parse_uproot_demo_v3.ipynb
+main_com.py
+multi_test.ipynb
+parse.ipynb
+parse_multiprocess.ipynb
+parse_multiprocess.py
+parse_uproot_old.py
