@@ -1,6 +1,26 @@
 import numpy as np
-import itertools
+import itertools, uproot, sys, os, tqdm
 import pandas as pd
+
+class pdgid():
+    def __init__(self):
+        self.w_plus = 24
+        self.w_minus = -24
+        self.down = 1
+        self.anti_down = -1 
+        self.up = 2
+        self.anti_up = -2 
+        self.strange = 3 
+        self.anti_strange = -3
+        self.charm = 4
+        self.anti_charm = -4
+        self.bottom = 5 
+        self.anti_bottom = -5
+        self.top = 6
+        self.anti_top = -6
+        self.higgs = 25
+
+PID = pdgid()
 
 def deltaPhi(phi1,phi2):
     phi = phi1-phi2
@@ -31,9 +51,346 @@ def to_matrix(target_1, target_2):
             
     return matrix
 
+def event_selection(PT, ETA, BTAG, MODEL):
+    marker_event = []
+    marker_jet = []
+    marker_btag = []
+    print("MODE: {0}, len of pt: {1}".format(MODEL, len(PT)))
 
-#Define Chi square minimizer
-def chi_square_minimizer( jet_pt_chi2, jet_eta_chi2, jet_phi_chi2, jet_btag_chi2, jet_mass_chi2):
+    if MODEL == "ttbar":
+        print("Start jet marking.")
+        for i in tqdm.trange(len(PT)):
+        
+            _marker_jet = []
+            _marker_btag = []
+            
+            for j in range(len(PT[i])):
+                if BTAG[i][j] == 1 and PT[i][j] > 25 and np.abs(ETA[i][j]) < 2.5:
+                    _marker_btag.append(1) 
+                else: 
+                    _marker_btag.append(0) 
+            
+                if PT[i][j] > 25 and np.abs(ETA[i][j]) <= 2.5:
+                    _marker_jet.append(1)
+                else:
+                    _marker_jet.append(0)
+                
+            marker_jet.append(np.asanyarray(_marker_jet, dtype=object))
+            marker_btag.append(np.asanyarray(_marker_btag, dtype=object))
+            
+        marker_jet = np.asanyarray(marker_jet, dtype=object)
+        marker_btag = np.asanyarray(marker_btag, dtype=object)
+        print("Start event marking.")
+        for i in tqdm.trange(len(PT)):
+        
+            if np.sum(marker_jet[i] == 1) >= 6 and np.sum(marker_btag[i] == 1) >= 2 :
+                marker_event.append(1)
+            else:
+                marker_event.append(0)
+        marker_event = np.asanyarray(marker_event, dtype=object)
+
+    elif MODEL == "ttH":
+        print("Start jet marking.")
+        for i in tqdm.trange(len(PT)):
+            _marker_event = []
+            _marker_jet = []
+            _marker_btag = []
+            for j in range(len(PT[i])):
+                if BTAG[i][j] == 1 and PT[i][j] > 25 and np.abs(ETA[i][j]) < 2.5:
+                    _marker_btag.append(1) 
+                else: 
+                    _marker_btag.append(0) 
+            
+                if PT[i][j] > 25 and np.abs(ETA[i][j]) <= 2.5:
+                    _marker_jet.append(1)
+                else:
+                    _marker_jet.append(0)
+            marker_jet.append(np.asanyarray(_marker_jet, dtype=object))
+            marker_btag.append(np.asanyarray(_marker_btag, dtype=object))
+        
+        marker_jet = np.asanyarray(marker_jet, dtype=object)
+        marker_btag = np.asanyarray(marker_btag, dtype=object)
+
+        print("Start event marking.")
+        for i in tqdm.trange(len(PT)):
+            if np.sum(marker_jet[i] == 1) >= 8 and np.sum(marker_btag[i] == 1) >= 2 :
+                marker_event.append(1)
+            else:
+                marker_event.append(0)
+        marker_event = np.asanyarray(marker_event, dtype=object)
+    elif MODEL == "four_top":
+        print("Start jet marking.")
+        for i in tqdm.trange(len(PT)):
+            _marker_event = []
+            _marker_jet = []
+            _marker_btag = []
+            for j in range(len(PT[i])):
+                if BTAG[i][j] == 1 and PT[i][j] > 25 and np.abs(ETA[i][j]) < 2.5:
+                    _marker_btag.append(1) 
+                else: 
+                    _marker_btag.append(0) 
+            
+                if PT[i][j] > 25 and np.abs(ETA[i][j]) <= 2.5:
+                    _marker_jet.append(1)
+                else:
+                    _marker_jet.append(0)
+            marker_jet.append(np.asanyarray(_marker_jet, dtype=object))
+            marker_btag.append(np.asanyarray(_marker_btag, dtype=object))
+
+        marker_jet = np.asanyarray(marker_jet, dtype=object)
+        marker_btag = np.asanyarray(marker_btag, dtype=object)
+        print("Start event marking.")
+        for i in tqdm.trange(len(PT)):
+            if np.sum(marker_jet[i] == 1) >= 12 and np.sum(marker_btag[i] == 1) >= 2 :
+                marker_event.append(1)
+            else:
+                marker_event.append(0)
+        marker_event = np.asanyarray(marker_event, dtype=object)
+    else:
+        print("Please select a correct mode. The mode available:\n1. ttbar.\n2. ttH\n3. four_top")
+    
+    return marker_event, marker_jet, marker_btag
+
+
+def shifted_particle_tracing(dataset, PID_daughter, idx):
+    if (dataset.iloc[idx,6] == PID_daughter):
+        return dataset.iloc[idx,4]
+
+def particle_tracing(dataset, PID, STATUS, MODEL):
+    if MODEL == 'ttbar' or MODEL == 'ttH':
+        for i in range(len(dataset)):
+            if(dataset.iloc[i,1] == STATUS and dataset.iloc[i,6] == PID ): 
+                daughter_index = int(dataset.iloc[i,0])
+        if( dataset.iloc[daughter_index,6] == PID ):
+            shifted_particle_index = dataset.iloc[daughter_index, 4]
+
+
+        while dataset.iloc[shifted_particle_index,6] == PID:
+            init_shifted_particle_index = shifted_particle_index
+            shifted_particle_index = shifted_particle_tracing(dataset, PID, init_shifted_particle_index)       
+
+        dauthter_idx_1 = dataset.iloc[init_shifted_particle_index, 4]
+        daughter_pid_1 = dataset.iloc[dauthter_idx_1, 6]
+
+        dauthter_idx_2 = dataset.iloc[init_shifted_particle_index, 5]
+        daughter_pid_2 = dataset.iloc[dauthter_idx_2, 6]
+
+        return init_shifted_particle_index, dauthter_idx_1, daughter_pid_1, dauthter_idx_2, daughter_pid_2
+    elif MODEL == 'four_top':
+        daughter_index = []
+        for i in range(len(dataset)):
+            if(dataset.iloc[i,1] == STATUS and dataset.iloc[i,6] == PID ): 
+                daughter_index.append(int(dataset.iloc[i,0]))
+        daughter_index_1, daughter_index_2 = daughter_index[0], daughter_index[1]
+
+        if( dataset.iloc[daughter_index_1,6] == PID ):
+            shifted_particle_index_1 = dataset.iloc[daughter_index_1, 4]
+        if( dataset.iloc[daughter_index_2,6] == PID ):
+            shifted_particle_index_2 = dataset.iloc[daughter_index_2, 4]
+
+
+        while dataset.iloc[shifted_particle_index_1,6] == PID:
+            init_shifted_particle_index_1 = shifted_particle_index_1
+            shifted_particle_index_1 = shifted_particle_tracing(dataset, PID, init_shifted_particle_index_1)       
+
+        while dataset.iloc[shifted_particle_index_2,6] == PID:
+            init_shifted_particle_index_2 = shifted_particle_index_2
+            shifted_particle_index_2 = shifted_particle_tracing(dataset, PID, init_shifted_particle_index_2)
+
+        dauthter_idx_1_1 = dataset.iloc[init_shifted_particle_index_1, 4]
+        daughter_pid_1_1 = dataset.iloc[dauthter_idx_1_1, 6]
+
+        dauthter_idx_1_2 = dataset.iloc[init_shifted_particle_index_1, 5]
+        daughter_pid_1_2 = dataset.iloc[dauthter_idx_1_2, 6]
+
+        dauthter_idx_2_1 = dataset.iloc[init_shifted_particle_index_2, 4]
+        daughter_pid_2_1 = dataset.iloc[dauthter_idx_2_1, 6]
+
+        dauthter_idx_2_2 = dataset.iloc[init_shifted_particle_index_2, 5]
+        daughter_pid_2_2 = dataset.iloc[dauthter_idx_2_2, 6]
+
+        return init_shifted_particle_index_1, init_shifted_particle_index_2, dauthter_idx_1_1, daughter_pid_1_1, dauthter_idx_1_2, daughter_pid_1_2, dauthter_idx_2_1, daughter_pid_2_1, dauthter_idx_2_2, daughter_pid_2_2
+    elif MODEL == 'four_top':
+        print("Work in progress")
+    else :
+        print("Plese select a correct model.")
+
+#tracing the daughters
+#Input two daughter of top/top_bar and find their daughter
+def quark_finder(dataset, mother_idx_1, mother_idx_2):
+    
+    #Specific two daughter of top
+    def W_b_specifier(dataset, input_1_idx, input_2_idx):
+        if dataset.iloc[int(input_1_idx),6] == PID.w_plus or dataset.iloc[int(input_1_idx),6] == PID.w_minus :
+            return int(input_1_idx), int(dataset.iloc[int(input_1_idx),6]), int(input_2_idx)
+        elif dataset.iloc[int(input_1_idx),6] == PID.bottom or dataset.iloc[int(input_1_idx),6] == PID.anti_bottom :
+            return  int(input_2_idx), int(dataset.iloc[int(input_1_idx),6]), int(input_1_idx)
+        else :
+            pass
+            #print("Please check your data.")
+    
+    W_boson_idx, mother_pid, b_quark_idx = W_b_specifier(dataset, mother_idx_1, mother_idx_2)
+    
+    #Find the two daughters of boson
+    
+    daughter_1_idx = dataset.iloc[W_boson_idx, 4]
+    daughter_1_pid = dataset.iloc[daughter_1_idx, 6]
+    daughter_2_idx = dataset.iloc[W_boson_idx, 5]
+    daughter_2_pid = dataset.iloc[daughter_2_idx, 6]
+
+    
+    if daughter_1_pid == mother_pid or daughter_2_pid == mother_pid:
+
+        init_idx = W_boson_idx
+        daughter_pid = daughter_1_pid
+        if daughter_2_pid == mother_pid:
+            daughter_pid = daughter_2_pid
+        while daughter_pid == mother_pid :
+            daughter_1_idx = dataset.iloc[int(init_idx), 4]
+            daughter_2_idx = dataset.iloc[int(init_idx), 5]
+
+            daughter_1_pid = dataset.iloc[int(daughter_1_idx), 6]
+            daughter_2_pid = dataset.iloc[int(daughter_2_idx), 6]
+
+            daughter_pid = daughter_1_pid
+            init_idx = daughter_1_idx
+            if daughter_2_pid == mother_pid:
+                daughter_pid = daughter_2_pid
+                init_idx = daughter_2_idx
+    
+    return  b_quark_idx, daughter_1_idx, daughter_2_idx
+
+
+def deltaR_matching(NUM_OF_PARTON, NUM_OF_JET, PARTON_ETA, PARTON_PHI, JET_ETA, JET_PHI, CUTS):
+    """
+    PARTON_ETA: Array, a list of partons's eta in a event.
+    PARTON_PHI: Array, a list of partons's phi in a event.
+    JET_ETA: Array, a list of jet's eta in a event.
+    JET_PHI: Array, a list of jet's phi in a event.
+    """
+    
+    _dR_between_parton_jet = []
+
+    _parton_jet_index = [int(999999999*i/i) for i in range(1, NUM_OF_PARTON+1)]
+    _jet_parton_index = [int(999999999*i/i) for i in range(1, NUM_OF_JET+1)]
+
+    
+    _jet_to_parton_list = np.zeros(len(PARTON_ETA))
+    _parton_to_jet_list = np.zeros(len(JET_ETA))
+
+
+    j = 0
+    a = 0
+    b = 0
+    while a < NUM_OF_PARTON :
+        for b in range( NUM_OF_JET ):
+            _dR_between_parton_jet.append(delta_R( PARTON_ETA[a], PARTON_PHI[a], JET_ETA[b], JET_PHI[b]))
+            j +=1
+        a += 1 
+
+    array = np.reshape(np.array(_dR_between_parton_jet), [NUM_OF_PARTON, NUM_OF_JET])
+    array_index = [x for x in range(len(PARTON_ETA))]
+
+    _dataset = pd.DataFrame(index = array_index, data = array).T
+    
+    for j in range(len(PARTON_ETA)):
+        min_val = _dataset.stack().min()
+        if min_val < CUTS:
+            min_idx, min_col = _dataset.stack().idxmin()
+            
+            _jet_to_parton_list[j] = int(min_idx)
+            _parton_to_jet_list[j] = int(min_col)
+            _dataset = _dataset.drop([min_col], axis=1)
+            _dataset = _dataset.drop([min_idx], axis=0)
+
+        else:
+            _jet_to_parton_list[j] = 'Nan'
+            _parton_to_jet_list[j] = 'Nan'
+    for k in range(NUM_OF_PARTON, NUM_OF_JET):
+        _parton_to_jet_list[k] = 'Nan'
+    
+
+    for j in range(len(JET_ETA)):
+        if _parton_to_jet_list[j] == 0 :
+            _parton_jet_index[0] = _jet_to_parton_list[j]
+        else: 
+            pass
+
+        if _parton_to_jet_list[j] == 1 :
+            _parton_jet_index[1] = _jet_to_parton_list[j]
+        else: 
+            pass
+        if _parton_to_jet_list[j] == 2 :
+            _parton_jet_index[2] = _jet_to_parton_list[j]
+        else: 
+            pass
+
+        if _parton_to_jet_list[j] == 3 :
+            _parton_jet_index[3] = _jet_to_parton_list[j]
+        else:
+            pass
+
+        if _parton_to_jet_list[j] == 4 :
+            _parton_jet_index[4] = _jet_to_parton_list[j]
+        else:
+            pass
+
+        if _parton_to_jet_list[j] == 5 :
+            _parton_jet_index[5] = _jet_to_parton_list[j]
+        else: 
+            pass
+
+
+    ll = len(JET_ETA)
+    for k in range(NUM_OF_PARTON):
+        for m in range(ll):
+            if _jet_to_parton_list[k] == int(m):
+                _jet_parton_index[int(m)] = _parton_to_jet_list[k]
+            else: pass
+
+    for l in range(NUM_OF_JET):
+        if _jet_parton_index[l] > NUM_OF_PARTON:
+            _jet_parton_index[l] = 'nan'
+    for l in range(NUM_OF_PARTON): 
+        if _parton_jet_index[l] > NUM_OF_PARTON:
+            _parton_jet_index[l] = 'Nan'
+    
+    return np.asanyarray(_jet_parton_index, dtype=object), np.asanyarray(_parton_jet_index, dtype=object)
+
+def barcode_recorder(SOURCE, MODEL):
+    _jet_barcode = [0*i for i in range(len(SOURCE))]
+    # print(_jet_barcode)
+    if MODEL == "ttbar":
+        barcode = np.array([34, 40, 40, 17, 20, 20])
+        for i in range(len(SOURCE)):
+            for j in range(len(barcode)):
+                if SOURCE[i] == int(j):
+                    _jet_barcode[i] = barcode[int(j)]
+                else :
+                    _jet_barcode[i] = 'Nan'
+    elif MODEL == "ttH":
+        barcode = np.array([68, 80, 80, 34, 40, 40, 1, 1])
+        for i in range(len(SOURCE)):
+            for j in range(len(barcode)):
+                if SOURCE[i] == int(j):
+                    _jet_barcode[i] = barcode[int(j)]
+                else :
+                    _jet_barcode[i] = 'Nan'
+
+    elif MODEL == "four_top":
+        barcode = np.array([2056, 2176, 2176, 516, 576, 576, 1028, 1056, 1056, 257, 272, 272])
+        for i in range(len(SOURCE)):
+            for j in range(len(barcode)):
+                if SOURCE[i] == int(j):
+                    _jet_barcode[i] = barcode[int(j)]
+                else :
+                    _jet_barcode[i] = 'Nan'
+    else:
+        print("Please select a correct model.")
+    
+    return np.asanyarray(_jet_barcode, dtype=object)
+
+def chi_square_minimizer( jet_pt_chi2, jet_eta_chi2, jet_phi_chi2, jet_btag_chi2, jet_mass_chi2, MODEL):
     
     num_of_btag = np.sum(np.array(jet_btag_chi2) ==1)
 
@@ -44,8 +401,9 @@ def chi_square_minimizer( jet_pt_chi2, jet_eta_chi2, jet_phi_chi2, jet_btag_chi2
             self.eta = jet_eta_chi2[self.idx]
             self.phi = jet_phi_chi2[self.idx]
             self.mass = jet_mass_chi2[self.idx]
-            scale = -0.0008228230613626063 * self.pt - 0.051359995969670155
-            scale = 1 - (scale/2)
+            # scale = -0.0008228230613626063 * self.pt - 0.051359995969670155
+            # scale = 1 - (scale/2)
+            scale = 1
 
             tmp_px = self.pt*np.cos(self.phi)
             tmp_py = self.pt*np.sin(self.phi)
@@ -81,7 +439,7 @@ def chi_square_minimizer( jet_pt_chi2, jet_eta_chi2, jet_phi_chi2, jet_btag_chi2
     sigma_W = 12.3
     sigma_t = 26.3
 
-    jet_idx_list = np.array(['Nan', 'Nan', 'Nan', 'Nan', 'Nan', 'Nan'])
+    _parton_jet_index = np.array(['Nan', 'Nan', 'Nan', 'Nan', 'Nan', 'Nan'])
     
     _jet_index = []
     for i in range(len(jet_pt_chi2)):
@@ -100,12 +458,10 @@ def chi_square_minimizer( jet_pt_chi2, jet_eta_chi2, jet_phi_chi2, jet_btag_chi2
 
     bjet = np.array(bjet, dtype='object')
 
-    #print(_bjet_list)
-    #print(bjet)
+
     jet_index_candidate = []
 
     for i in range(len(bjet)):
-        #print(bjet[i])
 
         jet = []
         
@@ -126,7 +482,7 @@ def chi_square_minimizer( jet_pt_chi2, jet_eta_chi2, jet_phi_chi2, jet_btag_chi2
             jet.append(b)
 
         jet = np.array(jet, dtype='object')
-        #print( jet)
+
         
         for j in range(len(jet)):
         
@@ -138,7 +494,6 @@ def chi_square_minimizer( jet_pt_chi2, jet_eta_chi2, jet_phi_chi2, jet_btag_chi2
             _jet_index_candidate.append(jet[j][2])
             _jet_index_candidate.append(jet[j][3])
             jet_index_candidate.append(_jet_index_candidate)
-    #print(jet_index_candidate)   
 
     for i in range(len(jet_index_candidate)):
 
@@ -168,7 +523,6 @@ def chi_square_minimizer( jet_pt_chi2, jet_eta_chi2, jet_phi_chi2, jet_btag_chi2
         chi2_part_3 = (W_2_inv - m_W)**2
         
         chi2_tmp = chi2_part_1/(2*(sigma_t**2)) + chi2_part_2/sigma_W**2 + chi2_part_3/sigma_W**2
-        #print(chi2_tmp, b_1_idx, j_1_idx, j_2_idx, b_2_idx, j_3_idx, j_4_idx)
         if (min_chi2 < 0 or chi2_tmp < min_chi2 ):
             min_chi2 = chi2_tmp
             jet_1_best_idx = j_1_idx
@@ -177,340 +531,22 @@ def chi_square_minimizer( jet_pt_chi2, jet_eta_chi2, jet_phi_chi2, jet_btag_chi2
             jet_4_best_idx = j_4_idx
             b_1_best_idx = b_1_idx
             b_2_best_idx = b_2_idx
-            jet_idx_list = np.array([b_1_best_idx, jet_1_best_idx, jet_2_best_idx, b_2_best_idx, jet_3_best_idx, jet_4_best_idx])
+            _parton_jet_index = np.array([b_1_best_idx, jet_1_best_idx, jet_2_best_idx, b_2_best_idx, jet_3_best_idx, jet_4_best_idx])
         else: 
             pass
-        
-    return min_chi2, jet_idx_list
+    _jet_parton_index = [9999999*i/i for i in range(1, len(jet_pt_chi2)+1)]
 
-
-def chi_square_minimizer_old( jet_pt_chi2, jet_eta_chi2, jet_phi_chi2, jet_btag_chi2, jet_mass_chi2):
-            
-    
-    if (np.sum(np.array(jet_btag_chi2, dtype='object') == 1) > 2):
-
-        length_of_btag = np.sum( np.array(jet_btag_chi2, dtype='object') == 1 )
-        a = 0
-        while a < length_of_btag-1:
-            b = a + 1
-            while b < length_of_btag:
-
-                m_W = 80.9
-                sigma_W = 9999
-                sigma_t = 1288.28
-                _btag_idx_tmp = []
-                _jet_idx_tmp = []
-                W_inv_cand = []
-                W_minus_inv_cand = [] 
-                top_inv_cand = []
-                top_bar_inv_cand = []
-
-                chi_square_value = []
-                min_chi2 = -1
-
-                jet_idx_list = np.array(['Nan', 'Nan', 'Nan', 'Nan', 'Nan', 'Nan'])
-                for i in range(len(jet_pt_chi2)):
-                    if jet_btag_chi2[i] == 1:
-                        _btag_idx_tmp.append(i)
-                    else :
-                        _jet_idx_tmp.append(i)
-
-                _btag_idx_tmp_re = _btag_idx_tmp
-                
-
-
-                _btag_idx_tmp_prime = []
-                _btag_idx_tmp_prime.append(_btag_idx_tmp_re[a])
-                _btag_idx_tmp_prime.append(_btag_idx_tmp_re[b])
-
-                _a = _btag_idx_tmp_re[a]
-                _b = _btag_idx_tmp_re[b]
-
-                _btag_idx_tmp_re.remove(_a)
-                _btag_idx_tmp_re.remove(_b)
-
-
-                for x in range(len(_btag_idx_tmp)):
-                    _jet_idx_tmp.append(_btag_idx_tmp_re[x])
-
-                _length = len(_jet_idx_tmp) 
-
-                for i in range(0,_length):
-
-                    _jet_1_idx = _jet_idx_tmp[i]
-                    _jet_1_pt = jet_pt_chi2[_jet_1_idx]
-                    _jet_1_eta = jet_eta_chi2[_jet_1_idx]
-                    _jet_1_phi = jet_phi_chi2[_jet_1_idx]
-                    _jet_1_mass = jet_mass_chi2[_jet_1_idx]
-                    _jet_1_px = _jet_1_pt*np.cos( _jet_1_phi )
-                    _jet_1_py = _jet_1_pt*np.sin( _jet_1_phi )
-                    _jet_1_pz = _jet_1_pt*np.sinh( _jet_1_eta )
-                    _jet_1_e = np.sqrt( ( _jet_1_px**2 + _jet_1_py**2 + _jet_1_pz**2) + _jet_1_mass**2 )
-                    for j in range(i+1, _length):
-
-                        _jet_2_idx = _jet_idx_tmp[j]
-                        _jet_2_pt = jet_pt_chi2[_jet_2_idx]
-                        _jet_2_eta = jet_eta_chi2[_jet_2_idx]
-                        _jet_2_phi = jet_phi_chi2[_jet_2_idx]
-                        _jet_2_mass = jet_mass_chi2[_jet_2_idx]
-                        _jet_2_px = _jet_2_pt*np.cos( _jet_2_phi )
-                        _jet_2_py = _jet_2_pt*np.sin( _jet_2_phi )
-                        _jet_2_pz = _jet_2_pt*np.sinh( _jet_2_eta )
-                        _jet_2_e = np.sqrt( ( _jet_2_px**2 + _jet_2_py**2 + _jet_2_pz**2) + _jet_2_mass**2 )
-                        for k in range(0, _length):
-
-                            _jet_3_idx = _jet_idx_tmp[k]
-                            if (_jet_3_idx == _jet_1_idx or _jet_3_idx ==_jet_2_idx):
-                                _jet_3_found = 0
-                            else:
-                                _jet_3_found = 1
-                                _jet_3_pt = jet_pt_chi2[_jet_3_idx]
-                                _jet_3_eta = jet_eta_chi2[_jet_3_idx]
-                                _jet_3_phi = jet_phi_chi2[_jet_3_idx]
-                                _jet_3_mass = jet_mass_chi2[_jet_3_idx]
-                                _jet_3_px = _jet_3_pt*np.cos( _jet_3_phi )
-                                _jet_3_py = _jet_3_pt*np.sin( _jet_3_phi )
-                                _jet_3_pz = _jet_3_pt*np.sinh( _jet_3_eta )
-                                _jet_3_e = np.sqrt( ( _jet_3_px**2 + _jet_3_py**2 + _jet_3_pz**2) + _jet_3_mass**2 )
-                            for l in range(k+1, _length):
-
-                                _jet_4_idx = _jet_idx_tmp[l]
-                                if (_jet_4_idx == _jet_1_idx or _jet_4_idx ==_jet_2_idx):
-                                    _jet_4_found = 0
-                                else :
-                                    _jet_4_found = 1
-                                    _jet_4_pt = jet_pt_chi2[_jet_4_idx]
-                                    _jet_4_eta = jet_eta_chi2[_jet_4_idx]
-                                    _jet_4_phi = jet_phi_chi2[_jet_4_idx]
-                                    _jet_4_mass = jet_mass_chi2[_jet_3_idx]
-                                    _jet_4_px = _jet_4_pt*np.cos( _jet_4_phi )
-                                    _jet_4_py = _jet_4_pt*np.sin( _jet_4_phi )
-                                    _jet_4_pz = _jet_4_pt*np.sinh( _jet_4_eta )
-                                    _jet_4_e = np.sqrt( ( _jet_4_px**2 + _jet_4_py**2 + _jet_4_pz**2) + _jet_4_mass**2 )
-
-                                for m in range(len(_btag_idx_tmp_prime)):
-
-                                    _b_cand_idx_1 = _btag_idx_tmp_prime[m]
-                                    _b_cand_pt_1 = jet_pt_chi2[_b_cand_idx_1]
-                                    _b_cand_eta_1 = jet_eta_chi2[_b_cand_idx_1]
-                                    _b_cand_phi_1 = jet_phi_chi2[_b_cand_idx_1]
-                                    _b_cand_mass_1 = jet_mass_chi2[_b_cand_idx_1]
-                                    _b_cand_px_1 = _b_cand_pt_1 * np.cos(_b_cand_phi_1)
-                                    _b_cand_py_1 = _b_cand_pt_1 * np.sin(_b_cand_phi_1)
-                                    _b_cand_pz_1 = _b_cand_pt_1 * np.sinh(_b_cand_eta_1)
-                                    _b_cand_e_1 = np.sqrt( ( _b_cand_px_1**2 + _b_cand_py_1**2 + _b_cand_pz_1**2) + _b_cand_mass_1**2 )
-
-                                    for n in range(m+1, len(_btag_idx_tmp_prime)):
-
-                                        if _btag_idx_tmp[m] == _btag_idx_tmp_prime[n] :
-                                            _btag_jet_found = 0
-                                        else : 
-                                            _btag_jet_found = 1
-                                            _b_cand_idx_2 = _btag_idx_tmp_prime[n]
-                                            _b_cand_pt_2 = jet_pt_chi2[_b_cand_idx_2]
-                                            _b_cand_eta_2 = jet_eta_chi2[_b_cand_idx_2]
-                                            _b_cand_phi_2 = jet_phi_chi2[_b_cand_idx_2]
-                                            _b_cand_mass_2 = jet_mass_chi2[_b_cand_idx_2]
-                                            _b_cand_px_2 = _b_cand_pt_2 * np.cos(_b_cand_phi_2)
-                                            _b_cand_py_2 = _b_cand_pt_2 * np.sin(_b_cand_phi_2)
-                                            _b_cand_pz_2 = _b_cand_pt_2 * np.sinh(_b_cand_eta_2)
-                                            _b_cand_e_2 = np.sqrt( ( _b_cand_px_2**2 + _b_cand_py_2**2 + _b_cand_pz_2**2) + _b_cand_mass_2**2 )
-
-                                        if (_jet_3_found == 1 and _jet_4_found == 1 and _btag_jet_found == 1):
-                                            _W_inv_mass = np.sqrt( (_jet_1_e + _jet_2_e)**2 
-                                                                - (_jet_1_px + _jet_2_px)**2 
-                                                                - (_jet_1_py + _jet_2_py)**2 
-                                                                - (_jet_1_pz + _jet_2_pz)**2 )
-                                            _W_inv_mass_1 = np.sqrt( (_jet_3_e + _jet_4_e)**2 
-                                                                - (_jet_3_px + _jet_4_px)**2  
-                                                                - (_jet_3_py + _jet_4_py)**2 
-                                                                - (_jet_3_pz + _jet_4_pz)**2 )
-                                            _top_inv_mass = np.sqrt( (_jet_1_e + _jet_2_e + _b_cand_e_1)**2 
-                                                                - (_jet_1_px + _jet_2_px + _b_cand_px_1)**2 
-                                                                - (_jet_1_py + _jet_2_py + _b_cand_py_1)**2 
-                                                                - (_jet_1_pz + _jet_2_pz + _b_cand_pz_1)**2 )
-                                            _top_inv_mass_1 = np.sqrt( (_jet_3_e + _jet_4_e + _b_cand_e_2)**2 
-                                                                - (_jet_3_px + _jet_4_px + _b_cand_px_2)**2 
-                                                                - (_jet_3_py + _jet_4_py + _b_cand_py_2)**2 
-                                                                - (_jet_3_pz + _jet_4_pz + _b_cand_pz_2)**2 )
-                                            W_inv_cand.append(_W_inv_mass)
-                                            W_minus_inv_cand.append(_W_inv_mass_1)
-                                            top_inv_cand.append(_top_inv_mass)
-                                            top_bar_inv_cand.append(_top_inv_mass_1)
-
-                                            chi_square_tmp = 0        
-                                            chi_square_tmp_1 = (_top_inv_mass - _top_inv_mass_1)**2 
-                                            chi_square_tmp_2 = (_W_inv_mass - m_W)**2
-                                            chi_square_tmp_3 = (_W_inv_mass_1 - m_W)**2
-                                            #print(type(chi_square_tmp_1), type(chi_square_tmp_2), type(chi_square_tmp_3))
-                                            chi_square_tmp = chi_square_tmp_1/(2*sigma_t**2) + chi_square_tmp_2/(sigma_W**2) + chi_square_tmp_3/(sigma_W**2)
-                                            #print(W_inv_cand, W_minus_inv_cand, top_inv_cand, top_bar_inv_cand, chi_square_tmp)  
-                                            if (min_chi2 < 0 or chi_square_tmp < min_chi2 ):
-                                                min_chi2 = chi_square_tmp
-                                                jet_1_best_idx = _jet_1_idx
-                                                jet_2_best_idx = _jet_2_idx
-                                                jet_3_best_idx = _jet_3_idx
-                                                jet_4_best_idx = _jet_4_idx
-                                                b_1_best_idx = _b_cand_idx_1
-                                                b_2_best_idx = _b_cand_idx_2
-                                                jet_idx_list = np.array([b_1_best_idx, jet_1_best_idx, jet_2_best_idx, b_2_best_idx, jet_3_best_idx, jet_4_best_idx])
-                                            else: 
-                                                pass
-                    b += 1
-                a += 1
-
-    else: 
-        length_of_btag = np.sum( np.array(jet_btag_chi2, dtype='object') == 1 )
-        #print("length_of_btag: {0}".format(length_of_btag))
-        m_W = 80.9
-        sigma_W = 197.4
-        sigma_t = 1288.28
-        _btag_idx_tmp = []
-        _jet_idx_tmp = []
-        W_inv_cand = []
-        W_minus_inv_cand = [] 
-        top_inv_cand = []
-        top_bar_inv_cand = []
-
-        chi_square_value = []
-        set_info = []
-
-        min_chi2 = -1
-
-        jet_idx_list = np.array(['Nan', 'Nan', 'Nan', 'Nan', 'Nan', 'Nan'])
-        for i in range(len(jet_pt_chi2)):
-            if jet_btag_chi2[i] == 1:
-                _btag_idx_tmp.append(i)
+    for k in range(len(jet_pt_chi2)):
+        for l in range(len(_parton_jet_index)):
+            if _parton_jet_index[l] == int(k):
+                _jet_parton_index[k] = int(l)
             else :
-                _jet_idx_tmp.append(i)
-        #print(_btag_idx_tmp, _jet_idx_tmp)
-        _length = len(_jet_idx_tmp)
-        for i in range(0,_length):
-
-            _jet_1_idx = _jet_idx_tmp[i]
-            _jet_1_pt = jet_pt_chi2[_jet_1_idx]
-            _jet_1_eta = jet_eta_chi2[_jet_1_idx]
-            _jet_1_phi = jet_phi_chi2[_jet_1_idx]
-            _jet_1_mass = jet_mass_chi2[_jet_1_idx]
-            _jet_1_px = _jet_1_pt*np.cos( _jet_1_phi )
-            _jet_1_py = _jet_1_pt*np.sin( _jet_1_phi )
-            _jet_1_pz = _jet_1_pt*np.sinh( _jet_1_eta )
-            _jet_1_e = np.sqrt( ( _jet_1_px**2 + _jet_1_py**2 + _jet_1_pz**2) + _jet_1_mass**2 )
-            #print("q1 has been found.")
-            for j in range(i+1, _length):
-
-                _jet_2_idx = _jet_idx_tmp[j]
-                _jet_2_pt = jet_pt_chi2[_jet_2_idx]
-                _jet_2_eta = jet_eta_chi2[_jet_2_idx]
-                _jet_2_phi = jet_phi_chi2[_jet_2_idx]
-                _jet_2_mass = jet_mass_chi2[_jet_2_idx]
-                _jet_2_px = _jet_2_pt*np.cos( _jet_2_phi )
-                _jet_2_py = _jet_2_pt*np.sin( _jet_2_phi )
-                _jet_2_pz = _jet_2_pt*np.sinh( _jet_2_eta )
-                _jet_2_e = np.sqrt( ( _jet_2_px**2 + _jet_2_py**2 + _jet_2_pz**2) + _jet_2_mass**2 )
-                #print("q2 has benn found.")
-                for k in range(0, _length):
-
-                    _jet_3_idx = _jet_idx_tmp[k]
-                    if (_jet_3_idx == _jet_1_idx or _jet_3_idx ==_jet_2_idx):
-                        _jet_3_found = 0
-                    else:
-                        _jet_3_found = 1
-                        _jet_3_pt = jet_pt_chi2[_jet_3_idx]
-                        _jet_3_eta = jet_eta_chi2[_jet_3_idx]
-                        _jet_3_phi = jet_phi_chi2[_jet_3_idx]
-                        _jet_3_mass = jet_mass_chi2[_jet_3_idx]
-                        _jet_3_px = _jet_3_pt*np.cos( _jet_3_phi )
-                        _jet_3_py = _jet_3_pt*np.sin( _jet_3_phi )
-                        _jet_3_pz = _jet_3_pt*np.sinh( _jet_3_eta )
-                        _jet_3_e = np.sqrt( ( _jet_3_px**2 + _jet_3_py**2 + _jet_3_pz**2) + _jet_3_mass**2 )
-                        #print("q3 has been found.")
-                    for l in range(k+1, _length):
-
-                        _jet_4_idx = _jet_idx_tmp[l]
-                        if (_jet_4_idx == _jet_1_idx or _jet_4_idx ==_jet_2_idx):
-                            _jet_4_found = 0
-                        else :
-                            _jet_4_found = 1
-                            _jet_4_pt = jet_pt_chi2[_jet_4_idx]
-                            _jet_4_eta = jet_eta_chi2[_jet_4_idx]
-                            _jet_4_phi = jet_phi_chi2[_jet_4_idx]
-                            _jet_4_mass = jet_mass_chi2[_jet_3_idx]
-                            _jet_4_px = _jet_4_pt*np.cos( _jet_4_phi )
-                            _jet_4_py = _jet_4_pt*np.sin( _jet_4_phi )
-                            _jet_4_pz = _jet_4_pt*np.sinh( _jet_4_eta )
-                            _jet_4_e = np.sqrt( ( _jet_4_px**2 + _jet_4_py**2 + _jet_4_pz**2) + _jet_4_mass**2 )
-                            #print("q4 has been found.")
-
-                        for m in range(len(_btag_idx_tmp)):
-
-                            _b_cand_idx_1 = _btag_idx_tmp[m]
-                            _b_cand_pt_1 = jet_pt_chi2[_b_cand_idx_1]
-                            _b_cand_eta_1 = jet_eta_chi2[_b_cand_idx_1]
-                            _b_cand_phi_1 = jet_phi_chi2[_b_cand_idx_1]
-                            _b_cand_mass_1 = jet_mass_chi2[_b_cand_idx_1]
-                            _b_cand_px_1 = _b_cand_pt_1 * np.cos(_b_cand_phi_1)
-                            _b_cand_py_1 = _b_cand_pt_1 * np.sin(_b_cand_phi_1)
-                            _b_cand_pz_1 = _b_cand_pt_1 * np.sinh(_b_cand_eta_1)
-                            _b_cand_e_1 = np.sqrt( ( _b_cand_px_1**2 + _b_cand_py_1**2 + _b_cand_pz_1**2) + _b_cand_mass_1**2 )
-                            #print("b1 has been found")
-
-                            for n in range(m+1, len(_btag_idx_tmp)):
-
-                                if _btag_idx_tmp[m] == _btag_idx_tmp[n] :
-                                    _btag_jet_found = 0
-                                else : 
-                                    _btag_jet_found = 1
-                                    _b_cand_idx_2 = _btag_idx_tmp[n]
-                                    _b_cand_pt_2 = jet_pt_chi2[_b_cand_idx_2]
-                                    _b_cand_eta_2 = jet_eta_chi2[_b_cand_idx_2]
-                                    _b_cand_phi_2 = jet_phi_chi2[_b_cand_idx_2]
-                                    _b_cand_mass_2 = jet_mass_chi2[_b_cand_idx_2]
-                                    _b_cand_px_2 = _b_cand_pt_2 * np.cos(_b_cand_phi_2)
-                                    _b_cand_py_2 = _b_cand_pt_2 * np.sin(_b_cand_phi_2)
-                                    _b_cand_pz_2 = _b_cand_pt_2 * np.sinh(_b_cand_eta_2)
-                                    _b_cand_e_2 = np.sqrt( ( _b_cand_px_2**2 + _b_cand_py_2**2 + _b_cand_pz_2**2) + _b_cand_mass_2**2 )
-                                    #print("b2 has been found.")
-
-                                if (_jet_3_found == 1 and _jet_4_found == 1 and _btag_jet_found == 1):
-                                    _W_inv_mass = np.sqrt( (_jet_1_e + _jet_2_e)**2 
-                                                        - (_jet_1_px + _jet_2_px)**2 
-                                                        - (_jet_1_py + _jet_2_py)**2 
-                                                        - (_jet_1_pz + _jet_2_pz)**2 )
-                                    _W_inv_mass_1 = np.sqrt( (_jet_3_e + _jet_4_e)**2 
-                                                        - (_jet_3_px + _jet_4_px)**2  
-                                                        - (_jet_3_py + _jet_4_py)**2 
-                                                        - (_jet_3_pz + _jet_4_pz)**2 )
-                                    _top_inv_mass = np.sqrt( (_jet_1_e + _jet_2_e + _b_cand_e_1)**2 
-                                                        - (_jet_1_px + _jet_2_px + _b_cand_px_1)**2 
-                                                        - (_jet_1_py + _jet_2_py + _b_cand_py_1)**2 
-                                                        - (_jet_1_pz + _jet_2_pz + _b_cand_pz_1)**2 )
-                                    _top_inv_mass_1 = np.sqrt( (_jet_3_e + _jet_4_e + _b_cand_e_2)**2 
-                                                        - (_jet_3_px + _jet_4_px + _b_cand_px_2)**2 
-                                                        - (_jet_3_py + _jet_4_py + _b_cand_py_2)**2 
-                                                        - (_jet_3_pz + _jet_4_pz + _b_cand_pz_2)**2 )
-                                    W_inv_cand.append(_W_inv_mass)
-                                    W_minus_inv_cand.append(_W_inv_mass_1)
-                                    top_inv_cand.append(_top_inv_mass)
-                                    top_bar_inv_cand.append(_top_inv_mass_1)
-                                            
-                                    chi_square_tmp_1 = (_top_inv_mass - _top_inv_mass_1)**2 
-                                    chi_square_tmp_2 = (_W_inv_mass - m_W)**2
-                                    chi_square_tmp_3 = (_W_inv_mass_1 - m_W)**2
-                                    chi_square_tmp = chi_square_tmp_1/(2*sigma_t**2) + chi_square_tmp_2/(sigma_W**2) + chi_square_tmp_3/(sigma_W**2)
-                                    #print(W_inv_cand, W_minus_inv_cand, top_inv_cand, top_bar_inv_cand, chi_square_tmp) 
-                                        
-                                    if (min_chi2 < 0 or chi_square_tmp < min_chi2 ):
-                                        min_chi2 = chi_square_tmp
-                                        jet_1_best_idx = _jet_1_idx
-                                        jet_2_best_idx = _jet_2_idx
-                                        jet_3_best_idx = _jet_3_idx
-                                        jet_4_best_idx = _jet_4_idx
-                                        b_1_best_idx = _b_cand_idx_1
-                                        b_2_best_idx = _b_cand_idx_2
-                                        jet_idx_list = np.array([b_1_best_idx, jet_1_best_idx, jet_2_best_idx, b_2_best_idx, jet_3_best_idx, jet_4_best_idx])
-                                    else: 
-                                        pass
-
-        
-    return min_chi2, jet_idx_list
+                pass
+    
+    for k in range(len(_jet_parton_index)):
+            if _jet_parton_index[k] == 9999999:
+                _jet_parton_index[k] = 'Nan'
+            else : 
+                pass
+    
+    return min_chi2, np.asanyarray(_parton_jet_index, dtype=object), np.asanyarray(_jet_parton_index, dtype=object)

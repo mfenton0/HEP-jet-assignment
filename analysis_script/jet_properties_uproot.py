@@ -12,10 +12,7 @@ class jet_properties():
         self.area = data.array('Jet.Area')
         self.mass = data.array('Jet.Mass')
         self.charge = data.array('Jet.Charge')
-        self.px = self.pt * np.cos(self.phi)
-        self.py = self.pt * np.sin(self.phi)
-        self.pz = self.pt * np.sinh(self.eta)
-        self.e = np.sqrt( (self.px**2 + self.py**2 + self.pz**2) + self.mass**2 )
+
 
     def dataframelize(self, index):
 
