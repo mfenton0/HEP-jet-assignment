@@ -30,6 +30,8 @@ def main():
         parse(args.input, args.output, args.model, args.single)
     elif args.usage == "chi2":
         chi2(args.input, args.output, args.model, args.single)
+    elif args.usage == "purity":
+        print("Work in progress.")
     else: 
         print("Please select a correct usage.\n1. cutflow\n2. parse")
 
