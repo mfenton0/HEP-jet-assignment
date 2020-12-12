@@ -261,7 +261,7 @@ def quark_finder(dataset, mother_idx_1, mother_idx_2):
     return  b_quark_idx, daughter_1_idx, daughter_2_idx
 
 
-def deltaR_matching(NUM_OF_PARTON, NUM_OF_JET, PARTON_ETA, PARTON_PHI, JET_ETA, JET_PHI, CUTS):
+def deltaR_matching(NUM_OF_PARTON, NUM_OF_JET, PARTON_ETA, PARTON_PHI, JET_ETA, JET_PHI, CUTS, MODEL):
     """
     PARTON_ETA: Array, a list of partons's eta in a event.
     PARTON_PHI: Array, a list of partons's phi in a event.
@@ -309,37 +309,139 @@ def deltaR_matching(NUM_OF_PARTON, NUM_OF_JET, PARTON_ETA, PARTON_PHI, JET_ETA, 
     for k in range(NUM_OF_PARTON, NUM_OF_JET):
         _parton_to_jet_list[k] = 'Nan'
     
+    
+    if MODEL == 'ttbar':
+        for j in range(len(JET_ETA)):
+            if _parton_to_jet_list[j] == 0 :
+                _parton_jet_index[0] = _jet_to_parton_list[j]
+            else: 
+                pass
 
-    for j in range(len(JET_ETA)):
-        if _parton_to_jet_list[j] == 0 :
-            _parton_jet_index[0] = _jet_to_parton_list[j]
-        else: 
-            pass
+            if _parton_to_jet_list[j] == 1 :
+                _parton_jet_index[1] = _jet_to_parton_list[j]
+            else: 
+                pass
+            if _parton_to_jet_list[j] == 2 :
+                _parton_jet_index[2] = _jet_to_parton_list[j]
+            else: 
+                pass
 
-        if _parton_to_jet_list[j] == 1 :
-            _parton_jet_index[1] = _jet_to_parton_list[j]
-        else: 
-            pass
-        if _parton_to_jet_list[j] == 2 :
-            _parton_jet_index[2] = _jet_to_parton_list[j]
-        else: 
-            pass
+            if _parton_to_jet_list[j] == 3 :
+                _parton_jet_index[3] = _jet_to_parton_list[j]
+            else:
+                pass
 
-        if _parton_to_jet_list[j] == 3 :
-            _parton_jet_index[3] = _jet_to_parton_list[j]
-        else:
-            pass
+            if _parton_to_jet_list[j] == 4 :
+                _parton_jet_index[4] = _jet_to_parton_list[j]
+            else:
+                pass
 
-        if _parton_to_jet_list[j] == 4 :
-            _parton_jet_index[4] = _jet_to_parton_list[j]
-        else:
-            pass
+            if _parton_to_jet_list[j] == 5 :
+                _parton_jet_index[5] = _jet_to_parton_list[j]
+            else: 
+                pass
+    elif MODEL == 'ttH':
+        for j in range(len(JET_ETA)):
+            if _parton_to_jet_list[j] == 0 :
+                _parton_jet_index[0] = _jet_to_parton_list[j]
+            else: 
+                pass
 
-        if _parton_to_jet_list[j] == 5 :
-            _parton_jet_index[5] = _jet_to_parton_list[j]
-        else: 
-            pass
+            if _parton_to_jet_list[j] == 1 :
+                _parton_jet_index[1] = _jet_to_parton_list[j]
+            else: 
+                pass
+            if _parton_to_jet_list[j] == 2 :
+                _parton_jet_index[2] = _jet_to_parton_list[j]
+            else: 
+                pass
 
+            if _parton_to_jet_list[j] == 3 :
+                _parton_jet_index[3] = _jet_to_parton_list[j]
+            else:
+                pass
+
+            if _parton_to_jet_list[j] == 4 :
+                _parton_jet_index[4] = _jet_to_parton_list[j]
+            else:
+                pass
+
+            if _parton_to_jet_list[j] == 5 :
+                _parton_jet_index[5] = _jet_to_parton_list[j]
+            else: 
+                pass
+            
+            if _parton_to_jet_list[j] == 6 :
+                _parton_jet_index[6] = _jet_to_parton_list[j]
+            else: 
+                pass
+            
+            if _parton_to_jet_list[j] == 7 :
+                _parton_jet_index[7] = _jet_to_parton_list[j]
+            else: 
+                pass
+    elif MODEL == 'four_top':
+        for j in range(len(JET_ETA)):
+            if _parton_to_jet_list[j] == 0 :
+                _parton_jet_index[0] = _jet_to_parton_list[j]
+            else: 
+                pass
+
+            if _parton_to_jet_list[j] == 1 :
+                _parton_jet_index[1] = _jet_to_parton_list[j]
+            else: 
+                pass
+            if _parton_to_jet_list[j] == 2 :
+                _parton_jet_index[2] = _jet_to_parton_list[j]
+            else: 
+                pass
+
+            if _parton_to_jet_list[j] == 3 :
+                _parton_jet_index[3] = _jet_to_parton_list[j]
+            else:
+                pass
+
+            if _parton_to_jet_list[j] == 4 :
+                _parton_jet_index[4] = _jet_to_parton_list[j]
+            else:
+                pass
+
+            if _parton_to_jet_list[j] == 5 :
+                _parton_jet_index[5] = _jet_to_parton_list[j]
+            else: 
+                pass
+            
+            if _parton_to_jet_list[j] == 6 :
+                _parton_jet_index[6] = _jet_to_parton_list[j]
+            else: 
+                pass
+            
+            if _parton_to_jet_list[j] == 7 :
+                _parton_jet_index[7] = _jet_to_parton_list[j]
+            else: 
+                pass
+            
+            if _parton_to_jet_list[j] == 8 :
+                _parton_jet_index[8] = _jet_to_parton_list[j]
+            else: 
+                pass
+            
+            if _parton_to_jet_list[j] == 9 :
+                _parton_jet_index[9] = _jet_to_parton_list[j]
+            else: 
+                pass
+            
+            if _parton_to_jet_list[j] == 10 :
+                _parton_jet_index[10] = _jet_to_parton_list[j]
+            else: 
+                pass
+            
+            if _parton_to_jet_list[j] == 11 :
+                _parton_jet_index[11] = _jet_to_parton_list[j]
+            else: 
+                pass
+    else:
+        print("Delta R matching faild, please check your model.")
 
     ll = len(JET_ETA)
     for k in range(NUM_OF_PARTON):
