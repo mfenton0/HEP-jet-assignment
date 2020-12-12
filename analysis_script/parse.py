@@ -434,7 +434,7 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE):
     jet_parton_index = []
     parton_jet_index = []
     for i in tqdm.trange(len(jet_pt)):
-        _jet_parton_index, _parton_jet_index = deltaR_matching(6, len(jet_pt[i]), parton_eta[i], parton_phi[i], jet_eta[i], jet_phi[i], CUTS=0.4)
+        _jet_parton_index, _parton_jet_index = deltaR_matching(NUM_OF_PARTON, len(jet_pt[i]), parton_eta[i], parton_phi[i], jet_eta[i], jet_phi[i], CUTS=0.4)
         jet_parton_index.append(_jet_parton_index)
         parton_jet_index.append(_parton_jet_index)
     print("+------------------------------------------------------------------------------------------------------+")
