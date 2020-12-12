@@ -434,7 +434,7 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE):
     jet_parton_index = []
     parton_jet_index = []
     for i in tqdm.trange(len(jet_pt)):
-        _jet_parton_index, _parton_jet_index = deltaR_matching(NUM_OF_PARTON, len(jet_pt[i]), parton_eta[i], parton_phi[i], jet_eta[i], jet_phi[i], CUTS=0.4)
+        _jet_parton_index, _parton_jet_index = deltaR_matching(NUM_OF_PARTON, len(jet_pt[i]), parton_eta[i], parton_phi[i], jet_eta[i], jet_phi[i], 0.4, MODEL)
         jet_parton_index.append(_jet_parton_index)
         parton_jet_index.append(_parton_jet_index)
     print("+------------------------------------------------------------------------------------------------------+")
@@ -506,7 +506,7 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE):
     # Save the event which pass the selection
     with h5py.File(OUTPUT_FILE,'w') as f:
         dt = h5py.vlen_dtype(np.dtype('float16'))
-
+        
         hdf5_jet_parton_index = f.create_dataset('jet_parton_index', (lene, ), dtype=dt)
         hdf5_jet_barcode = f.create_dataset('jet_barcode', (lene, ), dtype=dt)
         hdf5_jet_pt = f.create_dataset('jet_pt', (lene, ), dtype=dt)
@@ -514,7 +514,7 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE):
         hdf5_jet_phi = f.create_dataset('jet_phi', (lene, ), dtype=dt)
         hdf5_jet_mass = f.create_dataset('jet_mass', (lene, ), dtype=dt)
         hdf5_jet_btag = f.create_dataset('jet_btag', (lene, ), dtype=dt)
-
+        print("Writing jet information to {0}".format(OUTPUT_FILE))
         for i in tqdm.trange(lene):
             hdf5_jet_parton_index[i] = jet_parton_index[i]
             hdf5_jet_barcode[i] = jet_barcode[i]
@@ -534,7 +534,8 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE):
         hdf5_N_match_top_in_event = f.create_dataset('N_match_top_in_event', data = N_match_top_in_event)
         if MODEL == "ttH":
             N_match_higgs_in_event = f.create_dataset('N_match_higgs_in_event', data = N_match_higgs_in_event)
-
+        
+        print("Writing parton information to {0}".format(OUTPUT_FILE))
         for i in tqdm.trange(lene):
             hdf5_parton_jet_index[i] = parton_jet_index[i]
             hdf5_parton_pdgid[i] = parton_pdgid[i]
