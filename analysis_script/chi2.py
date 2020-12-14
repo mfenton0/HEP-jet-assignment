@@ -74,7 +74,7 @@ class properties_for_jet():
         return jet_df
 
 def chi2(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE):
-
+    
     PID = pdgid()
 
     if int(SINGLE) == 1:
