@@ -9,6 +9,7 @@ from jet_properties_uproot import jet_properties  #import jet properties helper 
 from cutflow import cutflow
 from parse import parse 
 from chi2 import chi2
+from fitting import fitting 
 import h5py, sys, traceback, os, tqdm
 from argparse import ArgumentParser
 
@@ -32,6 +33,8 @@ def main():
         chi2(args.input, args.output, args.model, args.single)
     elif args.usage == "purity":
         print("Work in progress.")
+    elif args.usage == "fitting":
+        fitting(args.input, args.output, args.model, args.single)
     else: 
         print("Please select a correct usage.\n1. cutflow\n2. parse")
 
