@@ -530,125 +530,248 @@ def chi_square_minimizer( jet_pt_chi2, jet_eta_chi2, jet_phi_chi2, jet_btag_chi2
         part_4 = (jet1.pz + jet2.pz + jet3.pz)**2
         return np.sqrt( part_1 - part_2 - part_3 - part_4 )
 
-    _bjet_list = []
-    
-    
-    bjet = []
-    _jet_list = []
-
-    min_chi2 = -1
-    m_W = 81.3
-    sigma_W = 12.3
-    sigma_t = 26.3
-
-    _parton_jet_index = np.array(['Nan', 'Nan', 'Nan', 'Nan', 'Nan', 'Nan'])
-    
-    _jet_index = []
-    for i in range(len(jet_pt_chi2)):
-        _jet_index.append(i)
-
-    for i in range(len(jet_btag_chi2)):
-        if jet_btag_chi2[i] == 1:
-            _bjet_list.append(i)
-        else :
-            _jet_list.append(i)
-            
-    _bjet = itertools.combinations(_bjet_list, 2)
-    
-    for a in _bjet:
-        bjet.append(a)
-
-    bjet = np.array(bjet, dtype='object')
-
-
-    jet_index_candidate = []
-
-    for i in range(len(bjet)):
-
-        jet = []
+    if MODEL == 'ttbar':
+        _bjet_list = []
         
-        tmp_jet_index = _bjet_list.copy()
-        for c in range(len(bjet[i])): 
-            
-            _tmp = bjet[i][c]
-            tmp_jet_index.remove(_tmp)
+        bjet = []
+        _jet_list = []
+
+        min_chi2 = -1
+        m_W = 81.3
+        sigma_W = 12.3
+        sigma_t = 26.3
+
+        _parton_jet_index = np.array(['Nan', 'Nan', 'Nan', 'Nan', 'Nan', 'Nan'])
         
-        tmp_jet_list = _jet_list.copy()
+        _jet_index = []
+        for i in range(len(jet_pt_chi2)):
+            _jet_index.append(i)
 
-        for d in tmp_jet_index:
-            tmp_jet_list.append(d)
-        
-        _jet = itertools.permutations(tmp_jet_list, 4)
-
-        for b in _jet:
-            jet.append(b)
-
-        jet = np.array(jet, dtype='object')
-
-        
-        for j in range(len(jet)):
-        
-            _jet_index_candidate = []
-            _jet_index_candidate.append(bjet[i][0])
-            _jet_index_candidate.append(bjet[i][1])
-            _jet_index_candidate.append(jet[j][0])
-            _jet_index_candidate.append(jet[j][1])
-            _jet_index_candidate.append(jet[j][2])
-            _jet_index_candidate.append(jet[j][3])
-            jet_index_candidate.append(_jet_index_candidate)
-
-    for i in range(len(jet_index_candidate)):
-
-        b_1_idx = jet_index_candidate[i][0]
-        b_2_idx = jet_index_candidate[i][1]
-
-        j_1_idx = jet_index_candidate[i][2]
-        j_2_idx = jet_index_candidate[i][3]
-        j_3_idx = jet_index_candidate[i][4]
-        j_4_idx = jet_index_candidate[i][5]
-
-        bjet_1 = jet_cand_properties(b_1_idx)
-        bjet_2 = jet_cand_properties(b_2_idx)
-
-        jet_1 = jet_cand_properties(j_1_idx)
-        jet_2 = jet_cand_properties(j_2_idx)
-        jet_3 = jet_cand_properties(j_3_idx)
-        jet_4 = jet_cand_properties(j_4_idx)
-        
-        W_1_inv = cal_W_inv(jet_1, jet_2)
-        W_2_inv = cal_W_inv(jet_3, jet_4)
-        top_1_inv = cal_top_inv(bjet_1, jet_1, jet_2)
-        top_2_inv = cal_top_inv(bjet_2, jet_3, jet_4)
-
-        chi2_part_1 = (top_1_inv - top_2_inv)**2
-        chi2_part_2 = (W_1_inv - m_W)**2
-        chi2_part_3 = (W_2_inv - m_W)**2
-        
-        chi2_tmp = chi2_part_1/(2*(sigma_t**2)) + chi2_part_2/sigma_W**2 + chi2_part_3/sigma_W**2
-        if (min_chi2 < 0 or chi2_tmp < min_chi2 ):
-            min_chi2 = chi2_tmp
-            jet_1_best_idx = j_1_idx
-            jet_2_best_idx = j_2_idx
-            jet_3_best_idx = j_3_idx
-            jet_4_best_idx = j_4_idx
-            b_1_best_idx = b_1_idx
-            b_2_best_idx = b_2_idx
-            _parton_jet_index = np.array([b_1_best_idx, jet_1_best_idx, jet_2_best_idx, b_2_best_idx, jet_3_best_idx, jet_4_best_idx])
-        else: 
-            pass
-    _jet_parton_index = [9999999*i/i for i in range(1, len(jet_pt_chi2)+1)]
-
-    for k in range(len(jet_pt_chi2)):
-        for l in range(len(_parton_jet_index)):
-            if _parton_jet_index[l] == int(k):
-                _jet_parton_index[k] = int(l)
+        for i in range(len(jet_btag_chi2)):
+            if jet_btag_chi2[i] == 1:
+                _bjet_list.append(i)
             else :
+                _jet_list.append(i)
+                
+        _bjet = itertools.combinations(_bjet_list, 2)
+        
+        for a in _bjet:
+            bjet.append(a)
+
+        bjet = np.array(bjet, dtype='object')
+
+        jet_index_candidate = []
+
+        for i in range(len(bjet)):
+
+            jet = []
+            
+            tmp_jet_index = _bjet_list.copy()
+            for c in range(len(bjet[i])): 
+                
+                _tmp = bjet[i][c]
+                tmp_jet_index.remove(_tmp)
+            
+            tmp_jet_list = _jet_list.copy()
+
+            for d in tmp_jet_index:
+                tmp_jet_list.append(d)
+            
+            _jet = itertools.permutations(tmp_jet_list, 4)
+
+            for b in _jet:
+                jet.append(b)
+
+            jet = np.array(jet, dtype='object')
+
+            
+            for j in range(len(jet)):
+            
+                _jet_index_candidate = []
+                _jet_index_candidate.append(bjet[i][0])
+                _jet_index_candidate.append(bjet[i][1])
+                _jet_index_candidate.append(jet[j][0])
+                _jet_index_candidate.append(jet[j][1])
+                _jet_index_candidate.append(jet[j][2])
+                _jet_index_candidate.append(jet[j][3])
+                jet_index_candidate.append(_jet_index_candidate)
+
+        for i in range(len(jet_index_candidate)):
+
+            b_1_idx = jet_index_candidate[i][0]
+            b_2_idx = jet_index_candidate[i][1]
+
+            j_1_idx = jet_index_candidate[i][2]
+            j_2_idx = jet_index_candidate[i][3]
+            j_3_idx = jet_index_candidate[i][4]
+            j_4_idx = jet_index_candidate[i][5]
+
+            bjet_1 = jet_cand_properties(b_1_idx)
+            bjet_2 = jet_cand_properties(b_2_idx)
+
+            jet_1 = jet_cand_properties(j_1_idx)
+            jet_2 = jet_cand_properties(j_2_idx)
+            jet_3 = jet_cand_properties(j_3_idx)
+            jet_4 = jet_cand_properties(j_4_idx)
+            
+            W_1_inv = cal_W_inv(jet_1, jet_2)
+            W_2_inv = cal_W_inv(jet_3, jet_4)
+            top_1_inv = cal_top_inv(bjet_1, jet_1, jet_2)
+            top_2_inv = cal_top_inv(bjet_2, jet_3, jet_4)
+
+            chi2_part_1 = (top_1_inv - top_2_inv)**2
+            chi2_part_2 = (W_1_inv - m_W)**2
+            chi2_part_3 = (W_2_inv - m_W)**2
+            
+            chi2_tmp = chi2_part_1/(2*(sigma_t**2)) + chi2_part_2/sigma_W**2 + chi2_part_3/sigma_W**2
+            if (min_chi2 < 0 or chi2_tmp < min_chi2 ):
+                min_chi2 = chi2_tmp
+                jet_1_best_idx = j_1_idx
+                jet_2_best_idx = j_2_idx
+                jet_3_best_idx = j_3_idx
+                jet_4_best_idx = j_4_idx
+                b_1_best_idx = b_1_idx
+                b_2_best_idx = b_2_idx
+                _parton_jet_index = np.array([b_1_best_idx, jet_1_best_idx, jet_2_best_idx, b_2_best_idx, jet_3_best_idx, jet_4_best_idx])
+            else: 
                 pass
-    
-    for k in range(len(_jet_parton_index)):
-            if _jet_parton_index[k] == 9999999:
-                _jet_parton_index[k] = 'Nan'
-            else : 
+        _jet_parton_index = [9999999*i/i for i in range(1, len(jet_pt_chi2)+1)]
+
+        for k in range(len(jet_pt_chi2)):
+            for l in range(len(_parton_jet_index)):
+                if _parton_jet_index[l] == int(k):
+                    _jet_parton_index[k] = int(l)
+                else :
+                    pass
+        
+        for k in range(len(_jet_parton_index)):
+                if _jet_parton_index[k] == 9999999:
+                    _jet_parton_index[k] = 'Nan'
+                else : 
+                    pass
+        
+        return min_chi2, np.asanyarray(_parton_jet_index, dtype=object), np.asanyarray(_jet_parton_index, dtype=object)
+        
+    elif MODEL == 'ttH':
+        _bjet_list = []
+        
+        bjet = []
+        _jet_list = []
+
+        min_chi2 = -1
+        m_W = 81.3
+        sigma_W = 12.3
+        sigma_t = 26.3
+
+        _parton_jet_index = np.array(['Nan', 'Nan', 'Nan', 'Nan', 'Nan', 'Nan'])
+        
+        _jet_index = []
+        for i in range(len(jet_pt_chi2)):
+            _jet_index.append(i)
+
+        for i in range(len(jet_btag_chi2)):
+            if jet_btag_chi2[i] == 1:
+                _bjet_list.append(i)
+            else :
+                _jet_list.append(i)
+                
+        _bjet = itertools.combinations(_bjet_list, 4)
+        
+        for a in _bjet:
+            bjet.append(a)
+
+        bjet = np.array(bjet, dtype='object')
+
+        jet_index_candidate = []
+
+        for i in range(len(bjet)):
+
+            jet = []
+            
+            tmp_jet_index = _bjet_list.copy()
+            for c in range(len(bjet[i])): 
+                
+                _tmp = bjet[i][c]
+                tmp_jet_index.remove(_tmp)
+            
+            tmp_jet_list = _jet_list.copy()
+
+            for d in tmp_jet_index:
+                tmp_jet_list.append(d)
+            
+            _jet = itertools.permutations(tmp_jet_list, 4)
+
+            for b in _jet:
+                jet.append(b)
+
+            jet = np.array(jet, dtype='object')
+
+            
+            for j in range(len(jet)):
+            
+                _jet_index_candidate = []
+                _jet_index_candidate.append(bjet[i][0])
+                _jet_index_candidate.append(bjet[i][1])
+                _jet_index_candidate.append(jet[j][0])
+                _jet_index_candidate.append(jet[j][1])
+                _jet_index_candidate.append(jet[j][2])
+                _jet_index_candidate.append(jet[j][3])
+                jet_index_candidate.append(_jet_index_candidate)
+
+        for i in range(len(jet_index_candidate)):
+
+            b_1_idx = jet_index_candidate[i][0]
+            b_2_idx = jet_index_candidate[i][1]
+
+            j_1_idx = jet_index_candidate[i][2]
+            j_2_idx = jet_index_candidate[i][3]
+            j_3_idx = jet_index_candidate[i][4]
+            j_4_idx = jet_index_candidate[i][5]
+
+            bjet_1 = jet_cand_properties(b_1_idx)
+            bjet_2 = jet_cand_properties(b_2_idx)
+
+            jet_1 = jet_cand_properties(j_1_idx)
+            jet_2 = jet_cand_properties(j_2_idx)
+            jet_3 = jet_cand_properties(j_3_idx)
+            jet_4 = jet_cand_properties(j_4_idx)
+            
+            W_1_inv = cal_W_inv(jet_1, jet_2)
+            W_2_inv = cal_W_inv(jet_3, jet_4)
+            top_1_inv = cal_top_inv(bjet_1, jet_1, jet_2)
+            top_2_inv = cal_top_inv(bjet_2, jet_3, jet_4)
+
+            chi2_part_1 = (top_1_inv - top_2_inv)**2
+            chi2_part_2 = (W_1_inv - m_W)**2
+            chi2_part_3 = (W_2_inv - m_W)**2
+            
+            chi2_tmp = chi2_part_1/(2*(sigma_t**2)) + chi2_part_2/sigma_W**2 + chi2_part_3/sigma_W**2
+            if (min_chi2 < 0 or chi2_tmp < min_chi2 ):
+                min_chi2 = chi2_tmp
+                jet_1_best_idx = j_1_idx
+                jet_2_best_idx = j_2_idx
+                jet_3_best_idx = j_3_idx
+                jet_4_best_idx = j_4_idx
+                b_1_best_idx = b_1_idx
+                b_2_best_idx = b_2_idx
+                _parton_jet_index = np.array([b_1_best_idx, jet_1_best_idx, jet_2_best_idx, b_2_best_idx, jet_3_best_idx, jet_4_best_idx])
+            else: 
                 pass
-    
-    return min_chi2, np.asanyarray(_parton_jet_index, dtype=object), np.asanyarray(_jet_parton_index, dtype=object)
+        _jet_parton_index = [9999999*i/i for i in range(1, len(jet_pt_chi2)+1)]
+
+        for k in range(len(jet_pt_chi2)):
+            for l in range(len(_parton_jet_index)):
+                if _parton_jet_index[l] == int(k):
+                    _jet_parton_index[k] = int(l)
+                else :
+                    pass
+        
+        for k in range(len(_jet_parton_index)):
+                if _jet_parton_index[k] == 9999999:
+                    _jet_parton_index[k] = 'Nan'
+                else : 
+                    pass
+        
+        return min_chi2, np.asanyarray(_parton_jet_index, dtype=object), np.asanyarray(_jet_parton_index, dtype=object)
+    elif MODEL == "four_top":
+        print("Work in progress.")

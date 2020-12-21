@@ -725,6 +725,16 @@ def cutflow(INPUT_FILE, OUTPUT_FILE, MODEL, CONFIG, SINGLE):
         print("+------------------------------------------------------------------------------------------------------+")
         print("Figure has been saved. Path: {0}.".format(OUTPUT_FILE))
         print("+------------------------------------------------------------------------------------------------------+")
+
+        print("+------------------------------------------------------------------------------------------------------+")
+        print("C1: {0}.".format(np.sum(marker_event_C1 == 1)))
+        print("C2: {0}.".format(np.sum(marker_event_C2 == 1)))
+        print("C3: {0}.".format(np.sum(marker_event_C3 == 1)))
+        print("C4: {0}.".format(np.sum(marker_event_C4 == 1)))
+        print("C5: {0}.".format(np.sum(marker_event_C5 == 1)))
+
+        print("+------------------------------------------------------------------------------------------------------+")
+
     else:
         print("Please inpurt a correct mode.\n1.-s 1\n2.-s > 1")
     

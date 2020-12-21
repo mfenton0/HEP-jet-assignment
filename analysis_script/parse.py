@@ -456,7 +456,7 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE):
     print("+------------------------------------------------------------------------------------------------------+")
 
     if MODEL == 'ttH':
-        target = [i for i in range(NUM_OF_PARTON)]
+        target = [i for i in range(6)]
         N_match_top_in_event = np.zeros([len(jet_pt)])
         for i in tqdm.trange(len(jet_parton_index)):
         
