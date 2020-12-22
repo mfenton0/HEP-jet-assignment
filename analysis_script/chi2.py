@@ -211,7 +211,7 @@ def chi2(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE):
     print("+------------------------------------------------------------------------------------------------------+")
     print("Start jet selection.")
     print("+------------------------------------------------------------------------------------------------------+")
-    marker_event, marker_jet, marker_btag = event_selection(jet.pt, jet.eta, jet.btag, "ttbar")
+    marker_event, marker_jet, marker_btag = event_selection(jet.pt, jet.eta, jet.btag, MODEL)
     print("+------------------------------------------------------------------------------------------------------+")
     print("Jet selection doen. {0} events has been selected.".format(np.sum(marker_event == 1)))
     print("+------------------------------------------------------------------------------------------------------+")
