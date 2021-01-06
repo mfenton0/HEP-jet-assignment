@@ -3,11 +3,11 @@ source ~/.bash_profile
 ANALYSIS_SCRIPT_PATH='/home/david/workplace/HEP-jet-assignment/analysis_script'
 ROOT_FILE_PATH='/home/david/pptt_lep/Events'
 LOG_FILE_PATH='/home/david'
-OUTPUT_FILE_PATH='/home/david'
+OUTPUT_FILE_PATH='$OUTPUT_FILE_PATH_PREFIX/ttbar_lep_data'
 echo "Path of script: $ANALYSIS_SCRIPT_PATH"
 echo "path of root file: $ROOT_FILE_PATH"
 echo "path of log file: $LOG_FILE_PATH"
-echo "path of output file: $OUTPUT_FILE_PATH"
+echo "Path of output file: $OUTPUT_FILE_PATH"
 for i in {1..9};do
 	if [ $i == 1 ]
        	then
