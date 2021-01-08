@@ -10,13 +10,12 @@ There is two main part in the repository, `madgraph` and `analysis_script`. The 
 In this project, we generate the data base on the follwing model.
 
 1. Fully hadronic top decay[[link]](https://github.com/davidho27941/HEP-jet-assignment/tree/v2/madgraph/pptt_preparation):
-$\qquad p\quad p\quad \to\quad t\quad \bar{t}\quad \to\quad W^{+}b\quad W^{-}\bar{b}\quad \to q_{1}q_{2}bq_{3}q_{4}\bar{b}$
+```p p > t t~ QED=0, (t > W+ b, W+ > j j), (t~ > w- b~, w- > j j )```
 2. Standard Model Higgs boson produced in association with top quarks[[link]](https://github.com/davidho27941/HEP-jet-assignment/tree/v2/madgraph/ppttH_preparation):
-$\qquad p\quad p\quad \to\quad t\quad \bar{t}\quad H\quad \to\quad W^{+}b\quad W^{-}\bar{b}\quad b\bar{b}\to q_{1}q_{2}b_{1}q_{3}q_{4}\bar{b}_{1}\quad b_{2}\bar{b}_{2}$
+
 3. Four top production(fully hadronic decay)[[link]](https://github.com/davidho27941/HEP-jet-assignment/tree/v2/madgraph/four_top_preparation):
-$\qquad p\quad p\quad \to\quad t\quad \bar{t}\quad t\quad \bar{t}\quad \to\quad W^{+}_{1}b_{1}W^{+}_{2}b_{2} W^{-}_{1}\bar{b}_{1}W^{-}_{2}\bar{b}_{2}\quad \to q_{1}q_{2}b_{1}q_{3}q_{4}\bar{b}_{1}\quad q_{5}q_{6}b_{2}q_{7}q_{8}\bar{b}_{2}$
+
 4. Semi-leptonic top decay[[link]](https://github.com/davidho27941/HEP-jet-assignment/tree/v2/madgraph/ttbar-semi-lep_preparation):
-$\qquad p\quad p\quad \to\quad t\quad \bar{t}\quad \to\quad W^{+}b\quad W^{-}\bar{b}\quad \to q_{1}q_{2}bl^{-}\nu\bar{b}$
 
 
 ## Analysis 
