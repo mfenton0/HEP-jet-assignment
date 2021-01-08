@@ -24,7 +24,7 @@ The script for analysis events can be found in this [folder](https://github.com/
 
 The supported analysis method in this repository is:
 1. Delta R matching(truth matching)
-2. $\chi^{2}$ reconstruction(Only available for two models[^1])
+2. Chi-square reconstruction(Only available for two models[^1])
 3. Cutflow[^2]
 4. Gaussian fitting for finding $\sigma$ for reconstructed invariant mass. 
 
