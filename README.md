@@ -24,13 +24,11 @@ The script for analysis events can be found in this [folder](https://github.com/
 
 The supported analysis method in this repository is:
 1. Delta R matching(truth matching)
-2. Chi-square reconstruction(Only available for two models[^1])
-3. Cutflow[^2]
+2. Chi-square reconstruction(Only available for two models)
+3. Cutflow
 4. Gaussian fitting for finding $\sigma$ for reconstructed invariant mass. 
 
+A full version can be found in [HackMD](https://hackmd.io/@davidho9713/SylPrl80D) page.
 
-
-[^1]: Fully hadronic top decay and Standard Model Higgs boson produced in association with top quarks
-[^2]: Only support number of cuts lager than 2 and less than 6.
 ###### tags: `Particle Physics`, `Machine Learning`, `Top quark`, `Transformer`, `SPA-Net`, `SPAttER`
 
