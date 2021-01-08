@@ -1,4 +1,4 @@
-HEP jet assignment - Data preparation(main page)
+HEP jet assignment - Data preparation
 ===
 
 ## Abstract 
