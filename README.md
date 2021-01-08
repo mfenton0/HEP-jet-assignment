@@ -9,14 +9,14 @@ There is two main part in the repository, `madgraph` and `analysis_script`. The 
 ## Madgraph
 In this project, we generate the data base on the follwing model.
 
-1. Fully hadronic top decay[[link]](https://github.com/davidho27941/HEP-jet-assignment/tree/v2/madgraph/pptt_preparation):
-```p p > t t~ QED=0, (t > W+ b, W+ > j j), (t~ > w- b~, w- > j j )```
-2. Standard Model Higgs boson produced in association with top quarks[[link]](https://github.com/davidho27941/HEP-jet-assignment/tree/v2/madgraph/ppttH_preparation):
-```p p > t t~ h , (t > W+ b, W+ > j j), (t~ > w- b~, w- > j j ), (h > b b~ )```
-3. Four top production(fully hadronic decay)[[link]](https://github.com/davidho27941/HEP-jet-assignment/tree/v2/madgraph/four_top_preparation):
-
-4. Semi-leptonic top decay[[link]](https://github.com/davidho27941/HEP-jet-assignment/tree/v2/madgraph/ttbar-semi-lep_preparation):
-
+1. Fully hadronic top decay[[link]](https://github.com/davidho27941/HEP-jet-assignment/tree/v2/madgraph/pptt_preparation):  
+```p p > t t~ QED=0, (t > W+ b, W+ > j j), (t~ > w- b~, w- > j j )```  
+2. Standard Model Higgs boson produced in association with top quarks[[link]](https://github.com/davidho27941/HEP-jet-assignment/tree/v2/madgraph/ppttH_preparation):  
+```p p > t t~ h , (t > W+ b, W+ > j j), (t~ > w- b~, w- > j j ), (h > b b~ )```  
+3. Four top production(fully hadronic decay)[[link]](https://github.com/davidho27941/HEP-jet-assignment/tree/v2/madgraph/four_top_preparation):  
+```p p > t t~ t t~ QED=0, (t > W+ b, W+ > j j), (t~ > w- b~, w- > j j )```  
+4. Semi-leptonic top decay[[link]](https://github.com/davidho27941/HEP-jet-assignment/tree/v2/madgraph/ttbar-semi-lep_preparation):  
+```p p > t t~ QED=0, (t > W+ b, W+ > j j), (t~ > W- b~, W- > l- vl~)```  
 
 ## Analysis 
 
