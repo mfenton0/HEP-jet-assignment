@@ -1,6 +1,6 @@
 HEP jet assignment - Data preparation(main page)
 ===
-[TOC]
+[![arXiv](https://img.shields.io/badge/arXiv-2010.09206%20-green.svg)](https://arxiv.org/abs/2010.09206) [![Release](https://img.shields.io/badge/Release-v2%20-green.svg)](https://github.com/davidho27941/HEP-jet-assignment)
 
 ## Abstract 
 This is a repository for the jet assignment project using state-of-the-art Machine Learning method.
