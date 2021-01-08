@@ -4,12 +4,7 @@ Institute: National Tsing Hua university, Department of Physics, Hsinchu, Taiwan
 Mail: davidho@gapp.nthu.edu.tw
 """
 #Import packages
-from particle_properties_uproot import particle_properties  #import particle properties helper function from particle_properties.py
-from jet_properties_uproot import jet_properties  #import jet properties helper function from jet_properties.py
-from cutflow import cutflow
-from parse import parse 
-from chi2 import chi2
-from fitting import fitting 
+from script import cutflow, parse, chi2, fitting
 import h5py, sys, traceback, os, tqdm
 from argparse import ArgumentParser
 
