@@ -1,6 +1,13 @@
 HEP jet assignment - Data preparation
 ===
 [![ArXiv](https://img.shields.io/badge/arxiv-2010.09206-green)](https://arxiv.org/abs/2010.09206)
+![Matplotlib](https://img.shields.io/badge/matplotlib-3.2.2-blue)
+![Numpy](https://img.shields.io/badge/numpy-1.19.0-blue)
+![h5py](https://img.shields.io/badge/h5py-3.1.0-blue)
+![Pandas](https://img.shields.io/badge/pandas-1.0.5-blue)
+![Uproot](https://img.shields.io/badge/uproot-3.11.7-blue)
+![tqdm](https://img.shields.io/badge/tqdm-4.54.1-blue)
+
 ## Abstract 
 This is a repository for the jet assignment project using state-of-the-art Machine Learning method.
 
