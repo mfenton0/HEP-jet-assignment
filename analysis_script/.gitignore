@@ -15,3 +15,4 @@ parse_uproot_old.py
 __pycache__/
 test_zone/
 .gitignore
+output/ttbar_lep_output/
