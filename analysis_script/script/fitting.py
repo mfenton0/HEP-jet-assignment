@@ -1,3 +1,8 @@
+"""
+Author: David Ho
+Institute: National Tsing Hua university, Department of Physics, Hsinchu, Taiwan 
+Mail: davidho@gapp.nthu.edu.tw
+"""
 import numpy as np
 import pandas as pd
 import h5py, os, tqdm, sys, uproot
