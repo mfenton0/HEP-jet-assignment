@@ -1,0 +1,13 @@
+generate p p > u u~ b b~
+output /home/david/bkg_uubb
+launch /home/david/bkg_uubb
+shower=Pythia8
+detector=Delphes
+analysis=OFF
+done
+set pdlabel = lhapdf
+set nevents = 10000
+set iseed = 100
+Delphes/cards/delphes_card_ATLAS.tcl
+done
+exit
