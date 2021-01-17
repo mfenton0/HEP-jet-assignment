@@ -9,8 +9,9 @@ import pandas as pd
 import numpy as np 
 from .particle_properties_uproot import particle_properties  #import particle properties helper function from particle_properties.py
 from .jet_properties_uproot import jet_properties  #import jet properties helper function from jet_properties.py
-import h5py, sys, traceback, os, tqdm
+import h5py, sys, traceback, os, tqdm, time
 from .utilize import delta_R, deltaPhi, pdgid, event_selection, quark_finder, particle_tracing, deltaR_matching, barcode_recorder
+import multiprocessing as mp
 
 class properties_for_particle():
     def __init__(self, event, pt, eta, phi, pid, M1, M2, D1, D2, status, rapidity, mass, charge):
@@ -254,138 +255,203 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE):
     print("Starting parton tracing and looking for its daughter.")
     print("+------------------------------------------------------------------------------------------------------+")
     #Particle tracing and daughter finding section
+    start = time.time()
     if MODEL == 'ttbar':
+
         top_idx, top_daughter_idx_1, top_daughter_pid_1, top_daughter_idx_2, top_daughter_pid_2 = [], [], [], [], []
         top_bar_idx, top_bar_daughter_idx_1, top_bar_daughter_pid_1, top_bar_daughter_idx_2, top_bar_daughter_pid_2 = [], [], [], [], []
-        for i in tqdm.trange(len(particle.event)):
-            _top_idx, _top_daughter_idx_1, _top_daughter_pid_1, _top_daughter_idx_2, _top_daughter_pid_2  = 0, 0, 0, 0, 0
-            _top_bar_idx, _top_bar_daughter_idx_1, _top_bar_daughter_pid_1, _top_bar_daughter_idx_2, _top_bar_daughter_pid_2  = 0, 0, 0, 0, 0
+        _src_top, _src_anti_top, _index  = [], [], []
+        for i in range(len(particle.event)):
             if marker_event[i] == 1:
-                a = particle.dataframelize(i)
-                _top_idx, _top_daughter_idx_1, _top_daughter_pid_1, _top_daughter_idx_2, _top_daughter_pid_2  = particle_tracing(particle.dataframelize(i), PID.top, 22, MODEL)
-                _top_bar_idx, _top_bar_daughter_idx_1, _top_bar_daughter_pid_1, _top_bar_daughter_idx_2, _top_bar_daughter_pid_2  = particle_tracing(particle.dataframelize(i), PID.anti_top, 22, MODEL)
-            else: 
-                pass
-            top_idx.append(_top_idx)
-            top_daughter_idx_1.append(_top_daughter_idx_1)
-            top_daughter_pid_1.append(_top_daughter_pid_1)
-            top_daughter_idx_2.append(_top_daughter_idx_2)
-            top_daughter_pid_2.append(_top_daughter_pid_2)
-            top_bar_idx.append(_top_bar_idx)
-            top_bar_daughter_idx_1.append(_top_bar_daughter_idx_1)
-            top_bar_daughter_pid_1.append(_top_bar_daughter_pid_1)
-            top_bar_daughter_idx_2.append(_top_bar_daughter_idx_2)
-            top_bar_daughter_pid_2.append(_top_bar_daughter_pid_2)
+                _index.append(i)
+                _src_top.append([particle.dataframelize(i), PID.top, 22, MODEL])
+                _src_anti_top.append([particle.dataframelize(i), PID.anti_top, 22, MODEL])
+        with mp.Pool(24) as p:
+            _result_top = p.starmap(particle_tracing, _src_top)
+            p.close()
+            p.join()
+        with mp.Pool(24) as p:
+            _result_anti_top = p.starmap(particle_tracing, _src_anti_top)
+            p.close()
+            p.join()
 
-        parton_array = np.zeros([ len(particle.event) , NUM_OF_PARTON, 7]) #7: index, pdgid, barcode, pt, eta, phi, mass
+        for i in range(len(_result_top)):
+            top_idx.append(_result_top[i][0])
+            top_daughter_idx_1.append(_result_top[i][1])
+            top_daughter_pid_1.append(_result_top[i][2])
+            top_daughter_idx_2.append(_result_top[i][3])
+            top_daughter_pid_2.append(_result_top[i][4])
+            top_bar_idx.append(_result_anti_top[i][0])
+            top_bar_daughter_idx_1.append(_result_anti_top[i][1])
+            top_bar_daughter_pid_1.append(_result_anti_top[i][2])
+            top_bar_daughter_idx_2.append(_result_anti_top[i][3])
+            top_bar_daughter_pid_2.append(_result_anti_top[i][4])
 
-        for i in tqdm.trange(len(particle.event)):
+        _src_top_d, _src_anti_top_d = [], []
+        parton_array = np.zeros([ len(_index) , NUM_OF_PARTON, 7])
 
-            if marker_event[i] == 1 :
-                parton_array[i][0][0], parton_array[i][1][0], parton_array[i][2][0] = quark_finder(particle.dataframelize(i), top_daughter_idx_1[i], top_daughter_idx_2[i])
-                parton_array[i][3][0], parton_array[i][4][0], parton_array[i][5][0], = quark_finder(particle.dataframelize(i), top_bar_daughter_idx_1[i], top_bar_daughter_idx_2[i])
-            elif marker_event[i] == 0 :
-                parton_array[i] = 'Nan'
-            else: pass
+        for i in range(len(_index)):
+            j = _index[i]
+            _src_top_d.append([particle.dataframelize(j), top_daughter_idx_1[i], top_daughter_idx_2[i]])
+            _src_anti_top_d.append([particle.dataframelize(j), top_bar_daughter_idx_1[i], top_bar_daughter_idx_2[i]])
+        with mp.Pool(24) as p:
+            _result_top = p.starmap(quark_finder, _src_top_d)
+            p.close()
+            p.join()
+        with mp.Pool(24) as p:
+            _result_anti_top = p.starmap(quark_finder, _src_anti_top_d)
+            p.close()
+            p.join()
+        
+        for i in range(len(_index)):
+            parton_array[i][0][0], parton_array[i][1][0], parton_array[i][2][0] = _result_top[i][0], _result_top[i][1], _result_top[i][2]
+            parton_array[i][3][0], parton_array[i][4][0], parton_array[i][5][0] = _result_anti_top[i][0], _result_anti_top[i][1], _result_anti_top[i][2]
+            
     elif MODEL == 'ttH':
         top_idx, top_daughter_idx_1, top_daughter_pid_1, top_daughter_idx_2, top_daughter_pid_2 = [], [], [], [], []
         top_bar_idx, top_bar_daughter_idx_1, top_bar_daughter_pid_1, top_bar_daughter_idx_2, top_bar_daughter_pid_2 = [], [], [], [], []
         higgs_idx, higgs_daughter_idx_1, higgs_daughter_pid_1, higgs_daughter_idx_2, higgs_daughter_pid_2 = [], [], [], [], []
-        for i in tqdm.trange(len(particle.event)):
-            _top_idx, _top_daughter_idx_1, _top_daughter_pid_1, _top_daughter_idx_2, _top_daughter_pid_2  = 0, 0, 0, 0, 0
-            _top_bar_idx, _top_bar_daughter_idx_1, _top_bar_daughter_pid_1, _top_bar_daughter_idx_2, _top_bar_daughter_pid_2  = 0, 0, 0, 0, 0
-            _higgs_idx, _higgs_daughter_idx_1, _higgs_daughter_pid_1, _higgs_daughter_idx_2, _higgs_daughter_pid_2 = 0, 0, 0, 0, 0
+        _src_top, _src_anti_top, _src_higgs, _index  = [], [], []
+        
+        for i in range(len(particle.event)):
             if marker_event[i] == 1:
-                _top_idx, _top_daughter_idx_1, _top_daughter_pid_1, _top_daughter_idx_2, _top_daughter_pid_2  = particle_tracing(particle.dataframelize(i), PID.top, 22, MODEL)
-                _top_bar_idx, _top_bar_daughter_idx_1, _top_bar_daughter_pid_1, _top_bar_daughter_idx_2, _top_bar_daughter_pid_2  = particle_tracing(particle.dataframelize(i), PID.anti_top, 22, MODEL)
-                _higgs_idx, _higgs_daughter_idx_1, _higgs_daughter_pid_1, _higgs_daughter_idx_2, _higgs_daughter_pid_2 = particle_tracing(particle.dataframelize(i), PID.higgs, 22, MODEL)
-            else: 
-                pass
-            top_idx.append(_top_idx)
-            top_daughter_idx_1.append(_top_daughter_idx_1)
-            top_daughter_pid_1.append(_top_daughter_pid_1)
-            top_daughter_idx_2.append(_top_daughter_idx_2)
-            top_daughter_pid_2.append(_top_daughter_pid_2)
-            top_bar_idx.append(_top_bar_idx)
-            top_bar_daughter_idx_1.append(_top_bar_daughter_idx_1)
-            top_bar_daughter_pid_1.append(_top_bar_daughter_pid_1)
-            top_bar_daughter_idx_2.append(_top_bar_daughter_idx_2)
-            top_bar_daughter_pid_2.append(_top_bar_daughter_pid_2)
-            higgs_idx.append(_higgs_idx)
-            higgs_daughter_idx_1.append(_higgs_daughter_idx_1)
-            higgs_daughter_pid_1.append(_higgs_daughter_pid_1)
-            higgs_daughter_idx_2.append(_higgs_daughter_idx_2)
-            higgs_daughter_pid_2.append(_higgs_daughter_pid_2)
+                _index.append(i)
+                _src_top.append([particle.dataframelize(i), PID.top, 22, MODEL])
+                _src_anti_top.append([particle.dataframelize(i), PID.anti_top, 22, MODEL])
+                _src_higgs.append([particle.dataframelize(i), PID.higgs, 22, MODEL])
+        with mp.Pool(24) as p:
+            _result_top = p.starmap(particle_tracing, _src_top)
+            p.close()
+            p.join()
+        with mp.Pool(24) as p:
+            _result_anti_top = p.starmap(particle_tracing, _src_anti_top)
+            p.close()
+            p.join()
+        with mp.Pool(24) as p:
+            _result_h = p.starmap(particle_tracing, _src_higgs)
+            p.close()
+            p.join()
+        
+        for i in range(len(_index)):
+            top_idx.append(_result_top[i][0])
+            top_daughter_idx_1.append(_result_top[i][1])
+            top_daughter_pid_1.append(_result_top[i][2])
+            top_daughter_idx_2.append(_result_top[i][3])
+            top_daughter_pid_2.append(_result_top[i][4])
+            top_bar_idx.append(_result_anti_top[0])
+            top_bar_daughter_idx_1.append(_result_anti_top[1])
+            top_bar_daughter_pid_1.append(_result_anti_top[2])
+            top_bar_daughter_idx_2.append(_result_anti_top[3])
+            top_bar_daughter_pid_2.append(_result_anti_top[4])
+            higgs_idx.append(_result_h[0])
+            higgs_daughter_idx_1.append(_result_h[1])
+            higgs_daughter_pid_1.append(_result_h[2])
+            higgs_daughter_idx_2.append(_result_h[3])
+            higgs_daughter_pid_2.append(_result_h[4])
+        
+        _src_top_d, _src_anti_top_d,  = [], []
+        parton_array = np.zeros([ len(_index) , NUM_OF_PARTON, 7])
 
-        parton_array = np.zeros([ len(particle.event) , NUM_OF_PARTON, 7]) #7: index, pdgid, barcode, pt, eta, phi, mass
+        for i in range(len(_index)):
+            j = _index[i]
+            _src_top_d.append([particle.dataframelize(j), top_daughter_idx_1[i], top_daughter_idx_2[i]])
+            _src_anti_top_d.append([particle.dataframelize(j), top_bar_daughter_idx_1[i], top_bar_daughter_idx_2[i]])
+        with mp.Pool(24) as p:
+            _result_top = p.starmap(quark_finder, _src_top_d)
+            p.close()
+            p.join()
+        with mp.Pool(24) as p:
+            _result_anti_top = p.starmap(quark_finder, _src_anti_top_d)
+            p.close()
+            p.join()
+        
+        for i in range(len(_index)):
+            parton_array[i][0][0], parton_array[i][1][0], parton_array[i][2][0] = _result_top[i][0], _result_top[i][1], _result_top[i][2]
+            parton_array[i][3][0], parton_array[i][4][0], parton_array[i][5][0] = _result_anti_top[i][0], _result_anti_top[i][1], _result_anti_top[i][2]
+            parton_array[i][6][0], parton_array[i][7][0] = higgs_daughter_idx_1[i], higgs_daughter_idx_2[i]
 
-        for i in tqdm.trange(len(particle.event)):
-
-            if marker_event[i] == 1 :
-                parton_array[i][0][0], parton_array[i][1][0], parton_array[i][2][0] = quark_finder(particle.dataframelize(i), top_daughter_idx_1[i], top_daughter_idx_2[i])
-                parton_array[i][3][0], parton_array[i][4][0], parton_array[i][5][0], = quark_finder(particle.dataframelize(i), top_bar_daughter_idx_1[i], top_bar_daughter_idx_2[i])
-                parton_array[i][6][0], parton_array[i][7][0] = higgs_daughter_idx_1[i], higgs_daughter_idx_2[i]
-            elif marker_event[i] == 0 :
-                parton_array[i] = 'Nan'
-            else: pass
     elif MODEL == 'four_top':
         top_1_idx, top_1_daughter_idx_1, top_1_daughter_pid_1, top_1_daughter_idx_2, top_1_daughter_pid_2 = [], [], [], [], []
         top_2_idx, top_2_daughter_idx_1, top_2_daughter_pid_1, top_2_daughter_idx_2, top_2_daughter_pid_2 = [], [], [], [], []
         top_1_bar_idx, top_1_bar_daughter_idx_1, top_1_bar_daughter_pid_1, top_1_bar_daughter_idx_2, top_1_bar_daughter_pid_2 = [], [], [], [], []
         top_2_bar_idx, top_2_bar_daughter_idx_1, top_2_bar_daughter_pid_1, top_2_bar_daughter_idx_2, top_2_bar_daughter_pid_2 = [], [], [], [], []
-
-        for i in tqdm.trange(len(particle.event)):
-
-            _top_1_idx, _top_2_idx, _top_1_daughter_idx_1, _top_1_daughter_pid_1, _top_1_daughter_idx_2, _top_1_daughter_pid_2,  _top_2_daughter_idx_1, _top_2_daughter_pid_1, _top_2_daughter_idx_2, _top_2_daughter_pid_2 = 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-            _top_1_bar_idx, _top_2_bar_idx, _top_1_bar_daughter_idx_1, _top_1_bar_daughter_pid_1, _top_1_bar_daughter_idx_2, _top_1_bar_daughter_pid_2,  _top_2_bar_daughter_idx_1, _top_2_bar_daughter_pid_1, _top_2_bar_daughter_idx_2, _top_2_bar_daughter_pid_2  = 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-
+        
+        _src_top, _src_anti_top, _index  = [], [], []
+        for i in range(len(particle.event)):
             if marker_event[i] == 1:
+                _index.append(i)
+                _src_top.append([particle.dataframelize(i), PID.top, 22, MODEL])
+                _src_anti_top.append([particle.dataframelize(i), PID.anti_top, 22, MODEL])
+        with mp.Pool(24) as p:
+            _result_top = p.starmap(particle_tracing, _src_top)
+            p.close()
+            p.join()
+        with mp.Pool(24) as p:
+            _result_anti_top = p.starmap(particle_tracing, _src_anti_top)
+            p.close()
+            p.join()
+        
+        for i in range(len(_index)):
+            top_1_idx.append(_result_top[0])
+            top_2_idx.append(_result_top[1])
+            top_1_daughter_idx_1.append(_result_top[2])
+            top_1_daughter_pid_1.append(_result_top[3]) 
+            top_1_daughter_idx_2.append(_result_top[4])
+            top_1_daughter_pid_2.append(_result_top[5])
+            top_2_daughter_idx_1.append(_result_top[6]) 
+            top_2_daughter_pid_1.append(_result_top[7])
+            top_2_daughter_idx_2.append(_result_top[8])
+            top_2_daughter_pid_2.append(_result_top[9])
+            top_1_bar_idx.append(_result_anti_top[0])
+            top_2_bar_idx.append(_result_anti_top[1])
+            top_1_bar_daughter_idx_1.append(_result_anti_top[2]) 
+            top_1_bar_daughter_pid_1.append(_result_anti_top[3])
+            top_1_bar_daughter_idx_2.append(_result_anti_top[4])
+            top_1_bar_daughter_pid_2.append(_result_anti_top[5])
+            top_2_bar_daughter_idx_1.append(_result_anti_top[6]) 
+            top_2_bar_daughter_pid_1.append(_result_anti_top[7])
+            top_2_bar_daughter_idx_2.append(_result_anti_top[8])
+            top_2_bar_daughter_pid_2.append(_result_anti_top[9])
+        
+        _src_top_d_1, _src_top_d_2, _src_anti_top_d_1, _src_anti_top_d_2 = [], [], [], []
+        
+        parton_array = np.zeros([ len(_index) , NUM_OF_PARTON, 7])
 
-                _top_1_idx, _top_2_idx, _top_1_daughter_idx_1, _top_1_daughter_pid_1, _top_1_daughter_idx_2, _top_1_daughter_pid_2,  _top_2_daughter_idx_1, _top_2_daughter_pid_1, _top_2_daughter_idx_2, _top_2_daughter_pid_2  = particle_tracing(particle.dataframelize(i), PID.top, 22, MODEL)
+        for i in range(len(_index)):
+            j = _index[i]
+            _src_top_d_1.append([particle.dataframelize(j), top_1_daughter_idx_1[i], top_1_daughter_idx_2[i]])
+            _src_top_d_2.append([particle.dataframelize(j), top_2_daughter_idx_1[i], top_2_daughter_idx_2[i]])
+            _src_anti_top_d_1.append([particle.dataframelize(j), top_1_bar_daughter_idx_1[i], top_1_bar_daughter_idx_2[i]])
+            _src_anti_top_d_2.append([particle.dataframelize(j), top_2_bar_daughter_idx_1[i], top_2_bar_daughter_idx_2[i]])
+        with mp.Pool(24) as p:
+            _result_top_1 = p.starmap(quark_finder, _src_top_d_1)
+            p.close()
+            p.join()
+        with mp.Pool(24) as p:
+            _result_top_2 = p.starmap(quark_finder, _src_top_d_2)
+            p.close()
+            p.join()
+        with mp.Pool(24) as p:
+            _result_anti_top_1 = p.starmap(quark_finder, _src_anti_top_d_1)
+            p.close()
+            p.join()
+        with mp.Pool(24) as p:
+            _result_anti_top_2 = p.starmap(quark_finder, _src_anti_top_d_2)
+            p.close()
+            p.join()
+        
+        for i in range(len(_index)):
+            parton_array[i][0][0], parton_array[i][1][0], parton_array[i][2][0] = _result_top_1[i][0], _result_top_1[i][1], _result_top_1[i][2]
+            parton_array[i][3][0], parton_array[i][4][0], parton_array[i][5][0] = _result_top_2[i][0], _result_top_2[i][1], _result_top_2[i][2]
+            parton_array[i][6][0], parton_array[i][7][0], parton_array[i][8][0] = _result_anti_top_1[i][0], _result_anti_top_1[i][1], _result_anti_top_1[i][2]
+            parton_array[i][9][0], parton_array[i][10][0], parton_array[i][11][0] = _result_anti_top_2[i][0], _result_anti_top_2[i][1], _result_anti_top_2[i][2]
 
-                _top_1_bar_idx, _top_2_bar_idx, _top_1_bar_daughter_idx_1, _top_1_bar_daughter_pid_1, _top_1_bar_daughter_idx_2, _top_1_bar_daughter_pid_2,  _top_2_bar_daughter_idx_1, _top_2_bar_daughter_pid_1, _top_2_bar_daughter_idx_2, _top_2_bar_daughter_pid_2 = particle_tracing(particle.dataframelize(i), PID.anti_top, 22, MODEL)
-            else: 
-                pass
-            top_1_idx.append(_top_1_idx)
-            top_1_daughter_idx_1.append(_top_1_daughter_idx_1)
-            top_1_daughter_pid_1.append(_top_1_daughter_pid_1) 
-            top_1_daughter_idx_2.append(_top_1_daughter_idx_2)
-            top_1_daughter_pid_2.append(_top_1_daughter_pid_2)
-            top_2_idx.append(_top_2_idx)
-            top_2_daughter_idx_1.append(_top_2_daughter_idx_1) 
-            top_2_daughter_pid_1.append(_top_2_daughter_pid_1)
-            top_2_daughter_idx_2.append(_top_2_daughter_idx_2)
-            top_2_daughter_pid_2.append(_top_2_daughter_pid_2)
-            top_1_bar_idx.append(_top_1_bar_idx)
-            top_1_bar_daughter_idx_1.append(_top_1_bar_daughter_idx_1) 
-            top_1_bar_daughter_pid_1.append(_top_1_bar_daughter_pid_1)
-            top_1_bar_daughter_idx_2.append(_top_1_bar_daughter_idx_2)
-            top_1_bar_daughter_pid_2.append(_top_1_bar_daughter_pid_2)
-            top_2_bar_idx.append(_top_2_bar_idx)
-            top_2_bar_daughter_idx_1.append(_top_2_bar_daughter_idx_1) 
-            top_2_bar_daughter_pid_1.append(_top_2_bar_daughter_pid_1)
-            top_2_bar_daughter_idx_2.append(_top_2_bar_daughter_idx_2)
-            top_2_bar_daughter_pid_2.append(_top_2_bar_daughter_pid_2)
-
-
-        parton_array = np.zeros([ len(particle.event) , NUM_OF_PARTON, 7]) #7: index, pdgid, barcode, pt, eta, phi, mass
-
-        for i in tqdm.trange(len(particle.event)):
-
-            if marker_event[i] == 1 :
-                parton_array[i][0][0], parton_array[i][1][0], parton_array[i][2][0] = quark_finder(particle.dataframelize(i), top_1_daughter_idx_1[i], top_1_daughter_idx_2[i])
-                parton_array[i][3][0], parton_array[i][4][0], parton_array[i][5][0], = quark_finder(particle.dataframelize(i), top_2_daughter_idx_1[i], top_2_daughter_idx_2[i])
-                parton_array[i][6][0], parton_array[i][7][0], parton_array[i][8][0], = quark_finder(particle.dataframelize(i), top_1_bar_daughter_idx_1[i], top_1_bar_daughter_idx_2[i])
-                parton_array[i][9][0], parton_array[i][10][0], parton_array[i][11][0], = quark_finder(particle.dataframelize(i), top_2_bar_daughter_idx_1[i], top_2_bar_daughter_idx_2[i])
-            elif marker_event[i] == 0 :
-                parton_array[i] = 'Nan'
-            else: pass
     else :
         print("Please select a correct model.")
 
 
     print("+------------------------------------------------------------------------------------------------------+")
-    print("Parton tracing section complete. The daughter of W+/W- and bbbar has been found.")
+    print("Parton tracing section complete. The daughter of W+/W- and bbbar has been found. Cost: {0:.3f} s".format(time.time()-start))
     print("+------------------------------------------------------------------------------------------------------+")
 
     print("+------------------------------------------------------------------------------------------------------+")
@@ -399,46 +465,56 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE):
     parton_mass = []
 
 
-    for i in tqdm.trange(len(particle.event)):
-        if marker_event[i] == 1:
-            _parton_pdgid = []
-            _parton_barcode = []
-            _parton_pt = []
-            _parton_eta = []
-            _parton_phi = []
-            _parton_mass = []
-            for j in range(NUM_OF_PARTON):
-                dataset = particle.dataframelize(i)
+    for i in tqdm.trange(len(_index)):
+        _parton_pdgid = []
+        _parton_barcode = []
+        _parton_pt = []
+        _parton_eta = []
+        _parton_phi = []
+        _parton_mass = []
+        for j in range(NUM_OF_PARTON):
+            k = _index[i]
+            dataset = particle.dataframelize(k)
 
-                _parton_pdgid.append(dataset.iloc[int(parton_array[i][j][0]), 6])
-                _parton_barcode.append(barcode[j])
-                _parton_pt.append(dataset.iloc[int(parton_array[i][j][0]), 7])
-                _parton_eta.append(dataset.iloc[int(parton_array[i][j][0]), 8])
-                _parton_phi.append(dataset.iloc[int(parton_array[i][j][0]), 9])
-                _parton_mass.append(dataset.iloc[int(parton_array[i][j][0]), 10])
+            _parton_pdgid.append(dataset.iloc[int(parton_array[i][j][0]), 6])
+            _parton_barcode.append(barcode[j])
+            _parton_pt.append(dataset.iloc[int(parton_array[i][j][0]), 7])
+            _parton_eta.append(dataset.iloc[int(parton_array[i][j][0]), 8])
+            _parton_phi.append(dataset.iloc[int(parton_array[i][j][0]), 9])
+            _parton_mass.append(dataset.iloc[int(parton_array[i][j][0]), 10])
 
 
-            parton_pdgid.append(_parton_pdgid)
-            parton_barcode.append(_parton_barcode)
-            parton_pt.append(_parton_pt)
-            parton_eta.append(_parton_eta)
-            parton_phi.append(_parton_phi)
-            parton_mass.append(_parton_mass)
+        parton_pdgid.append(_parton_pdgid)
+        parton_barcode.append(_parton_barcode)
+        parton_pt.append(_parton_pt)
+        parton_eta.append(_parton_eta)
+        parton_phi.append(_parton_phi)
+        parton_mass.append(_parton_mass)
     print("+------------------------------------------------------------------------------------------------------+")
     print("Finished to record the kinematics variables of partons in the selected event.")
     print("+------------------------------------------------------------------------------------------------------+")
 
+    
     print("+------------------------------------------------------------------------------------------------------+")
     print("Starting parton-jet matching.")
     print("+------------------------------------------------------------------------------------------------------+")
     jet_parton_index = []
     parton_jet_index = []
+    _src_delta_R = []
+    start = time.time()
     for i in tqdm.trange(len(jet_pt)):
-        _jet_parton_index, _parton_jet_index = deltaR_matching(NUM_OF_PARTON, len(jet_pt[i]), parton_eta[i], parton_phi[i], jet_eta[i], jet_phi[i], 0.4, MODEL)
-        jet_parton_index.append(_jet_parton_index)
-        parton_jet_index.append(_parton_jet_index)
+        _src_delta_R.append([NUM_OF_PARTON, len(jet_pt[i]), parton_eta[i], parton_phi[i], jet_eta[i], jet_phi[i], 0.4, MODEL])
+
+    with mp.Pool(24) as p:
+        _result_delta_R = p.starmap(deltaR_matching, _src_delta_R)
+        p.close()
+        p.join()
+    
+    for i in range(len(_result_delta_R)):
+        jet_parton_index.append(_result_delta_R[i][0])
+        parton_jet_index.append(_result_delta_R[i][1])
     print("+------------------------------------------------------------------------------------------------------+")
-    print("Parton-jet matching finished.")
+    print("Parton-jet matching finished. Cost: {0:.3f} s".format(time.time()-start))
     print("+------------------------------------------------------------------------------------------------------+")
     jet_parton_index = np.asanyarray(jet_parton_index, dtype=object)
     parton_jet_index = np.asanyarray(parton_jet_index, dtype=object)
