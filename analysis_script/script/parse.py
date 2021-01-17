@@ -306,7 +306,9 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE):
         for i in range(len(_index)):
             parton_array[i][0][0], parton_array[i][1][0], parton_array[i][2][0] = _result_top[i][0], _result_top[i][1], _result_top[i][2]
             parton_array[i][3][0], parton_array[i][4][0], parton_array[i][5][0] = _result_anti_top[i][0], _result_anti_top[i][1], _result_anti_top[i][2]
-            
+        print("+------------------------------------------------------------------------------------------------------+")
+        print("Parton tracing section complete. The daughter of W+/W- and bbbar has been found. Cost: {0:.3f} s".format(time.time()-start))
+        print("+------------------------------------------------------------------------------------------------------+")
     elif MODEL == 'ttH':
         top_idx, top_daughter_idx_1, top_daughter_pid_1, top_daughter_idx_2, top_daughter_pid_2 = [], [], [], [], []
         top_bar_idx, top_bar_daughter_idx_1, top_bar_daughter_pid_1, top_bar_daughter_idx_2, top_bar_daughter_pid_2 = [], [], [], [], []
@@ -369,7 +371,9 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE):
             parton_array[i][0][0], parton_array[i][1][0], parton_array[i][2][0] = _result_top[i][0], _result_top[i][1], _result_top[i][2]
             parton_array[i][3][0], parton_array[i][4][0], parton_array[i][5][0] = _result_anti_top[i][0], _result_anti_top[i][1], _result_anti_top[i][2]
             parton_array[i][6][0], parton_array[i][7][0] = higgs_daughter_idx_1[i], higgs_daughter_idx_2[i]
-
+        print("+------------------------------------------------------------------------------------------------------+")
+        print("Parton tracing section complete. The daughter of W+/W-, bbbar, and Higgs has been found. Cost: {0:.3f} s".format(time.time()-start))
+        print("+------------------------------------------------------------------------------------------------------+")
     elif MODEL == 'four_top':
         top_1_idx, top_1_daughter_idx_1, top_1_daughter_pid_1, top_1_daughter_idx_2, top_1_daughter_pid_2 = [], [], [], [], []
         top_2_idx, top_2_daughter_idx_1, top_2_daughter_pid_1, top_2_daughter_idx_2, top_2_daughter_pid_2 = [], [], [], [], []
@@ -445,14 +449,14 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE):
             parton_array[i][3][0], parton_array[i][4][0], parton_array[i][5][0] = _result_top_2[i][0], _result_top_2[i][1], _result_top_2[i][2]
             parton_array[i][6][0], parton_array[i][7][0], parton_array[i][8][0] = _result_anti_top_1[i][0], _result_anti_top_1[i][1], _result_anti_top_1[i][2]
             parton_array[i][9][0], parton_array[i][10][0], parton_array[i][11][0] = _result_anti_top_2[i][0], _result_anti_top_2[i][1], _result_anti_top_2[i][2]
-
+        print("+------------------------------------------------------------------------------------------------------+")
+        print("Parton tracing section complete. The daughter of W+/W- and bbbar has been found. Cost: {0:.3f} s".format(time.time()-start))
+        print("+------------------------------------------------------------------------------------------------------+")
     else :
         print("Please select a correct model.")
 
 
-    print("+------------------------------------------------------------------------------------------------------+")
-    print("Parton tracing section complete. The daughter of W+/W- and bbbar has been found. Cost: {0:.3f} s".format(time.time()-start))
-    print("+------------------------------------------------------------------------------------------------------+")
+    
 
     print("+------------------------------------------------------------------------------------------------------+")
     print("Recording the kinematics variables of partons in the selected event.")

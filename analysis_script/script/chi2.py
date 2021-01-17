@@ -254,54 +254,129 @@ def chi2(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE):
     print("Starting parton tracing and looking for its daughter.")
     print("+------------------------------------------------------------------------------------------------------+")
     #Particle tracing and daughter finding section
+    start = time.time()
+    if MODEL == 'ttbar':
 
-    top_idx, top_daughter_idx_1, top_daughter_pid_1, top_daughter_idx_2, top_daughter_pid_2 = [], [], [], [], []
+        top_idx, top_daughter_idx_1, top_daughter_pid_1, top_daughter_idx_2, top_daughter_pid_2 = [], [], [], [], []
+        top_bar_idx, top_bar_daughter_idx_1, top_bar_daughter_pid_1, top_bar_daughter_idx_2, top_bar_daughter_pid_2 = [], [], [], [], []
+        _src_top, _src_anti_top, _index  = [], [], []
+        for i in range(len(particle.event)):
+            if marker_event[i] == 1:
+                _index.append(i)
+                _src_top.append([particle.dataframelize(i), PID.top, 22, MODEL])
+                _src_anti_top.append([particle.dataframelize(i), PID.anti_top, 22, MODEL])
+        with mp.Pool(24) as p:
+            _result_top = p.starmap(particle_tracing, _src_top)
+            p.close()
+            p.join()
+        with mp.Pool(24) as p:
+            _result_anti_top = p.starmap(particle_tracing, _src_anti_top)
+            p.close()
+            p.join()
 
+        for i in range(len(_result_top)):
+            top_idx.append(_result_top[i][0])
+            top_daughter_idx_1.append(_result_top[i][1])
+            top_daughter_pid_1.append(_result_top[i][2])
+            top_daughter_idx_2.append(_result_top[i][3])
+            top_daughter_pid_2.append(_result_top[i][4])
+            top_bar_idx.append(_result_anti_top[i][0])
+            top_bar_daughter_idx_1.append(_result_anti_top[i][1])
+            top_bar_daughter_pid_1.append(_result_anti_top[i][2])
+            top_bar_daughter_idx_2.append(_result_anti_top[i][3])
+            top_bar_daughter_pid_2.append(_result_anti_top[i][4])
 
-    top_bar_idx, top_bar_daughter_idx_1, top_bar_daughter_pid_1, top_bar_daughter_idx_2, top_bar_daughter_pid_2 = [], [], [], [], []
+        _src_top_d, _src_anti_top_d = [], []
+        parton_array = np.zeros([ len(_index) , NUM_OF_PARTON, 7])
 
+        for i in range(len(_index)):
+            j = _index[i]
+            _src_top_d.append([particle.dataframelize(j), top_daughter_idx_1[i], top_daughter_idx_2[i]])
+            _src_anti_top_d.append([particle.dataframelize(j), top_bar_daughter_idx_1[i], top_bar_daughter_idx_2[i]])
+        with mp.Pool(24) as p:
+            _result_top = p.starmap(quark_finder, _src_top_d)
+            p.close()
+            p.join()
+        with mp.Pool(24) as p:
+            _result_anti_top = p.starmap(quark_finder, _src_anti_top_d)
+            p.close()
+            p.join()
+        
+        for i in range(len(_index)):
+            parton_array[i][0][0], parton_array[i][1][0], parton_array[i][2][0] = _result_top[i][0], _result_top[i][1], _result_top[i][2]
+            parton_array[i][3][0], parton_array[i][4][0], parton_array[i][5][0] = _result_anti_top[i][0], _result_anti_top[i][1], _result_anti_top[i][2]
+        print("+------------------------------------------------------------------------------------------------------+")
+        print("Parton tracing section complete. The daughter of W+/W- and bbbar has been found. Cost: {0:.3f} s".format(time.time()-start))
+        print("+------------------------------------------------------------------------------------------------------+")
+    elif MODEL == 'ttH':
+        top_idx, top_daughter_idx_1, top_daughter_pid_1, top_daughter_idx_2, top_daughter_pid_2 = [], [], [], [], []
+        top_bar_idx, top_bar_daughter_idx_1, top_bar_daughter_pid_1, top_bar_daughter_idx_2, top_bar_daughter_pid_2 = [], [], [], [], []
+        higgs_idx, higgs_daughter_idx_1, higgs_daughter_pid_1, higgs_daughter_idx_2, higgs_daughter_pid_2 = [], [], [], [], []
+        _src_top, _src_anti_top, _src_higgs, _index  = [], [], []
+        
+        for i in range(len(particle.event)):
+            if marker_event[i] == 1:
+                _index.append(i)
+                _src_top.append([particle.dataframelize(i), PID.top, 22, MODEL])
+                _src_anti_top.append([particle.dataframelize(i), PID.anti_top, 22, MODEL])
+                _src_higgs.append([particle.dataframelize(i), PID.higgs, 22, MODEL])
+        with mp.Pool(24) as p:
+            _result_top = p.starmap(particle_tracing, _src_top)
+            p.close()
+            p.join()
+        with mp.Pool(24) as p:
+            _result_anti_top = p.starmap(particle_tracing, _src_anti_top)
+            p.close()
+            p.join()
+        with mp.Pool(24) as p:
+            _result_h = p.starmap(particle_tracing, _src_higgs)
+            p.close()
+            p.join()
+        
+        for i in range(len(_index)):
+            top_idx.append(_result_top[i][0])
+            top_daughter_idx_1.append(_result_top[i][1])
+            top_daughter_pid_1.append(_result_top[i][2])
+            top_daughter_idx_2.append(_result_top[i][3])
+            top_daughter_pid_2.append(_result_top[i][4])
+            top_bar_idx.append(_result_anti_top[0])
+            top_bar_daughter_idx_1.append(_result_anti_top[1])
+            top_bar_daughter_pid_1.append(_result_anti_top[2])
+            top_bar_daughter_idx_2.append(_result_anti_top[3])
+            top_bar_daughter_pid_2.append(_result_anti_top[4])
+            higgs_idx.append(_result_h[0])
+            higgs_daughter_idx_1.append(_result_h[1])
+            higgs_daughter_pid_1.append(_result_h[2])
+            higgs_daughter_idx_2.append(_result_h[3])
+            higgs_daughter_pid_2.append(_result_h[4])
+        
+        _src_top_d, _src_anti_top_d,  = [], []
+        parton_array = np.zeros([ len(_index) , NUM_OF_PARTON, 7])
 
-    for i in tqdm.trange(len(particle.event)):
-
-        if marker_event[i] == 1:
-            _top_idx, _top_daughter_idx_1, _top_daughter_pid_1, _top_daughter_idx_2, _top_daughter_pid_2  = particle_tracing(particle.dataframelize(i), PID.top, 22, MODEL)
-            _top_bar_idx, _top_bar_daughter_idx_1, _top_bar_daughter_pid_1, _top_bar_daughter_idx_2, _top_bar_daughter_pid_2  = particle_tracing(particle.dataframelize(i), PID.anti_top, 22, MODEL)
-            top_idx.append(_top_idx)
-            top_daughter_idx_1.append(_top_daughter_idx_1)
-            top_daughter_pid_1.append(_top_daughter_pid_1)
-            top_daughter_idx_2.append(_top_daughter_idx_2)
-            top_daughter_pid_2.append(_top_daughter_pid_2)
-            top_bar_idx.append(_top_bar_idx)
-            top_bar_daughter_idx_1.append(_top_bar_daughter_idx_1)
-            top_bar_daughter_pid_1.append(_top_bar_daughter_pid_1)
-            top_bar_daughter_idx_2.append(_top_bar_daughter_idx_2)
-            top_bar_daughter_pid_2.append(_top_bar_daughter_pid_2)
-        else: 
-            top_idx.append(0)
-            top_daughter_idx_1.append(0)
-            top_daughter_pid_1.append(0)
-            top_daughter_idx_2.append(0)
-            top_daughter_pid_2.append(0)
-            top_bar_idx.append(0)
-            top_bar_daughter_idx_1.append(0)
-            top_bar_daughter_pid_1.append(0)
-            top_bar_daughter_idx_2.append(0)
-            top_bar_daughter_pid_2.append(0)
-
-    parton_array = np.zeros([ len(particle.event) , NUM_OF_PARTON, 7]) #7: index, pdgid, barcode, pt, eta, phi, mass
-
-    for i in tqdm.trange(len(particle.event)):
-    
-        if marker_event[i] == 1 :
-            # print(particle.dataframelize(i), type(top_daughter_idx_1[i]), type(top_daughter_idx_2[i]))
-            parton_array[i][0][0], parton_array[i][1][0], parton_array[i][2][0] = quark_finder(particle.dataframelize(i), top_daughter_idx_1[i], top_daughter_idx_2[i])
-            parton_array[i][3][0], parton_array[i][4][0], parton_array[i][5][0], = quark_finder(particle.dataframelize(i), top_bar_daughter_idx_1[i], top_bar_daughter_idx_2[i])
-        elif marker_event[i] == 0 :
-            parton_array[i] = 'Nan'
-        else: pass
-    print("+------------------------------------------------------------------------------------------------------+")
-    print("Parton tracing section complete. The daughter of W+/W- and bbbar has been found.")
-    print("+------------------------------------------------------------------------------------------------------+")
+        for i in range(len(_index)):
+            j = _index[i]
+            _src_top_d.append([particle.dataframelize(j), top_daughter_idx_1[i], top_daughter_idx_2[i]])
+            _src_anti_top_d.append([particle.dataframelize(j), top_bar_daughter_idx_1[i], top_bar_daughter_idx_2[i]])
+        with mp.Pool(24) as p:
+            _result_top = p.starmap(quark_finder, _src_top_d)
+            p.close()
+            p.join()
+        with mp.Pool(24) as p:
+            _result_anti_top = p.starmap(quark_finder, _src_anti_top_d)
+            p.close()
+            p.join()
+        
+        for i in range(len(_index)):
+            parton_array[i][0][0], parton_array[i][1][0], parton_array[i][2][0] = _result_top[i][0], _result_top[i][1], _result_top[i][2]
+            parton_array[i][3][0], parton_array[i][4][0], parton_array[i][5][0] = _result_anti_top[i][0], _result_anti_top[i][1], _result_anti_top[i][2]
+            parton_array[i][6][0], parton_array[i][7][0] = higgs_daughter_idx_1[i], higgs_daughter_idx_2[i]
+        print("+------------------------------------------------------------------------------------------------------+")
+        print("Parton tracing section complete. The daughter of W+/W-, bbbar, and Higgs has been found. Cost: {0:.3f} s".format(time.time()-start))
+        print("+------------------------------------------------------------------------------------------------------+")
+    elif MODEL == 'four_top':
+        print("chi-square method haven't support four top model yet.")
+    else :
+        print("Please select a correct model.")
 
     print("+------------------------------------------------------------------------------------------------------+")
     print("Recording the kinematics variables of partons in the selected event.")
@@ -314,8 +389,7 @@ def chi2(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE):
     parton_mass = []
 
 
-    for i in tqdm.trange(len(particle.event)):
-        if marker_event[i] == 1:
+    for i in tqdm.trange(len(_index)):
             _parton_pdgid = []
             _parton_barcode = []
             _parton_pt = []
@@ -323,7 +397,8 @@ def chi2(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE):
             _parton_phi = []
             _parton_mass = []
             for j in range(NUM_OF_PARTON):
-                dataset = particle.dataframelize(i)
+                k = _index[i]
+                dataset = particle.dataframelize(k)
 
                 _parton_pdgid.append(dataset.iloc[int(parton_array[i][j][0]), 6])
                 _parton_barcode.append(barcode[j])
@@ -344,27 +419,34 @@ def chi2(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE):
     print("+------------------------------------------------------------------------------------------------------+")
 
     print("+------------------------------------------------------------------------------------------------------+")
-    print("Starting chi square matching.")
+    print("Starting chi-square matching.")
     print("+------------------------------------------------------------------------------------------------------+")
-    
+    start = time.time()
     chi2_value = []
     jet_parton_index = []
     parton_jet_index = []
-    for i in tqdm.trange(len(jet_pt)):
-        _chi2_value, _tmp_parton_jet_index, _tmp_jet_parton_index = chi_square_minimizer(jet_pt[i], jet_eta[i], jet_phi[i], jet_btag[i], jet_mass[i], MODEL)
-        if _chi2_value == -1 :
+    _src_chi2 = []
+    for i in range(len(jet_pt)):
+        _src_chi2.append([jet_pt[i], jet_eta[i], jet_phi[i], jet_btag[i], jet_mass[i], MODEL])
+    
+    with mp.Pool(24) as p:
+        _result_chi2 = p.starmap(chi_square_minimizer, _src_chi2)
+        p.close()
+        p.join()
+    
+    for i in range(len(_result_chi2)):
+        if _result_chi2[i][0] == -1 :
             print("+++++++++++++++++++++++++++++++++++++")
             print('An error occur!')
-            print("Ebvent number: {0}, chi2 vslue: {1}, _tmp_parton_jet_index: {2}, _ttmp_jet_parton_index: {3}".format(i, _chi2_value, _tmp_parton_jet_index, _tmp_jet_parton_index))
+            print("Ebvent number: {0}, chi2 vslue: {1}, _tmp_parton_jet_index: {2}, _ttmp_jet_parton_index: {3}".format(i, _result_chi2[i][0], _result_chi2[i][1], _result_chi2[i][2]))
             print("+++++++++++++++++++++++++++++++++++++")
-        if _chi2_value != -1 :
-            chi2_value.append(_chi2_value)
-            jet_parton_index.append(_tmp_jet_parton_index)
-            parton_jet_index.append(_tmp_parton_jet_index)
-        else: pass 
+        if _result_chi2[i][0] != -1 :
+            chi2_value.append(_result_chi2[i][0])
+            jet_parton_index.append(_result_chi2[i][1])
+            parton_jet_index.append(_result_chi2[i][2])
 
     print("+------------------------------------------------------------------------------------------------------+")
-    print("Parton-jet matching finished.")
+    print("Chi-square matching finished. Cost: {0:.3f}".format(time.time() - start))
     print("+------------------------------------------------------------------------------------------------------+")
     jet_parton_index = np.asanyarray(jet_parton_index, dtype=object)
     parton_jet_index = np.asanyarray(parton_jet_index, dtype=object)
@@ -409,16 +491,7 @@ def chi2(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE):
         print("Jet-parton matching section complete.\nFound {0} events with 1 ttbar candidate exist.\nFound {1} events with 2 ttbar candidate exist.".format( np.sum(N_match_top_in_event == 1), np.sum(N_match_top_in_event == 2)  ))
         print("+------------------------------------------------------------------------------------------------------+")
     elif MODEL == 'four_top':
-        target = [i for i in range(NUM_OF_PARTON)]
-        
-        N_match_top_in_event = np.zeros([len(jet_pt)])
-        for i in tqdm.trange(len(jet_parton_index)):
-            
-            intersetion = set(target).intersection(jet_parton_index[i])
-            N_match_top_in_event[i] = len(intersetion) // 3
-        print("+------------------------------------------------------------------------------------------------------+")
-        print("Jet-parton matching section complete.\nFound {0} events with 1 ttbar candidate exist.\nFound {1} events with 2 ttbar candidate exist.\nFound {2} events with 3 ttbar candidate exist.\nFound {3} events with 4 ttbar candidate exist.".format( np.sum(N_match_top_in_event == 1), np.sum(N_match_top_in_event == 2), np.sum(N_match_top_in_event == 3), np.sum(N_match_top_in_event == 4)  ))
-        print("+------------------------------------------------------------------------------------------------------+")
+        print("chi-square method haven't support four top model yet.")
     else : pass
     
    
