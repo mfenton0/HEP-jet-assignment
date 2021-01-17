@@ -446,7 +446,7 @@ def chi2(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE):
             parton_jet_index.append(_result_chi2[i][2])
 
     print("+------------------------------------------------------------------------------------------------------+")
-    print("Chi-square matching finished. Cost: {0:.3f}".format(time.time() - start))
+    print("Chi-square matching finished. Cost: {0:.3f} s".format(time.time() - start))
     print("+------------------------------------------------------------------------------------------------------+")
     jet_parton_index = np.asanyarray(jet_parton_index, dtype=object)
     parton_jet_index = np.asanyarray(parton_jet_index, dtype=object)
