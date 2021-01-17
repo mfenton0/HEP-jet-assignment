@@ -4,7 +4,7 @@ Institute: National Tsing Hua university, Department of Physics, Hsinchu, Taiwan
 Mail: davidho@gapp.nthu.edu.tw
 """
 #Import packages
-import uproot
+import uproot, time
 import pandas as pd 
 import numpy as np 
 from .particle_properties_uproot import particle_properties  #import particle properties helper function from particle_properties.py
