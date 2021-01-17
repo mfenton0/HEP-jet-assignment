@@ -11,6 +11,7 @@ from .particle_properties_uproot import particle_properties  #import particle pr
 from .jet_properties_uproot import jet_properties  #import jet properties helper function from jet_properties.py
 import h5py, sys, traceback, os, tqdm
 from .utilize import delta_R, deltaPhi, pdgid, event_selection, quark_finder, particle_tracing, deltaR_matching, barcode_recorder, chi_square_minimizer
+import multiprocessing as mp
 
 class properties_for_particle():
     def __init__(self, event, pt, eta, phi, pid, M1, M2, D1, D2, status, rapidity, mass, charge):
