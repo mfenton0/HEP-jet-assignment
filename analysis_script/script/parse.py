@@ -74,7 +74,7 @@ class properties_for_jet():
         jet_df = pd.DataFrame(jet_dict)
         return jet_df
 
-def parse(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE):
+def parse(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS):
 
     PID = pdgid()
 
@@ -266,15 +266,17 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE):
                 _index.append(i)
                 _src_top.append([particle.dataframelize(i), PID.top, 22, MODEL])
                 _src_anti_top.append([particle.dataframelize(i), PID.anti_top, 22, MODEL])
-        with mp.Pool(24) as p:
+        print("Using {0} process for accelerating speed.".format(PROCESS))
+        with mp.Pool(PROCESS) as p:
             _result_top = p.starmap(particle_tracing, _src_top)
             p.close()
             p.join()
-        with mp.Pool(24) as p:
+        print("Top tracing finished.")
+        with mp.Pool(PROCESS) as p:
             _result_anti_top = p.starmap(particle_tracing, _src_anti_top)
             p.close()
             p.join()
-
+        print("Anti-Top tracing finished.")
         for i in range(len(_result_top)):
             top_idx.append(_result_top[i][0])
             top_daughter_idx_1.append(_result_top[i][1])
@@ -294,14 +296,16 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE):
             j = _index[i]
             _src_top_d.append([particle.dataframelize(j), top_daughter_idx_1[i], top_daughter_idx_2[i]])
             _src_anti_top_d.append([particle.dataframelize(j), top_bar_daughter_idx_1[i], top_bar_daughter_idx_2[i]])
-        with mp.Pool(24) as p:
+        with mp.Pool(PROCESS) as p:
             _result_top = p.starmap(quark_finder, _src_top_d)
             p.close()
             p.join()
-        with mp.Pool(24) as p:
+        print("Daughter of Top's daughter found.")
+        with mp.Pool(PROCESS) as p:
             _result_anti_top = p.starmap(quark_finder, _src_anti_top_d)
             p.close()
             p.join()
+        print("Daughter of Anti-Top's daughter found.")
         
         for i in range(len(_index)):
             parton_array[i][0][0], parton_array[i][1][0], parton_array[i][2][0] = _result_top[i][0], _result_top[i][1], _result_top[i][2]
@@ -321,18 +325,22 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE):
                 _src_top.append([particle.dataframelize(i), PID.top, 22, MODEL])
                 _src_anti_top.append([particle.dataframelize(i), PID.anti_top, 22, MODEL])
                 _src_higgs.append([particle.dataframelize(i), PID.higgs, 22, MODEL])
-        with mp.Pool(24) as p:
+        print("Using {0} process for accelerating speed.".format(PROCESS))
+        with mp.Pool(PROCESS) as p:
             _result_top = p.starmap(particle_tracing, _src_top)
             p.close()
             p.join()
-        with mp.Pool(24) as p:
+        print("Top tracing finished.")
+        with mp.Pool(PROCESS) as p:
             _result_anti_top = p.starmap(particle_tracing, _src_anti_top)
             p.close()
             p.join()
-        with mp.Pool(24) as p:
+        print("Anti-Top tracing finished.")
+        with mp.Pool(PROCESS) as p:
             _result_h = p.starmap(particle_tracing, _src_higgs)
             p.close()
             p.join()
+        print("Higgs tracing finished.")
         
         for i in range(len(_index)):
             top_idx.append(_result_top[i][0])
@@ -358,15 +366,16 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE):
             j = _index[i]
             _src_top_d.append([particle.dataframelize(j), top_daughter_idx_1[i], top_daughter_idx_2[i]])
             _src_anti_top_d.append([particle.dataframelize(j), top_bar_daughter_idx_1[i], top_bar_daughter_idx_2[i]])
-        with mp.Pool(24) as p:
+        with mp.Pool(PROCESS) as p:
             _result_top = p.starmap(quark_finder, _src_top_d)
             p.close()
             p.join()
-        with mp.Pool(24) as p:
+        print("Daughter of Top's daughter found.")
+        with mp.Pool(PROCESS) as p:
             _result_anti_top = p.starmap(quark_finder, _src_anti_top_d)
             p.close()
             p.join()
-        
+        print("Daughter of Anti-Top's daughter found.")
         for i in range(len(_index)):
             parton_array[i][0][0], parton_array[i][1][0], parton_array[i][2][0] = _result_top[i][0], _result_top[i][1], _result_top[i][2]
             parton_array[i][3][0], parton_array[i][4][0], parton_array[i][5][0] = _result_anti_top[i][0], _result_anti_top[i][1], _result_anti_top[i][2]
@@ -386,15 +395,17 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE):
                 _index.append(i)
                 _src_top.append([particle.dataframelize(i), PID.top, 22, MODEL])
                 _src_anti_top.append([particle.dataframelize(i), PID.anti_top, 22, MODEL])
-        with mp.Pool(24) as p:
+        print("Using {0} process for accelerating speed.".format(PROCESS))
+        with mp.Pool(PROCESS) as p:
             _result_top = p.starmap(particle_tracing, _src_top)
             p.close()
             p.join()
-        with mp.Pool(24) as p:
+        print("Top tracing finished.")
+        with mp.Pool(PROCESS) as p:
             _result_anti_top = p.starmap(particle_tracing, _src_anti_top)
             p.close()
             p.join()
-        
+        print("Anti-Top tracing finished.")
         for i in range(len(_index)):
             top_1_idx.append(_result_top[0])
             top_2_idx.append(_result_top[1])
@@ -427,23 +438,26 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE):
             _src_top_d_2.append([particle.dataframelize(j), top_2_daughter_idx_1[i], top_2_daughter_idx_2[i]])
             _src_anti_top_d_1.append([particle.dataframelize(j), top_1_bar_daughter_idx_1[i], top_1_bar_daughter_idx_2[i]])
             _src_anti_top_d_2.append([particle.dataframelize(j), top_2_bar_daughter_idx_1[i], top_2_bar_daughter_idx_2[i]])
-        with mp.Pool(24) as p:
+        with mp.Pool(PROCESS) as p:
             _result_top_1 = p.starmap(quark_finder, _src_top_d_1)
             p.close()
             p.join()
-        with mp.Pool(24) as p:
+        print("Daughter of Top_1's daughter found.") 
+        with mp.Pool(PROCESS) as p:
             _result_top_2 = p.starmap(quark_finder, _src_top_d_2)
             p.close()
             p.join()
-        with mp.Pool(24) as p:
+        print("Daughter of Top_2's daughter found.") 
+        with mp.Pool(PROCESS) as p:
             _result_anti_top_1 = p.starmap(quark_finder, _src_anti_top_d_1)
             p.close()
             p.join()
-        with mp.Pool(24) as p:
+        print("Daughter of Anti-Top_1's daughter found.") 
+        with mp.Pool(PROCESS) as p:
             _result_anti_top_2 = p.starmap(quark_finder, _src_anti_top_d_2)
             p.close()
             p.join()
-        
+        print("Daughter of Anti-Top_2's daughter found.") 
         for i in range(len(_index)):
             parton_array[i][0][0], parton_array[i][1][0], parton_array[i][2][0] = _result_top_1[i][0], _result_top_1[i][1], _result_top_1[i][2]
             parton_array[i][3][0], parton_array[i][4][0], parton_array[i][5][0] = _result_top_2[i][0], _result_top_2[i][1], _result_top_2[i][2]
@@ -508,8 +522,8 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE):
     start = time.time()
     for i in tqdm.trange(len(jet_pt)):
         _src_delta_R.append([NUM_OF_PARTON, len(jet_pt[i]), parton_eta[i], parton_phi[i], jet_eta[i], jet_phi[i], 0.4, MODEL])
-
-    with mp.Pool(24) as p:
+    print("Using {0} process for accelerating speed.".format(PROCESS))
+    with mp.Pool(PROCESS) as p:
         _result_delta_R = p.starmap(deltaR_matching, _src_delta_R)
         p.close()
         p.join()

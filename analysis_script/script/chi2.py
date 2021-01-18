@@ -74,7 +74,7 @@ class properties_for_jet():
         jet_df = pd.DataFrame(jet_dict)
         return jet_df
 
-def chi2(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE):
+def chi2(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS):
     
     PID = pdgid()
 
@@ -265,15 +265,18 @@ def chi2(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE):
                 _index.append(i)
                 _src_top.append([particle.dataframelize(i), PID.top, 22, MODEL])
                 _src_anti_top.append([particle.dataframelize(i), PID.anti_top, 22, MODEL])
-        with mp.Pool(24) as p:
+        print("Using {0} process for accelerating speed.".format(PROCESS))
+        with mp.Pool(PROCESS) as p:
             _result_top = p.starmap(particle_tracing, _src_top)
             p.close()
             p.join()
-        with mp.Pool(24) as p:
+        print("Top tracing finished.")
+        with mp.Pool(PROCESS) as p:
             _result_anti_top = p.starmap(particle_tracing, _src_anti_top)
             p.close()
             p.join()
-
+        print("Anti-Top tracing finished.")
+        
         for i in range(len(_result_top)):
             top_idx.append(_result_top[i][0])
             top_daughter_idx_1.append(_result_top[i][1])
@@ -293,15 +296,17 @@ def chi2(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE):
             j = _index[i]
             _src_top_d.append([particle.dataframelize(j), top_daughter_idx_1[i], top_daughter_idx_2[i]])
             _src_anti_top_d.append([particle.dataframelize(j), top_bar_daughter_idx_1[i], top_bar_daughter_idx_2[i]])
-        with mp.Pool(24) as p:
+        
+        with mp.Pool(PROCESS) as p:
             _result_top = p.starmap(quark_finder, _src_top_d)
             p.close()
             p.join()
-        with mp.Pool(24) as p:
+        print("Daughter of Top's daughter found.")
+        with mp.Pool(PROCESS) as p:
             _result_anti_top = p.starmap(quark_finder, _src_anti_top_d)
             p.close()
             p.join()
-        
+        print("Daughter of Antu-Top's daughter found.")
         for i in range(len(_index)):
             parton_array[i][0][0], parton_array[i][1][0], parton_array[i][2][0] = _result_top[i][0], _result_top[i][1], _result_top[i][2]
             parton_array[i][3][0], parton_array[i][4][0], parton_array[i][5][0] = _result_anti_top[i][0], _result_anti_top[i][1], _result_anti_top[i][2]
@@ -320,19 +325,22 @@ def chi2(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE):
                 _src_top.append([particle.dataframelize(i), PID.top, 22, MODEL])
                 _src_anti_top.append([particle.dataframelize(i), PID.anti_top, 22, MODEL])
                 _src_higgs.append([particle.dataframelize(i), PID.higgs, 22, MODEL])
-        with mp.Pool(24) as p:
+        print("Using {0} process for accelerating speed.".format(PROCESS))
+        with mp.Pool(PROCESS) as p:
             _result_top = p.starmap(particle_tracing, _src_top)
             p.close()
             p.join()
-        with mp.Pool(24) as p:
+        print("Top tracing finished.")
+        with mp.Pool(PROCESS) as p:
             _result_anti_top = p.starmap(particle_tracing, _src_anti_top)
             p.close()
             p.join()
-        with mp.Pool(24) as p:
+        print("Antu-Top tracing finished.")
+        with mp.Pool(PROCESS) as p:
             _result_h = p.starmap(particle_tracing, _src_higgs)
             p.close()
             p.join()
-        
+        print("Higgs tracing finished.")
         for i in range(len(_index)):
             top_idx.append(_result_top[i][0])
             top_daughter_idx_1.append(_result_top[i][1])
@@ -357,15 +365,16 @@ def chi2(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE):
             j = _index[i]
             _src_top_d.append([particle.dataframelize(j), top_daughter_idx_1[i], top_daughter_idx_2[i]])
             _src_anti_top_d.append([particle.dataframelize(j), top_bar_daughter_idx_1[i], top_bar_daughter_idx_2[i]])
-        with mp.Pool(24) as p:
+        with mp.Pool(PROCESS) as p:
             _result_top = p.starmap(quark_finder, _src_top_d)
             p.close()
             p.join()
-        with mp.Pool(24) as p:
+        print("Daughter of Top's daughter found.")
+        with mp.Pool(PROCESS) as p:
             _result_anti_top = p.starmap(quark_finder, _src_anti_top_d)
             p.close()
             p.join()
-        
+        print("Daughter of Anti-Top's daughter found.")
         for i in range(len(_index)):
             parton_array[i][0][0], parton_array[i][1][0], parton_array[i][2][0] = _result_top[i][0], _result_top[i][1], _result_top[i][2]
             parton_array[i][3][0], parton_array[i][4][0], parton_array[i][5][0] = _result_anti_top[i][0], _result_anti_top[i][1], _result_anti_top[i][2]
@@ -428,12 +437,11 @@ def chi2(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE):
     _src_chi2 = []
     for i in range(len(jet_pt)):
         _src_chi2.append([jet_pt[i], jet_eta[i], jet_phi[i], jet_btag[i], jet_mass[i], MODEL])
-    
-    with mp.Pool(24) as p:
+    print("Using {0} process for accelerating speed.".format(PROCESS))
+    with mp.Pool(PROCESS) as p:
         _result_chi2 = p.starmap(chi_square_minimizer, _src_chi2)
         p.close()
         p.join()
-    
     for i in range(len(_result_chi2)):
         if _result_chi2[i][0] == -1 :
             print("+++++++++++++++++++++++++++++++++++++")
@@ -514,7 +522,7 @@ def chi2(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE):
         hdf5_jet_phi = f.create_dataset('jet_phi', (lene, ), dtype=dt)
         hdf5_jet_mass = f.create_dataset('jet_mass', (lene, ), dtype=dt)
         hdf5_jet_btag = f.create_dataset('jet_btag', (lene, ), dtype=dt)
-
+        print("Writing jet information to {0}".format(OUTPUT_FILE))
         for i in tqdm.trange(lene):
             hdf5_jet_parton_index[i] = jet_parton_index[i]
             hdf5_jet_barcode[i] = jet_barcode[i]
@@ -535,7 +543,7 @@ def chi2(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE):
         hdf5_N_match_top_in_event = f.create_dataset('N_match_top_in_event', data = N_match_top_in_event)
         if MODEL == "ttH":
             N_match_higgs_in_event = f.create_dataset('N_match_higgs_in_event', data = N_match_higgs_in_event)
-
+        print("Writing parton information to {0}".format(OUTPUT_FILE))
         for i in tqdm.trange(lene):
             hdf5_parton_jet_index[i] = parton_jet_index[i]
             hdf5_parton_pdgid[i] = parton_pdgid[i]
