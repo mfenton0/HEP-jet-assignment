@@ -4,7 +4,7 @@ Institute: National Tsing Hua university, Department of Physics, Hsinchu, Taiwan
 Mail: davidho@gapp.nthu.edu.tw
 """
 #Import packages
-from script import cutflow, parse, chi2, fitting
+from script import cutflow, parse, chi2, fitting, background
 import h5py, sys, traceback, os, tqdm
 from argparse import ArgumentParser
 import multiprocessing as mp
@@ -21,6 +21,7 @@ def main():
     parser.add_argument("-c", "--config", dest="config", help="The directory configuration file for cutflow.")
     parser.add_argument("-s", "--single", dest="single", default=1, help="Determin is dealing with single file or not. If not dealing with single file, please input the directory of root files.")
     parser.add_argument("-p", "--num_process", dest="process", default=cpus, help="Number of extra process for accelerating speed.")
+    parser.add_argument("-e", "--exrta_option", dest="extra", default="normal", help="Extra option for used.")
     args = parser.parse_args()
     
 
@@ -29,11 +30,13 @@ def main():
     elif args.usage == "parse":
         parse(args.input, args.output, args.model, args.single, args.process)
     elif args.usage == "chi2":
-        chi2(args.input, args.output, args.model, args.single, args.process)
+        chi2(args.input, args.output, args.model, args.single, args.process, args.extra)
     elif args.usage == "purity":
         print("Work in progress.")
     elif args.usage == "fitting":
         fitting(args.input, args.output, args.model, args.single)
+    elif args.usage == 'background':
+        background(args.input, args.output, args.single)
     else: 
         print("Please select a correct usage.\n1. cutflow\n2. parse")
 
