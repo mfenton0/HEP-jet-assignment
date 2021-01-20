@@ -436,7 +436,7 @@ def chi2(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS, EXTRA):
     parton_jet_index = []
     _src_chi2 = []
     for i in range(len(jet_pt)):
-        _src_chi2.append([jet_pt[i], jet_eta[i], jet_phi[i], jet_btag[i], jet_mass[i], MODEL])
+        _src_chi2.append([jet_pt[i], jet_eta[i], jet_phi[i], jet_btag[i], jet_mass[i], MODEL, EXTRA])
     print("Using {0} process for accelerating speed.".format(PROCESS))
     with mp.Pool(PROCESS) as p:
         _result_chi2 = p.starmap(chi_square_minimizer, _src_chi2)
