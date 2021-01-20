@@ -497,7 +497,7 @@ def barcode_recorder(SOURCE, MODEL):
     
     return np.asanyarray(_jet_barcode, dtype=object)
 
-def chi_square_minimizer( jet_pt_chi2, jet_eta_chi2, jet_phi_chi2, jet_btag_chi2, jet_mass_chi2, MODEL):
+def chi_square_minimizer( jet_pt_chi2, jet_eta_chi2, jet_phi_chi2, jet_btag_chi2, jet_mass_chi2, MODEL, EXTRA):
     
     num_of_btag = np.sum(np.array(jet_btag_chi2) ==1)
 
@@ -543,6 +543,7 @@ def chi_square_minimizer( jet_pt_chi2, jet_eta_chi2, jet_phi_chi2, jet_btag_chi2
 
         min_chi2 = -1
         m_W = 81.3
+        m_top = 172.7
         sigma_W = 12.3
         sigma_t = 26.3
 
@@ -623,12 +624,22 @@ def chi_square_minimizer( jet_pt_chi2, jet_eta_chi2, jet_phi_chi2, jet_btag_chi2
             W_2_inv = cal_two_parton_inv(jet_3, jet_4)
             top_1_inv = cal_three_parton_inv(bjet_1, jet_1, jet_2)
             top_2_inv = cal_three_parton_inv(bjet_2, jet_3, jet_4)
-
-            chi2_part_1 = (top_1_inv - top_2_inv)**2
-            chi2_part_2 = (W_1_inv - m_W)**2
-            chi2_part_3 = (W_2_inv - m_W)**2
             
-            chi2_tmp = chi2_part_1/(2*(sigma_t**2)) + chi2_part_2/sigma_W**2 + chi2_part_3/sigma_W**2
+            if EXTRA == "normal":
+                chi2_part_1 = (top_1_inv - top_2_inv)**2
+                chi2_part_2 = (W_1_inv - m_W)**2
+                chi2_part_3 = (W_2_inv - m_W)**2
+
+                chi2_tmp = chi2_part_1/(2*(sigma_t**2)) + chi2_part_2/sigma_W**2 + chi2_part_3/sigma_W**2
+            elif EXTRA == "mtop_base":
+                chi2_part_1 = (top_1_inv - m_top)**2
+                chi2_part_2 = (top_2_inv - m_top)**2
+                chi2_part_3 = (W_1_inv - m_W)**2
+                chi2_part_4 = (W_2_inv - m_W)**2
+                
+                chi2_tmp = chi2_part_1/sigma_t**2 + chi2_part_2/sigma_t**2  + chi2_part_2/sigma_W**2 + chi2_part_3/sigma_W**2
+            else: print("Please input a available extra option")
+                
             if (min_chi2 < 0 or chi2_tmp < min_chi2 ):
                 min_chi2 = chi2_tmp
                 jet_1_best_idx = j_1_idx
@@ -828,7 +839,7 @@ def chi_square_minimizer( jet_pt_chi2, jet_eta_chi2, jet_phi_chi2, jet_btag_chi2
             top_1_inv = cal_three_parton_inv(bjet_1, jet_1, jet_2)
             top_2_inv = cal_three_parton_inv(bjet_2, jet_3, jet_4)
             higgs_inv = cal_two_parton_inv(bjet_3, bjet_4)
-
+            
             chi2_part_1 = (top_1_inv - top_2_inv)**2
             chi2_part_2 = (W_1_inv - m_W)**2
             chi2_part_3 = (W_2_inv - m_W)**2
