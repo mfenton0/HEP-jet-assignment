@@ -592,7 +592,6 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS):
     
    
     # Save selected events
-
     lene = len(parton_pdgid)
 
     print("+------------------------------------------------------------------------------------------------------+")
