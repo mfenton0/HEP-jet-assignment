@@ -74,7 +74,7 @@ class properties_for_jet():
         jet_df = pd.DataFrame(jet_dict)
         return jet_df
 
-def chi2(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS):
+def chi2(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS, EXTRA):
     
     PID = pdgid()
 
