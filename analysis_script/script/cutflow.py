@@ -331,7 +331,7 @@ def cutflow(INPUT_FILE, OUTPUT_FILE, MODEL, CONFIG, SINGLE):
             cutflow[6] = np.sum(marker_event_C5 == 1)
         else:
             print("Please input a number of cuts within 1 ~ 5.")
-        print(jet_C1, bjet_C1, jet_C2, bjet_C2, jet_C3, bjet_C3, jet_C4, bjet_C4, jet_C5, bjet_C5)
+
         if num_of_cuts == 1:
             x = np.linspace(0,2,3)
             plt.figure(figsize=(8,6))
@@ -400,7 +400,19 @@ def cutflow(INPUT_FILE, OUTPUT_FILE, MODEL, CONFIG, SINGLE):
             
         else:
             print("Please input a number of cuts within 1 ~ 5.")
-    
+            
+        print("+------------------------------------------------------------------------------------------------------+")
+        print("Figure has been saved. Path: {0}.".format(OUTPUT_FILE))
+        print("+------------------------------------------------------------------------------------------------------+")
+
+        print("+------------------------------------------------------------------------------------------------------+")
+        print("C1: {0}.".format(np.sum(marker_event_C1 == 1)))
+        print("C2: {0}.".format(np.sum(marker_event_C2 == 1)))
+        print("C3: {0}.".format(np.sum(marker_event_C3 == 1)))
+        print("C4: {0}.".format(np.sum(marker_event_C4 == 1)))
+        print("C5: {0}.".format(np.sum(marker_event_C5 == 1)))
+
+        print("+------------------------------------------------------------------------------------------------------+")
     elif int(SINGLE) != 1 and bool(SINGLE.isdigit) == True:
         _data = []
         particle = []
