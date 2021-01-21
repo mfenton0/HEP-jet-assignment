@@ -1,7 +1,6 @@
 backup/
 chi2.ipynb
 background/
-demo/
 *.h5
 data/
 demo/hdf5_read_demo_v3.ipynb 
