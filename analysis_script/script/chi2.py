@@ -450,8 +450,8 @@ def chi2(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS, EXTRA):
             print("+++++++++++++++++++++++++++++++++++++")
         if _result_chi2[i][0] != -1 :
             chi2_value.append(_result_chi2[i][0])
-            jet_parton_index.append(_result_chi2[i][1])
-            parton_jet_index.append(_result_chi2[i][2])
+            jet_parton_index.append(_result_chi2[i][2])
+            parton_jet_index.append(_result_chi2[i][1])
 
     print("+------------------------------------------------------------------------------------------------------+")
     print("Chi-square matching finished. Cost: {0:.1f} s".format(time.time() - start))
