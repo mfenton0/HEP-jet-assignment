@@ -36,7 +36,7 @@ def main():
     elif args.usage == "fitting":
         fitting(args.input, args.output, args.model, args.single)
     elif args.usage == 'background':
-        background(args.input, args.output, args.model, args.single)
+        background(args.input, args.output, args.model, args.single, args.process)
     else: 
         print("Please select a correct usage.\n1. cutflow\n2. parse")
 
