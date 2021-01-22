@@ -75,7 +75,7 @@ class properties_for_jet():
         return jet_df
 
 
-def background(INPUT, OUTPUT, MODEL, SINGLE):
+def background(INPUT, OUTPUT, MODEL, SINGLE, PROCESS):
     PID = pdgid()
 
     if int(SINGLE) == 1:
@@ -167,7 +167,7 @@ def background(INPUT, OUTPUT, MODEL, SINGLE):
     print("+------------------------------------------------------------------------------------------------------+")
     print("Jet selection doen. {0} events has been selected.".format(np.sum(marker_event == 1)))
     print("+------------------------------------------------------------------------------------------------------+")
-
+    
     print("+------------------------------------------------------------------------------------------------------+")
     print("Recording the kinematics variables of jets in the selected event.")
     print("+------------------------------------------------------------------------------------------------------+")
@@ -201,6 +201,34 @@ def background(INPUT, OUTPUT, MODEL, SINGLE):
     print("Finished to record the kinematics variables of jets in the selected event.")
     print("+------------------------------------------------------------------------------------------------------+")
     
+    print("+------------------------------------------------------------------------------------------------------+")
+    print("Starting chi-square matching.")
+    print("+------------------------------------------------------------------------------------------------------+")
+    start = time.time()
+    chi2_value = []
+    chi2_result = []
+    _src_chi2 = []
+    for i in range(len(jet_pt)):
+        _src_chi2.append([jet_pt[i], jet_eta[i], jet_phi[i], jet_btag[i], jet_mass[i], MODEL, EXTRA])
+    print("Using {0} process for accelerating speed.".format(PROCESS))
+    with mp.Pool(PROCESS) as p:
+        _result_chi2 = p.starmap(chi_square_minimizer, _src_chi2)
+        p.close()
+        p.join()
+    for i in range(len(_result_chi2)):
+        if _result_chi2[i][0] == -1 :
+            print("+++++++++++++++++++++++++++++++++++++")
+            print('An error occur!')
+            print("Ebvent number: {0}, chi2 vslue: {1}, _tmp_parton_jet_index: {2}, _ttmp_jet_parton_index: {3}".format(i, _result_chi2[i][0], _result_chi2[i][1], _result_chi2[i][2]))
+            print("+++++++++++++++++++++++++++++++++++++")
+        if _result_chi2[i][0] != -1 :
+            chi2_value.append(_result_chi2[i][0])
+            chi2_result.append(_result_chi2[i][1])
+
+    print("+------------------------------------------------------------------------------------------------------+")
+    print("Chi-square matching finished. Cost: {0:.1f} s".format(time.time() - start))
+    print("+------------------------------------------------------------------------------------------------------+")
+    
     # Save selected events
     lene = len(parton_pdgid)
 
@@ -212,17 +240,16 @@ def background(INPUT, OUTPUT, MODEL, SINGLE):
     with h5py.File(OUTPUT_FILE,'w') as f:
         dt = h5py.vlen_dtype(np.dtype('float16'))
         
-#         hdf5_jet_parton_index = f.create_dataset('jet_parton_index', (lene, ), dtype=dt)
-#         hdf5_jet_barcode = f.create_dataset('jet_barcode', (lene, ), dtype=dt)
+        hdf5_chi2_result = f.create_dataset('chi2_result', (lene, ), dtype=dt)
         hdf5_jet_pt = f.create_dataset('jet_pt', (lene, ), dtype=dt)
         hdf5_jet_eta = f.create_dataset('jet_eta', (lene, ), dtype=dt)
         hdf5_jet_phi = f.create_dataset('jet_phi', (lene, ), dtype=dt)
         hdf5_jet_mass = f.create_dataset('jet_mass', (lene, ), dtype=dt)
         hdf5_jet_btag = f.create_dataset('jet_btag', (lene, ), dtype=dt)
         print("Writing jet information to {0}".format(OUTPUT_FILE))
+        
         for i in tqdm.trange(lene):
-#             hdf5_jet_parton_index[i] = jet_parton_index[i]
-#             hdf5_jet_barcode[i] = jet_barcode[i]
+            hdf5_chi2_result[i] = chi2_result[i]
             hdf5_jet_pt[i] = jet_pt[i]
             hdf5_jet_eta[i] = jet_eta[i]
             hdf5_jet_phi[i] = jet_phi[i]
