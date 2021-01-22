@@ -637,7 +637,7 @@ def chi_square_minimizer( jet_pt_chi2, jet_eta_chi2, jet_phi_chi2, jet_btag_chi2
                 chi2_part_3 = (W_1_inv - m_W)**2
                 chi2_part_4 = (W_2_inv - m_W)**2
                 
-                chi2_tmp = chi2_part_1/sigma_t**2 + chi2_part_2/sigma_t**2  + chi2_part_2/sigma_W**2 + chi2_part_3/sigma_W**2
+                chi2_tmp = chi2_part_1/sigma_t**2 + chi2_part_2/sigma_t**2  + chi2_part_3/sigma_W**2 + chi2_part_4/sigma_W**2
             else: print("Please input a available extra option")
                 
             if (min_chi2 < 0 or chi2_tmp < min_chi2 ):
