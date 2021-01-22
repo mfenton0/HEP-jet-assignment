@@ -75,7 +75,7 @@ class properties_for_jet():
         return jet_df
 
 
-def background(INPUT, OUTPUT, MODEL, SINGLE, PROCESS):
+def background(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS, EXTRA):
     PID = pdgid()
 
     if int(SINGLE) == 1:
@@ -230,7 +230,7 @@ def background(INPUT, OUTPUT, MODEL, SINGLE, PROCESS):
     print("+------------------------------------------------------------------------------------------------------+")
     
     # Save selected events
-    lene = len(parton_pdgid)
+    lene = len(jet_pt)
 
     print("+------------------------------------------------------------------------------------------------------+")
     print("Writing event record to the hdf5 file.")
