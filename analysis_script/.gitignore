@@ -1,6 +1,5 @@
 backup/
 chi2.ipynb
-background/
 *.h5
 data/
 demo/hdf5_read_demo_v3.ipynb 
@@ -14,5 +13,4 @@ parse_uproot_old.py
 .ipynb_checkpoints/
 __pycache__/
 test_zone/
-.gitignore
 output/ttbar_lep_output/
