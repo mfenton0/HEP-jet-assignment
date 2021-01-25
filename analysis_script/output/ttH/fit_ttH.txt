@@ -1,5 +1,0 @@
-Mean value of W+ invariant mass is: 77.3286618828736, sigma is: 19.20950748190847
-Mean value of W- invariant mass is: 78.58464893089304, sigma is: 18.205920451052283
-Mean value of t invariant mass is: 162.0221400337568, sigma is: 28.85737766952786
-Mean value of t_bar invariant mass is: 162.4135774950152, sigma is: 27.1916654658694
-Mean value of Higgs boson mass is: 108.11750056934403, sigma is: 22.339609295823863
