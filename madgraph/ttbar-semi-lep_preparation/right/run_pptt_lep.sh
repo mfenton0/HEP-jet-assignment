@@ -1,7 +1,7 @@
 #!/bin/bash
 source ~/.bash_profile
 ANALYSIS_SCRIPT_PATH='/home/david/workplace/HEP-jet-assignment/analysis_script'
-ROOT_FILE_PATH='/home/david/pptt_lep/Events'
+ROOT_FILE_PATH='/home/david/pptt_lep_right/Events'
 LOG_FILE_PATH='/home/david'
 echo "Path of script: $ANALYSIS_SCRIPT_PATH"
 echo "path of root file: $ROOT_FILE_PATH"

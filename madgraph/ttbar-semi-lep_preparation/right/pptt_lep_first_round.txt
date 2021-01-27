@@ -1,6 +1,6 @@
 generate p p > t t~ QED=0, (t > W+ b, W+ > j j), (t~ > W- b~, W- > l- vl~)
-output /home/david/pptt_lep
-launch /home/david/pptt_lep
+output /home/david/pptt_lep_right
+launch /home/david/pptt_lep_right
 shower=Pythia8
 detector=Delphes
 analysis=OFF
