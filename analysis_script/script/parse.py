@@ -849,7 +849,7 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS):
     for i in tqdm.trange(len(jet_pt)):
         _jet_barcode = barcode_recorder(jet_parton_index[i], MODEL)
         jet_barcode.append(_jet_barcode)
-
+    jet_barcode = np.asanyarray(jet_barcode, dtype=object)
     print("+------------------------------------------------------------------------------------------------------+")
     print("Barcode information has beed record.")
     print("+------------------------------------------------------------------------------------------------------+")
