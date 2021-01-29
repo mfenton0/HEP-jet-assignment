@@ -24,6 +24,18 @@ class pdgid():
         self.top = 6
         self.anti_top = -6
         self.higgs = 25
+        self.electron = 11 
+        self.positron = -11
+        self.electron_neutrino = 12
+        self.anti_electron_neutrino = -12
+        self.muon = 13
+        self.anti_muon = -13
+        self.muon_neutrino = 14
+        self.anti_muon_neutrino = -14
+        self.tau = 17 
+        self.anti_tau = -17
+        self.tau_neutrino = 18
+        self.anti_tau_neutrino = -18
 
 PID = pdgid()
 
@@ -56,7 +68,7 @@ def to_matrix(target_1, target_2):
             
     return matrix
 
-def event_selection(PT, ETA, BTAG, MODEL):
+def event_selection(PT, ETA, PHI, BTAG, LEPTON_PT, LEPTON_ETA, LEPTON_PHI, MODEL):
     marker_event = []
     marker_jet = []
     marker_btag = []
@@ -151,6 +163,56 @@ def event_selection(PT, ETA, BTAG, MODEL):
             else:
                 marker_event.append(0)
         marker_event = np.asanyarray(marker_event, dtype=object)
+    elif MODEL == 'ttbar_lep_left' or MODEL == "ttbar_lep_right":
+        marker_lepton = []
+        print("Start jet marking.")
+        for i in tqdm.trange(len(PT)):
+            _marker_event = []
+            _marker_jet = []
+            _marker_btag = []
+            for j in range(len(PT[i])):
+                if BTAG[i][j] == 1 and PT[i][j] > 25 and np.abs(ETA[i][j]) < 2.5:
+                    _marker_btag.append(1) 
+                else: 
+                    _marker_btag.append(0) 
+            
+                if PT[i][j] > 25 and np.abs(ETA[i][j]) <= 2.5:
+                    _marker_jet.append(1)
+                else:
+                    _marker_jet.append(0)
+            marker_jet.append(np.asanyarray(_marker_jet, dtype=object))
+            marker_btag.append(np.asanyarray(_marker_btag, dtype=object))
+        
+        marker_jet = np.asanyarray(marker_jet, dtype=object)
+        marker_btag = np.asanyarray(marker_btag, dtype=object)
+        
+        #Remove electron from jets catogary
+        for i in range(len(PT)):
+            
+            for j in range(len(PT[i])):
+                for k in range(len(LEPTON_PT[i])):
+                    if delta_R(ETA[i][j], PHI[i][j], LEPTON_ETA[i][k], LEPTON_PHI[i][k]) < 0.4:
+                        marker_jet[i][j] = 0
+                        
+                    else : pass 
+        
+        for i in tqdm.trange(len(LEPTON_PT)):
+            _marker_lepton = []
+            for j in range(len(LEPTON_PT[i])):
+                if LEPTON_PT[i][j] > 25 and np.abs(LEPTON_ETA[i][j]) < 2.5:
+                    _marker_lepton.append(1)
+                else :
+                    _marker_lepton.append(0)
+            marker_lepton.append(np.asanyarray(_marker_lepton, dtype=object))
+        marker_lepton = np.asanyarray(marker_lepton, dtype=object)
+        print("Start event marking.")
+        for i in tqdm.trange(len(PT)):
+            if np.sum(marker_jet[i] == 1) >= 4 and np.sum(marker_btag[i] == 1) >= 2 and np.sum(marker_lepton[i] ==1) == 1 and len(marker_lepton[i]) == 1:
+                marker_event.append(1)
+            else:
+                marker_event.append(0)
+        marker_event = np.asanyarray(marker_event, dtype=object)
+
     else:
         print("Please select a correct mode. The mode available:\n1. ttbar.\n2. ttH\n3. four_top")
     
@@ -162,7 +224,7 @@ def shifted_particle_tracing(dataset, PID_daughter, idx):
         return dataset.iloc[idx,4]
 
 def particle_tracing(dataset, PID, STATUS, MODEL):
-    if MODEL == 'ttbar' or MODEL == 'ttH':
+    if MODEL == 'ttbar' or MODEL == 'ttH' or MODEL == "ttbar_lep_right" or MODEL == "ttbar_lep_left":
         for i in range(len(dataset)):
             if(dataset.iloc[i,1] == STATUS and dataset.iloc[i,6] == PID ): 
                 daughter_index = int(dataset.iloc[i,0])
@@ -445,6 +507,26 @@ def deltaR_matching(NUM_OF_PARTON, NUM_OF_JET, PARTON_ETA, PARTON_PHI, JET_ETA, 
                 _parton_jet_index[11] = _jet_to_parton_list[j]
             else: 
                 pass
+    elif MODEL == 'ttbar_lep_left' or MODEL == 'ttbar_lep_right':
+        for j in range(len(JET_ETA)):
+            if _parton_to_jet_list[j] == 0 :
+                _parton_jet_index[0] = _jet_to_parton_list[j]
+            else: 
+                pass
+
+            if _parton_to_jet_list[j] == 1 :
+                _parton_jet_index[1] = _jet_to_parton_list[j]
+            else: 
+                pass
+            if _parton_to_jet_list[j] == 2 :
+                _parton_jet_index[2] = _jet_to_parton_list[j]
+            else: 
+                pass
+
+            if _parton_to_jet_list[j] == 3 :
+                _parton_jet_index[3] = _jet_to_parton_list[j]
+            else:
+                pass
     else:
         print("Delta R matching faild, please check your model.")
 
@@ -486,6 +568,22 @@ def barcode_recorder(SOURCE, MODEL):
 
     elif MODEL == "four_top":
         barcode = np.array([2056, 2176, 2176, 516, 576, 576, 1028, 1056, 1056, 257, 272, 272])
+        for i in range(len(SOURCE)):
+            for j in range(len(barcode)):
+                if SOURCE[i] == int(j):
+                    _jet_barcode[i] = barcode[int(j)]
+                else :
+                    _jet_barcode[i] = 'Nan'
+    elif MODEL == 'ttbar_lep_left': 
+        barcode = np.array([34, 17, 20, 20])
+        for i in range(len(SOURCE)):
+            for j in range(len(barcode)):
+                if SOURCE[i] == int(j):
+                    _jet_barcode[i] = barcode[int(j)]
+                else :
+                    _jet_barcode[i] = 'Nan'
+    elif MODEL == 'ttbar_lep_right': 
+        barcode = np.array([34, 40, 40, 17])
         for i in range(len(SOURCE)):
             for j in range(len(barcode)):
                 if SOURCE[i] == int(j):
