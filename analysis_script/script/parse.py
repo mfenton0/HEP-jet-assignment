@@ -1012,5 +1012,5 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS):
                             simulation_lepton_barcode=simulation_lepton_barcode)
 
     print("+------------------------------------------------------------------------------------------------------+")
-    print("Event record has been send to {0}.".format(OUTPUT_FILE))
+    print("Event record has been send to {0}.npz.".format(OUTPUT_FILE))
     print("+------------------------------------------------------------------------------------------------------+")
