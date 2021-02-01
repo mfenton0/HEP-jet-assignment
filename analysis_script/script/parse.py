@@ -386,10 +386,10 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS):
                     lepton_eta.append(np.asanyarray(lepton_eta_tmp, dtype=object))
                     lepton_phi.append(np.asanyarray(lepton_phi_tmp, dtype=object))
                     lepton_pdgid.append(np.asanyarray(lepton_pdgid_tmp, dtype=object))
-    lepton_pt = np.asanyarray(lepton_pt, dtype=object)
-    lepton_eta = np.asanyarray(lepton_eta, dtype=object)
-    lepton_phi = np.asanyarray(lepton_phi, dtype=object)
-    lepton_pdgid = np.asanyarray(lepton_pdgid, dtype=object)
+        lepton_pt = np.asanyarray(lepton_pt, dtype=object)
+        lepton_eta = np.asanyarray(lepton_eta, dtype=object)
+        lepton_phi = np.asanyarray(lepton_phi, dtype=object)
+        lepton_pdgid = np.asanyarray(lepton_pdgid, dtype=object)
 
     for i in tqdm.trange(len(jet.event)):
         if marker_event[i] == 1:
@@ -424,10 +424,11 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS):
             jet_phi.append(jet_phi_tmp)
             jet_mass.append(jet_mass_tmp)
             jet_btag.append(jet_btag_tmp)
-    lepton_pt = np.asanyarray(lepton_pt, dtype=object)
-    lepton_eta = np.asanyarray(lepton_eta, dtype=object)
-    lepton_phi = np.asanyarray(lepton_phi, dtype=object)
-    lepton_pdgid = np.asanyarray(lepton_pdgid, dtype=object)
+        if MODEL == 'ttbar_lep_left' or MODEL == "ttbar_lep_right":
+            lepton_pt = np.asanyarray(lepton_pt, dtype=object)
+            lepton_eta = np.asanyarray(lepton_eta, dtype=object)
+            lepton_phi = np.asanyarray(lepton_phi, dtype=object)
+            lepton_pdgid = np.asanyarray(lepton_pdgid, dtype=object)
 
     MET = []
     MET_ETA = []
@@ -511,7 +512,7 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS):
         top_idx, top_daughter_idx_1, top_daughter_pid_1, top_daughter_idx_2, top_daughter_pid_2 = [], [], [], [], []
         top_bar_idx, top_bar_daughter_idx_1, top_bar_daughter_pid_1, top_bar_daughter_idx_2, top_bar_daughter_pid_2 = [], [], [], [], []
         higgs_idx, higgs_daughter_idx_1, higgs_daughter_pid_1, higgs_daughter_idx_2, higgs_daughter_pid_2 = [], [], [], [], []
-        _src_top, _src_anti_top, _src_higgs, _index  = [], [], []
+        _src_top, _src_anti_top, _src_higgs, _index  = [], [], [], []
         
         for i in range(len(particle.event)):
             if marker_event[i] == 1:
@@ -542,18 +543,18 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS):
             top_daughter_pid_1.append(_result_top[i][2])
             top_daughter_idx_2.append(_result_top[i][3])
             top_daughter_pid_2.append(_result_top[i][4])
-            top_bar_idx.append(_result_anti_top[0])
-            top_bar_daughter_idx_1.append(_result_anti_top[1])
-            top_bar_daughter_pid_1.append(_result_anti_top[2])
-            top_bar_daughter_idx_2.append(_result_anti_top[3])
-            top_bar_daughter_pid_2.append(_result_anti_top[4])
-            higgs_idx.append(_result_h[0])
-            higgs_daughter_idx_1.append(_result_h[1])
-            higgs_daughter_pid_1.append(_result_h[2])
-            higgs_daughter_idx_2.append(_result_h[3])
-            higgs_daughter_pid_2.append(_result_h[4])
+            top_bar_idx.append(_result_anti_top[i][0])
+            top_bar_daughter_idx_1.append(_result_anti_top[i][1])
+            top_bar_daughter_pid_1.append(_result_anti_top[i][2])
+            top_bar_daughter_idx_2.append(_result_anti_top[i][3])
+            top_bar_daughter_pid_2.append(_result_anti_top[i][4])
+            higgs_idx.append(_result_h[i][0])
+            higgs_daughter_idx_1.append(_result_h[i][1])
+            higgs_daughter_pid_1.append(_result_h[i][2])
+            higgs_daughter_idx_2.append(_result_h[i][3])
+            higgs_daughter_pid_2.append(_result_h[i][4])
         
-        _src_top_d, _src_anti_top_d,  = [], []
+        _src_top_d, _src_anti_top_d  = [], []
         parton_array = np.zeros([ len(_index) , NUM_OF_DAUGHTER, 7])
 
         for i in range(len(_index)):
@@ -601,26 +602,26 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS):
             p.join()
         print("Anti-Top tracing finished.")
         for i in range(len(_index)):
-            top_1_idx.append(_result_top[0])
-            top_2_idx.append(_result_top[1])
-            top_1_daughter_idx_1.append(_result_top[2])
-            top_1_daughter_pid_1.append(_result_top[3]) 
-            top_1_daughter_idx_2.append(_result_top[4])
-            top_1_daughter_pid_2.append(_result_top[5])
-            top_2_daughter_idx_1.append(_result_top[6]) 
-            top_2_daughter_pid_1.append(_result_top[7])
-            top_2_daughter_idx_2.append(_result_top[8])
-            top_2_daughter_pid_2.append(_result_top[9])
-            top_1_bar_idx.append(_result_anti_top[0])
-            top_2_bar_idx.append(_result_anti_top[1])
-            top_1_bar_daughter_idx_1.append(_result_anti_top[2]) 
-            top_1_bar_daughter_pid_1.append(_result_anti_top[3])
-            top_1_bar_daughter_idx_2.append(_result_anti_top[4])
-            top_1_bar_daughter_pid_2.append(_result_anti_top[5])
-            top_2_bar_daughter_idx_1.append(_result_anti_top[6]) 
-            top_2_bar_daughter_pid_1.append(_result_anti_top[7])
-            top_2_bar_daughter_idx_2.append(_result_anti_top[8])
-            top_2_bar_daughter_pid_2.append(_result_anti_top[9])
+            top_1_idx.append(_result_top[i][0])
+            top_2_idx.append(_result_top[i][1])
+            top_1_daughter_idx_1.append(_result_top[i][2])
+            top_1_daughter_pid_1.append(_result_top[i][3]) 
+            top_1_daughter_idx_2.append(_result_top[i][4])
+            top_1_daughter_pid_2.append(_result_top[i][5])
+            top_2_daughter_idx_1.append(_result_top[i][6]) 
+            top_2_daughter_pid_1.append(_result_top[i][7])
+            top_2_daughter_idx_2.append(_result_top[i][8])
+            top_2_daughter_pid_2.append(_result_top[i][9])
+            top_1_bar_idx.append(_result_anti_top[i][0])
+            top_2_bar_idx.append(_result_anti_top[i][1])
+            top_1_bar_daughter_idx_1.append(_result_anti_top[i][2]) 
+            top_1_bar_daughter_pid_1.append(_result_anti_top[i][3])
+            top_1_bar_daughter_idx_2.append(_result_anti_top[i][4])
+            top_1_bar_daughter_pid_2.append(_result_anti_top[i][5])
+            top_2_bar_daughter_idx_1.append(_result_anti_top[i][6]) 
+            top_2_bar_daughter_pid_1.append(_result_anti_top[i][7])
+            top_2_bar_daughter_idx_2.append(_result_anti_top[i][8])
+            top_2_bar_daughter_pid_2.append(_result_anti_top[i][9])
         
         _src_top_d_1, _src_top_d_2, _src_anti_top_d_1, _src_anti_top_d_2 = [], [], [], []
         
@@ -812,10 +813,7 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS):
     print("+------------------------------------------------------------------------------------------------------+")
     jet_parton_index = np.asanyarray(jet_parton_index, dtype=object)
     parton_jet_index = np.asanyarray(parton_jet_index, dtype=object)
-    print("+------------------------------------------------------------------------------------------------------+")
-    print("Recording barcode information.")
-    print("+------------------------------------------------------------------------------------------------------+")
-
+    
     if MODEL == 'ttbar_lep_left' or MODEL == "ttbar_lep_right":
         print("+------------------------------------------------------------------------------------------------------+")
         print("Starting lepton matching.")
@@ -844,6 +842,10 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS):
         print("+------------------------------------------------------------------------------------------------------+")
         print("Neutrino matching finished.")
         print("+------------------------------------------------------------------------------------------------------+") 
+
+    print("+------------------------------------------------------------------------------------------------------+")
+    print("Recording barcode information.")
+    print("+------------------------------------------------------------------------------------------------------+")
 
     jet_barcode = []
     for i in tqdm.trange(len(jet_pt)):
