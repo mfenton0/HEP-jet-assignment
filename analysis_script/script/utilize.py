@@ -979,7 +979,7 @@ def chi_square_minimizer( jet_pt_chi2, jet_eta_chi2, jet_phi_chi2, jet_btag_chi2
 
         min_chi2 = -1
         m_W = 81.3
-        m_h = 125
+        m_top = 172.7
         sigma_W = 18.7
         sigma_t = 28.8
 
@@ -1169,8 +1169,8 @@ def chi_square_minimizer( jet_pt_chi2, jet_eta_chi2, jet_phi_chi2, jet_btag_chi2
             
             top_1_inv = cal_three_parton_inv(bjet_1, jet_1, jet_2)
             top_2_inv = cal_three_parton_inv(bjet_2, jet_3, jet_4)
-            top_2_inv = cal_three_parton_inv(bjet_3, jet_5, jet_6)
-            top_2_inv = cal_three_parton_inv(bjet_4, jet_7, jet_8)
+            top_3_inv = cal_three_parton_inv(bjet_3, jet_5, jet_6)
+            top_4_inv = cal_three_parton_inv(bjet_4, jet_7, jet_8)
             
             chi2_part_1 = (top_1_inv - m_top)**2
             chi2_part_2 = (top_2_inv - m_top)**2
