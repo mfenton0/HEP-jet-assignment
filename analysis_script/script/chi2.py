@@ -809,7 +809,7 @@ def chi2(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS, EXTRA):
             chi2_value.append(_result_chi2[i][0])
             jet_parton_index.append(_result_chi2[i][2])
             parton_jet_index.append(_result_chi2[i][1])
-
+        
     print("+------------------------------------------------------------------------------------------------------+")
     print("Chi-square matching finished. Cost: {0:.1f} s".format(time.time() - start))
     print("+------------------------------------------------------------------------------------------------------+")
@@ -887,7 +887,25 @@ def chi2(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS, EXTRA):
         print("Jet-parton matching section complete.\nFound {0} events with 1 ttbar candidate exist.\nFound {1} events with 2 ttbar candidate exist.".format( np.sum(N_match_top_in_event == 1), np.sum(N_match_top_in_event == 2)  ))
         print("+------------------------------------------------------------------------------------------------------+")
     elif MODEL == 'four_top':
-        print("chi-square method haven't support four top model yet.")
+        target = [i for i in range(NUM_OF_PARTON)]
+        N_match_top_in_event = np.zeros([len(jet_pt)])
+        for i in tqdm.trange(len(jet_parton_index)):
+            
+            intersetion = set(target).intersection(jet_parton_index[i])
+            count_inter = 0
+            if intersetion.intersection(set([0, 1, 2])) == {0,1,2}:
+                count_inter += 1
+            if intersetion.intersection(set([3, 4, 5])) == {3,4,5}:
+                count_inter += 1
+            if intersetion.intersection(set([6, 7, 8])) == {6,7,8}:
+                count_inter += 1
+            if intersetion.intersection(set([9, 10, 11])) == {9,10,11}:
+                count_inter += 1
+
+            N_match_top_in_event[i] = count_inter
+        print("+------------------------------------------------------------------------------------------------------+")
+        print("Jet-parton matching section complete.\nFound {0} events with 1 ttbar candidate exist.\nFound {1} events with 2 ttbar candidate exist.\nFound {2} events with 3 ttbar candidate exist.\nFound {3} events with 4 ttbar candidate exist.".format( np.sum(N_match_top_in_event == 1), np.sum(N_match_top_in_event == 2), np.sum(N_match_top_in_event == 3), np.sum(N_match_top_in_event == 4)  ))
+        print("+------------------------------------------------------------------------------------------------------+")
     elif MODEL == 'ttbar_lep_left' or MODEL == 'ttbar_lep_right':
         N_match_top_in_event = np.zeros([len(jet_pt)])
         target = [i for i in range(NUM_OF_PARTON)]
