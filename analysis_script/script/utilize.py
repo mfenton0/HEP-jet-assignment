@@ -1132,7 +1132,7 @@ def chi_square_minimizer( jet_pt_chi2, jet_eta_chi2, jet_phi_chi2, jet_btag_chi2
                         _jet_index_candidate.append(jet[j][6])
                         _jet_index_candidate.append(jet[j][7])
                         jet_index_candidate.append(_jet_index_candidate)
-
+        
         for i in range(len(jet_index_candidate)):
             b_1_idx = jet_index_candidate[i][0]
             b_2_idx = jet_index_candidate[i][1]
