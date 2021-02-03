@@ -380,151 +380,151 @@ def deltaR_matching(NUM_OF_PARTON, NUM_OF_JET, PARTON_ETA, PARTON_PHI, JET_ETA, 
     if MODEL == 'ttbar':
         for j in range(len(JET_ETA)):
             if _parton_to_jet_list[j] == 0 :
-                _parton_jet_index[0] = _jet_to_parton_list[j]
+                _parton_jet_index[0] = int(_jet_to_parton_list[j])
             else: 
                 pass
 
             if _parton_to_jet_list[j] == 1 :
-                _parton_jet_index[1] = _jet_to_parton_list[j]
+                _parton_jet_index[1] = int(_jet_to_parton_list[j])
             else: 
                 pass
             if _parton_to_jet_list[j] == 2 :
-                _parton_jet_index[2] = _jet_to_parton_list[j]
+                _parton_jet_index[2] = int(_jet_to_parton_list[j])
             else: 
                 pass
 
             if _parton_to_jet_list[j] == 3 :
-                _parton_jet_index[3] = _jet_to_parton_list[j]
+                _parton_jet_index[3] = int(_jet_to_parton_list[j])
             else:
                 pass
 
             if _parton_to_jet_list[j] == 4 :
-                _parton_jet_index[4] = _jet_to_parton_list[j]
+                _parton_jet_index[4] = int(_jet_to_parton_list[j])
             else:
                 pass
 
             if _parton_to_jet_list[j] == 5 :
-                _parton_jet_index[5] = _jet_to_parton_list[j]
+                _parton_jet_index[5] = int(_jet_to_parton_list[j])
             else: 
                 pass
     elif MODEL == 'ttH':
         for j in range(len(JET_ETA)):
             if _parton_to_jet_list[j] == 0 :
-                _parton_jet_index[0] = _jet_to_parton_list[j]
+                _parton_jet_index[0] = int(_jet_to_parton_list[j])
             else: 
                 pass
 
             if _parton_to_jet_list[j] == 1 :
-                _parton_jet_index[1] = _jet_to_parton_list[j]
+                _parton_jet_index[1] = int(_jet_to_parton_list[j])
             else: 
                 pass
             if _parton_to_jet_list[j] == 2 :
-                _parton_jet_index[2] = _jet_to_parton_list[j]
+                _parton_jet_index[2] = int(_jet_to_parton_list[j])
             else: 
                 pass
 
             if _parton_to_jet_list[j] == 3 :
-                _parton_jet_index[3] = _jet_to_parton_list[j]
+                _parton_jet_index[3] = int(_jet_to_parton_list[j])
             else:
                 pass
 
             if _parton_to_jet_list[j] == 4 :
-                _parton_jet_index[4] = _jet_to_parton_list[j]
+                _parton_jet_index[4] = int(_jet_to_parton_list[j])
             else:
                 pass
 
             if _parton_to_jet_list[j] == 5 :
-                _parton_jet_index[5] = _jet_to_parton_list[j]
+                _parton_jet_index[5] = int(_jet_to_parton_list[j])
             else: 
                 pass
             
             if _parton_to_jet_list[j] == 6 :
-                _parton_jet_index[6] = _jet_to_parton_list[j]
+                _parton_jet_index[6] = int(_jet_to_parton_list[j])
             else: 
                 pass
             
             if _parton_to_jet_list[j] == 7 :
-                _parton_jet_index[7] = _jet_to_parton_list[j]
+                _parton_jet_index[7] = int(_jet_to_parton_list[j])
             else: 
                 pass
     elif MODEL == 'four_top':
         for j in range(len(JET_ETA)):
             if _parton_to_jet_list[j] == 0 :
-                _parton_jet_index[0] = _jet_to_parton_list[j]
+                _parton_jet_index[0] = int(_jet_to_parton_list[j])
             else: 
                 pass
 
             if _parton_to_jet_list[j] == 1 :
-                _parton_jet_index[1] = _jet_to_parton_list[j]
+                _parton_jet_index[1] = int(_jet_to_parton_list[j])
             else: 
                 pass
             if _parton_to_jet_list[j] == 2 :
-                _parton_jet_index[2] = _jet_to_parton_list[j]
+                _parton_jet_index[2] = int(_jet_to_parton_list[j])
             else: 
                 pass
 
             if _parton_to_jet_list[j] == 3 :
-                _parton_jet_index[3] = _jet_to_parton_list[j]
+                _parton_jet_index[3] = int(_jet_to_parton_list[j])
             else:
                 pass
 
             if _parton_to_jet_list[j] == 4 :
-                _parton_jet_index[4] = _jet_to_parton_list[j]
+                _parton_jet_index[4] = int(_jet_to_parton_list[j])
             else:
                 pass
 
             if _parton_to_jet_list[j] == 5 :
-                _parton_jet_index[5] = _jet_to_parton_list[j]
+                _parton_jet_index[5] = int(_jet_to_parton_list[j])
             else: 
                 pass
             
             if _parton_to_jet_list[j] == 6 :
-                _parton_jet_index[6] = _jet_to_parton_list[j]
+                _parton_jet_index[6] = int(_jet_to_parton_list[j])
             else: 
                 pass
             
             if _parton_to_jet_list[j] == 7 :
-                _parton_jet_index[7] = _jet_to_parton_list[j]
+                _parton_jet_index[7] = int(_jet_to_parton_list[j])
             else: 
                 pass
             
             if _parton_to_jet_list[j] == 8 :
-                _parton_jet_index[8] = _jet_to_parton_list[j]
+                _parton_jet_index[8] = int(_jet_to_parton_list[j])
             else: 
                 pass
             
             if _parton_to_jet_list[j] == 9 :
-                _parton_jet_index[9] = _jet_to_parton_list[j]
+                _parton_jet_index[9] = int(_jet_to_parton_list[j])
             else: 
                 pass
             
             if _parton_to_jet_list[j] == 10 :
-                _parton_jet_index[10] = _jet_to_parton_list[j]
+                _parton_jet_index[10] = int(_jet_to_parton_list[j])
             else: 
                 pass
             
             if _parton_to_jet_list[j] == 11 :
-                _parton_jet_index[11] = _jet_to_parton_list[j]
+                _parton_jet_index[11] = int(_jet_to_parton_list[j])
             else: 
                 pass
     elif MODEL == 'ttbar_lep_left' or MODEL == 'ttbar_lep_right':
         for j in range(len(JET_ETA)):
             if _parton_to_jet_list[j] == 0 :
-                _parton_jet_index[0] = _jet_to_parton_list[j]
+                _parton_jet_index[0] = int(_jet_to_parton_list[j])
             else: 
                 pass
 
             if _parton_to_jet_list[j] == 1 :
-                _parton_jet_index[1] = _jet_to_parton_list[j]
+                _parton_jet_index[1] = int(_jet_to_parton_list[j])
             else: 
                 pass
             if _parton_to_jet_list[j] == 2 :
-                _parton_jet_index[2] = _jet_to_parton_list[j]
+                _parton_jet_index[2] = int(_jet_to_parton_list[j])
             else: 
                 pass
 
             if _parton_to_jet_list[j] == 3 :
-                _parton_jet_index[3] = _jet_to_parton_list[j]
+                _parton_jet_index[3] = int(_jet_to_parton_list[j])
             else:
                 pass
     else:
@@ -541,7 +541,7 @@ def deltaR_matching(NUM_OF_PARTON, NUM_OF_JET, PARTON_ETA, PARTON_PHI, JET_ETA, 
         if _jet_parton_index[l] > NUM_OF_PARTON:
             _jet_parton_index[l] = 'nan'
     for l in range(NUM_OF_PARTON): 
-        if _parton_jet_index[l] > NUM_OF_PARTON:
+        if _parton_jet_index[l] > NUM_OF_JET:
             _parton_jet_index[l] = 'Nan'
     
     return np.asanyarray(_jet_parton_index, dtype=object), np.asanyarray(_parton_jet_index, dtype=object)
