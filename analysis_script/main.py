@@ -20,7 +20,7 @@ def main():
     parser.add_argument("-m", "--model", dest="model", help="Select a model to parse. Usable mode: ttbar, ttH, four_top, bkg")
     parser.add_argument("-c", "--config", dest="config", help="The directory configuration file for cutflow.")
     parser.add_argument("-s", "--single", dest="single", default=1, help="Determin is dealing with single file or not. If not dealing with single file, please input the directory of root files.")
-    parser.add_argument("-p", "--num_process", dest="process", default=cpus, help="Number of extra process for accelerating speed.")
+    parser.add_argument("-p", "--num_process", dest="process", default=1, type=int, help="Number of extra process for accelerating speed.")
     parser.add_argument("-e", "--exrta_option", dest="extra", default="normal", help="Extra option for used.")
     args = parser.parse_args()
     

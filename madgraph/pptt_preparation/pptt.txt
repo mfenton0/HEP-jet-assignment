@@ -1,10 +1,11 @@
-launch pptt
+set nb_core 1
+launch /home/david/pptt
 shower=Pythia8
 detector=Delphes
 analysis=OFF
 done
-set nevents = 100000
-set iseed = 100
+set nevents = 10000
+set iseed = 1
 Delphes/cards/delphes_card_ATLAS.tcl
 done
 exit
