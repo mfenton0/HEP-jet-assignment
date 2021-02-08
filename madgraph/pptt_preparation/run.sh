@@ -1,5 +1,10 @@
 #!/bin/bash
 source ~/.bash_profile
+
+export MKL_NUM_THREADS=1
+export NUMEXPR_NUM_THREADS=1
+export OMP_NUM_THREADS=1
+
 ANALYSIS_SCRIPT_PATH='/home/workplace/HEP-jet-assignment/analysis_script'
 ROOT_FILE_PATH='/home/david/pptt/Events'
 LOG_FILE_PATH='/home/david'
@@ -21,7 +26,7 @@ for i in {1..9};do
 		rm $ROOT_FILE_PATH/run_0$i/*
 	fi 		
 done
-for i in {10..24};do
+for i in {10..20};do
 	echo $i
 	awk -F"=" 'BEGIN{OFS=FS} $1=="set iseed "{$2=" "$2+1}1' pptt.txt > pptt2.txt && mv -f pptt2.txt pptt.txt
     ./bin/mg5_aMC pptt.txt >> $LOG_FILE_PATH/log.txt
