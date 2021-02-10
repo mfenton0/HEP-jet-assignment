@@ -26,7 +26,7 @@ for i in {1..9};do
 		rm $ROOT_FILE_PATH/run_0$i/*
 	fi 		
 done
-for i in {10..20};do
+for i in {10..100};do
 	echo $i
 	awk -F"=" 'BEGIN{OFS=FS} $1=="set iseed "{$2=" "$2+1}1' pptt.txt > pptt2.txt && mv -f pptt2.txt pptt.txt
     ./bin/mg5_aMC pptt.txt >> $LOG_FILE_PATH/log.txt
