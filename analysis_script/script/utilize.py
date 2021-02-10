@@ -1216,3 +1216,117 @@ def chi_square_minimizer( jet_pt_chi2, jet_eta_chi2, jet_phi_chi2, jet_btag_chi2
                     pass
         
         return min_chi2, np.asanyarray(_parton_jet_index, dtype=object), np.asanyarray(_jet_parton_index, dtype=object)
+
+def purity_classifier(src, target, mode, model):
+    if model == 'ttbar':
+        if mode == "pair":
+            left_target = target[:3]
+            right_target = target[3:]
+
+            left_src = src[:3]    
+            right_src = src[3:]    
+
+            b_1_target = left_target[0]
+            b_2_target = right_target[0]
+            j_12_target = set(left_target[1:])
+            j_34_target = set(right_target[1:])
+            target_b_pair = [b_1_target, b_2_target]
+
+            b_1_src = left_src[0]
+            b_2_src = right_src[0]
+            j_12_src = set(left_src[1:])
+            j_34_src = set(right_src[1:])
+            src_b_pair = [b_1_src, b_2_src]
+
+            if src_b_pair[0] == target_b_pair[0] and src_b_pair[1] == target_b_pair[1]:
+                _case = 1
+            elif src_b_pair[0] == target_b_pair[1] and src_b_pair[1] == target_b_pair[0]:
+                _case = 2
+            elif src_b_pair[0] == target_b_pair[0] and src_b_pair[1] != target_b_pair[1]:
+                _case = 3
+            elif src_b_pair[0] != target_b_pair[0] and src_b_pair[1] == target_b_pair[1]:
+                _case = 4
+            elif src_b_pair[0] == target_b_pair[1] and src_b_pair[1] != target_b_pair[0]:
+                _case = 5
+            elif src_b_pair[0] != target_b_pair[1] and src_b_pair[1] == target_b_pair[0]:
+                _case = 6
+            else: 
+                _case = 7
+
+            if _case == 1:
+                if j_12_src == j_12_target and j_34_src == j_34_target:
+                    _correct_left = _correct_right = 1
+                elif j_12_src != j_12_target and j_34_src == j_34_target:
+                    _correct_left = 0 
+                    _correct_right = 1
+                elif j_12_src == j_12_target and j_34_src != j_34_target:
+                    _correct_left = 1
+                    _correct_right = 0
+                elif j_12_src != j_12_target and j_34_src != j_34_target:
+                    _correct_left = _correct_right = 0
+                else:
+                    print("Error occur in function.")
+
+            elif _case == 2:
+                if j_12_src == j_34_target and j_34_src == j_12_target:
+                    _correct_left = _correct_right = 1
+                elif j_12_src != j_34_target and j_34_src == j_12_target:
+                    _correct_left = 0 
+                    _correct_right = 1
+                elif j_12_src == j_34_target and j_34_src != j_12_target:
+                    _correct_left = 1
+                    _correct_right = 0
+                elif j_12_src != j_34_target and j_34_src != j_12_target:
+                    _correct_left = _correct_right = 0
+                else:
+                    print("Error occur in function.")
+            elif _case == 3:
+                _correct_right = 0
+                if j_12_src == j_12_target:
+                    _correct_left = 1
+                else:
+                    _correct_left = 0
+            elif _case == 4:
+                _correct_left = 0
+                if j_34_src == j_34_target:
+                    _correct_right = 1
+                else:
+                    _correct_right = 0
+            elif _case == 5:
+                _correct_right = 0
+                if j_12_src == j_34_target:
+                    _correct_left = 1
+                else:
+                    _correct_left = 0
+            elif _case == 6:
+                _correct_left = 0
+                if j_34_src == j_12_target:
+                    _correct_right = 1
+                else:
+                    _correct_right = 0
+            elif _case == 7:
+                _correct_left  = _correct_right = 0
+            else: 
+                pass
+
+            return _correct_left, _correct_right
+        elif mode == "left":
+            left_src = set(src[:3])
+            left_target = set(target[:3])
+            if left_src == left_target: 
+                return 1 
+            else: 
+                return 0
+
+        elif mode == "right":
+            right_src = set(src[3:])
+            right_target = set(target[3:])
+            if right_src == right_target: 
+                return 1 
+            else: 
+                return 0
+        else: 
+            print("Error occur in function")
+    else: 
+        print("Please select a available model. (Only ttbar model(fully hadronic decay) available currently.)")
+
