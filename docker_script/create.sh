@@ -19,8 +19,6 @@ do
 
 	docker run \
 		-d \
-		--cpuset-cpus=$i \
-		--cpus="1.0" \
 		-v $HOME/docker_$j:/home/david \
 		-v $HOME/workplace:/home/workplace \
 		alan200276/centos:SVJsimulation \
