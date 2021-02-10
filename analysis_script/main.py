@@ -22,6 +22,8 @@ def main():
     parser.add_argument("-s", "--single", dest="single", default=1, help="Determin is dealing with single file or not. If not dealing with single file, please input the directory of root files.")
     parser.add_argument("-p", "--num_process", dest="process", default=1, type=int, help="Number of extra process for accelerating speed.")
     parser.add_argument("-e", "--exrta_option", dest="extra", default="normal", help="Extra option for used.")
+    parser.add_argument("-t", "--target_file", dest="target", help="target file for computing purity")
+    
     args = parser.parse_args()
     
 
@@ -32,7 +34,7 @@ def main():
     elif args.usage == "chi2":
         chi2(args.input, args.output, args.model, args.single, args.process, args.extra)
     elif args.usage == "purity":
-        purity(args.input, args.output, args.model, args.single)
+        purity(args.input, args.target, args.output, args.model, args.single)
     elif args.usage == "fitting":
         fitting(args.input, args.output, args.model, args.single)
     elif args.usage == 'background':
