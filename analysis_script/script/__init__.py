@@ -6,3 +6,4 @@ from .purity import purity
 from .background import background
 from .jet_properties_uproot import jet_properties
 from .particle_properties_uproot import particle_properties
+from .chi2_from_npz import chi2_from_npz
