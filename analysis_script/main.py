@@ -4,7 +4,7 @@ Institute: National Tsing Hua university, Department of Physics, Hsinchu, Taiwan
 Mail: davidho@gapp.nthu.edu.tw
 """
 #Import packages
-from script import cutflow, parse, chi2, fitting, background, purity
+from script import cutflow, parse, chi2, fitting, background, purity, chi2_from_npz
 import h5py, sys, traceback, os, tqdm
 from argparse import ArgumentParser
 import multiprocessing as mp
@@ -33,6 +33,8 @@ def main():
         parse(args.input, args.output, args.model, args.single, args.process)
     elif args.usage == "chi2":
         chi2(args.input, args.output, args.model, args.single, args.process, args.extra)
+    elif args.usage == "chi2_from_npz":
+        chi2_from_npz(args.input, args.output, args.model, args.single, args.process, args.extra)
     elif args.usage == "purity":
         purity(args.input, args.target, args.output, args.model, args.single)
     elif args.usage == "fitting":
