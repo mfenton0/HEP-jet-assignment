@@ -699,7 +699,8 @@ def chi_square_minimizer( jet_pt_chi2, jet_eta_chi2, jet_phi_chi2, jet_btag_chi2
                 _jet_index_candidate.append(jet[j][2])
                 _jet_index_candidate.append(jet[j][3])
                 jet_index_candidate.append(_jet_index_candidate)
-
+        _cand_record  = []
+        _chi2_value = []
         for i in range(len(jet_index_candidate)):
 
             b_1_idx = jet_index_candidate[i][0]
@@ -738,6 +739,8 @@ def chi_square_minimizer( jet_pt_chi2, jet_eta_chi2, jet_phi_chi2, jet_btag_chi2
                 chi2_tmp = chi2_part_1/sigma_t**2 + chi2_part_2/sigma_t**2  + chi2_part_3/sigma_W**2 + chi2_part_4/sigma_W**2
             else: print("Please input a available extra option")
                 
+            _cand_record.append([[b_1_idx, j_1_idx, j_2_idx, b_2_idx, j_3_idx, j_4_idx]])
+            _chi2_value.append(chi2_tmp)
             if (min_chi2 < 0 or chi2_tmp < min_chi2 ):
                 min_chi2 = chi2_tmp
                 jet_1_best_idx = j_1_idx
@@ -750,7 +753,10 @@ def chi_square_minimizer( jet_pt_chi2, jet_eta_chi2, jet_phi_chi2, jet_btag_chi2
             else: 
                 pass
         _jet_parton_index = [9999999*i/i for i in range(1, len(jet_pt_chi2)+1)]
-
+    
+        chi2_value = _chi2_value[-10:]
+        cand_record = _cand_record[-10:]
+        del _chi2_value, _cand_record
         for k in range(len(jet_pt_chi2)):
             for l in range(len(_parton_jet_index)):
                 if _parton_jet_index[l] == int(k):
@@ -764,7 +770,7 @@ def chi_square_minimizer( jet_pt_chi2, jet_eta_chi2, jet_phi_chi2, jet_btag_chi2
                 else : 
                     pass
         
-        return min_chi2, np.asanyarray(_parton_jet_index, dtype=object), np.asanyarray(_jet_parton_index, dtype=object)
+        return min_chi2, np.asanyarray(_parton_jet_index, dtype=object), np.asanyarray(_jet_parton_index, dtype=object), np.asanyarray(cand_record, dtype=object), np.asanyarray(chi2_value, dtype=object)
         
     elif MODEL == 'ttH':
         tmp_jet_list = []
@@ -912,7 +918,9 @@ def chi_square_minimizer( jet_pt_chi2, jet_eta_chi2, jet_phi_chi2, jet_btag_chi2
                         _jet_index_candidate.append(jet[j][2])
                         _jet_index_candidate.append(jet[j][3])
                         jet_index_candidate.append(_jet_index_candidate)
-
+                        
+        _cand_record  = []
+        _chi2_value = []
         for i in range(len(jet_index_candidate)):
             b_1_idx = jet_index_candidate[i][0]
             b_2_idx = jet_index_candidate[i][1]
@@ -944,6 +952,9 @@ def chi_square_minimizer( jet_pt_chi2, jet_eta_chi2, jet_phi_chi2, jet_btag_chi2
             chi2_part_4 = (higgs_inv - m_h)**2
             
             chi2_tmp = chi2_part_1/(2*(sigma_t**2)) + chi2_part_2/sigma_W**2 + chi2_part_3/sigma_W**2 + (chi2_part_4)/sigma_h**2
+            
+            _chi2_value.append(chi2_tmp)
+            _cand_record.append([[b_1_idx, j_1_idx, j_2_idx, b_2_idx, j_3_idx, j_4_idx, b_3_idx, b_4_idx]])
             if (min_chi2 < 0 or chi2_tmp < min_chi2 ):
                 min_chi2 = chi2_tmp
                 jet_1_best_idx = j_1_idx
@@ -958,7 +969,10 @@ def chi_square_minimizer( jet_pt_chi2, jet_eta_chi2, jet_phi_chi2, jet_btag_chi2
             else: 
                 pass
         _jet_parton_index = [9999999*i/i for i in range(1, len(jet_pt_chi2)+1)]
-
+        
+        chi2_value = _chi2_value[-10:]
+        cand_record = _cand_record[-10:]
+        del _chi2_value, _cand_record
         for k in range(len(jet_pt_chi2)):
             for l in range(len(_parton_jet_index)):
                 if _parton_jet_index[l] == int(k):
@@ -972,7 +986,7 @@ def chi_square_minimizer( jet_pt_chi2, jet_eta_chi2, jet_phi_chi2, jet_btag_chi2
                 else : 
                     pass
         
-        return min_chi2, np.asanyarray(_parton_jet_index, dtype=object), np.asanyarray(_jet_parton_index, dtype=object)
+        return min_chi2, np.asanyarray(_parton_jet_index, dtype=object), np.asanyarray(_jet_parton_index, dtype=object), np.asanyarray(cand_record, dtype=object), np.asanyarray(chi2_value, dtype=object)
     elif MODEL == "four_top":
         tmp_jet_list = []
         tmp_bjet_list = []
@@ -1132,7 +1146,9 @@ def chi_square_minimizer( jet_pt_chi2, jet_eta_chi2, jet_phi_chi2, jet_btag_chi2
                         _jet_index_candidate.append(jet[j][6])
                         _jet_index_candidate.append(jet[j][7])
                         jet_index_candidate.append(_jet_index_candidate)
-        
+                        
+        _cand_record  = []
+        _chi2_value = []
         for i in range(len(jet_index_candidate)):
             b_1_idx = jet_index_candidate[i][0]
             b_2_idx = jet_index_candidate[i][1]
@@ -1182,6 +1198,9 @@ def chi_square_minimizer( jet_pt_chi2, jet_eta_chi2, jet_phi_chi2, jet_btag_chi2
             chi2_part_8 = (W_4_inv - m_W)**2
             
             chi2_tmp =  chi2_part_1/sigma_t**2 + chi2_part_2/sigma_t**2  + chi2_part_3/sigma_W**2 + chi2_part_4/sigma_W**2 +  chi2_part_5/sigma_t**2 + chi2_part_6/sigma_t**2  + chi2_part_7/sigma_W**2 + chi2_part_8/sigma_W**2
+            
+            _chi2_value.append(chi2_tmp)
+            _cand_record.append([[b_1_idx, j_1_idx, j_2_idx, b_2_idx, j_3_idx, j_4_idx, b_3_idx, j_5_idx, j_6_idx, b_4_idx, j_7_idx, j_8_idx]])
             if (min_chi2 < 0 or chi2_tmp < min_chi2 ):
                 min_chi2 = chi2_tmp
                 jet_1_best_idx = j_1_idx
@@ -1201,7 +1220,10 @@ def chi_square_minimizer( jet_pt_chi2, jet_eta_chi2, jet_phi_chi2, jet_btag_chi2
             else: 
                 pass
         _jet_parton_index = [9999999*i/i for i in range(1, len(jet_pt_chi2)+1)]
-
+        
+        chi2_value = _chi2_value[-10:]
+        cand_record = _cand_record[-10:]
+        del _chi2_value, _cand_record
         for k in range(len(jet_pt_chi2)):
             for l in range(len(_parton_jet_index)):
                 if _parton_jet_index[l] == int(k):
@@ -1215,7 +1237,7 @@ def chi_square_minimizer( jet_pt_chi2, jet_eta_chi2, jet_phi_chi2, jet_btag_chi2
                 else : 
                     pass
         
-        return min_chi2, np.asanyarray(_parton_jet_index, dtype=object), np.asanyarray(_jet_parton_index, dtype=object)
+        return min_chi2, np.asanyarray(_parton_jet_index, dtype=object), np.asanyarray(_jet_parton_index, dtype=object), np.asanyarray(cand_record, dtype=object), np.asanyarray(chi2_value, dtype=object)
 
 def purity_classifier(src, target, mode, model):
     if model == 'ttbar':
@@ -1313,18 +1335,28 @@ def purity_classifier(src, target, mode, model):
         elif mode == "left":
             left_src = set(src[:3])
             left_target = set(target[:3])
-            if left_src == left_target: 
-                return 1 
-            else: 
-                return 0
+            right_target = set(target[3:])
 
+            if left_src == left_target: 
+                _correct_left = 1
+            elif left_src == right_target: 
+                _correct_left = 1
+            else: 
+                _correct_left = 0
+                
+            return _correct_left
         elif mode == "right":
             right_src = set(src[3:])
             right_target = set(target[3:])
+            left_target = set(target[:3])
+
             if right_src == right_target: 
-                return 1 
+                _correct_right = 1
+            elif  right_src == left_target: 
+                _correct_right = 1
             else: 
-                return 0
+                _correct_right = 0
+            return  _correct_right
         else: 
             print("Error occur in function")
     else: 

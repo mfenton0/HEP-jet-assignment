@@ -788,9 +788,11 @@ def chi2(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS, EXTRA):
     print("Starting chi-square matching.")
     print("+------------------------------------------------------------------------------------------------------+")
     start = time.time()
-    chi2_value = []
+    min_chi2_value = []
     jet_parton_index = []
     parton_jet_index = []
+    chi2_value_list = []
+    cand_list = []
     _src_chi2 = []
     for i in range(len(jet_pt)):
         _src_chi2.append([jet_pt[i], jet_eta[i], jet_phi[i], jet_btag[i], jet_mass[i], MODEL, EXTRA])
@@ -806,9 +808,11 @@ def chi2(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS, EXTRA):
             print("Ebvent number: {0}, chi2 vslue: {1}, _tmp_parton_jet_index: {2}, _ttmp_jet_parton_index: {3}".format(i, _result_chi2[i][0], _result_chi2[i][1], _result_chi2[i][2]))
             print("+++++++++++++++++++++++++++++++++++++")
         if _result_chi2[i][0] != -1 :
-            chi2_value.append(_result_chi2[i][0])
+            min_chi2_value.append(_result_chi2[i][0])
             jet_parton_index.append(_result_chi2[i][2])
             parton_jet_index.append(_result_chi2[i][1])
+            cand_list.append(_result_chi2[i][3])
+            chi2_value_list.append(_result_chi2[i][4])
         
     print("+------------------------------------------------------------------------------------------------------+")
     print("Chi-square matching finished. Cost: {0:.1f} s".format(time.time() - start))
@@ -949,7 +953,10 @@ def chi2(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS, EXTRA):
                             parton_eta=parton_eta,
                             parton_phi=parton_phi,
                             parton_mass=parton_mass,
-                            N_match_top_in_event=N_match_top_in_event)
+                            N_match_top_in_event=N_match_top_in_event,
+                            min_chi2_value=min_chi2_value, 
+                            cand_list=cand_list,
+                            chi2_value_list=chi2_value_list)
     elif MODEL == 'ttH':
         np.savez_compressed(OUTPUT_FILE, 
                             jet_parton_index=jet_parton_index,
@@ -967,7 +974,10 @@ def chi2(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS, EXTRA):
                             parton_phi=parton_phi,
                             parton_mass=parton_mass,
                             N_match_top_in_event=N_match_top_in_event,
-                            N_match_higgs_in_event=N_match_higgs_in_event)
+                            N_match_higgs_in_event=N_match_higgs_in_event,
+                            min_chi2_value=min_chi2_value, 
+                            cand_list=cand_list,
+                            chi2_value_list=chi2_value_list)
     elif MODEL == 'ttbar_lep_left' or MODEL == 'ttbar_lep_right':
         np.savez_compressed(OUTPUT_FILE, 
                             jet_parton_index=jet_parton_index,
@@ -1003,7 +1013,10 @@ def chi2(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS, EXTRA):
                             simulation_lepton_phi=simulation_lepton_phi,
                             simulation_lepton_pdgid=simulation_lepton_pdgid,
                             simulation_lepton_mass=simulation_lepton_mass,
-                            simulation_lepton_barcode=simulation_lepton_barcode)
+                            simulation_lepton_barcode=simulation_lepton_barcode,
+                            min_chi2_value=min_chi2_value, 
+                            cand_list=cand_list,
+                            chi2_value_list=chi2_value_list)
 
     print("+------------------------------------------------------------------------------------------------------+")
     print("Event record has been send to {0}.npz.".format(OUTPUT_FILE))
