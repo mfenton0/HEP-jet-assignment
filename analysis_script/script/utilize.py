@@ -739,8 +739,7 @@ def chi_square_minimizer( jet_pt_chi2, jet_eta_chi2, jet_phi_chi2, jet_btag_chi2
                 chi2_tmp = chi2_part_1/sigma_t**2 + chi2_part_2/sigma_t**2  + chi2_part_3/sigma_W**2 + chi2_part_4/sigma_W**2
             else: print("Please input a available extra option")
                 
-            _cand_record.append([[b_1_idx, j_1_idx, j_2_idx, b_2_idx, j_3_idx, j_4_idx]])
-            _chi2_value.append(chi2_tmp)
+            
             if (min_chi2 < 0 or chi2_tmp < min_chi2 ):
                 min_chi2 = chi2_tmp
                 jet_1_best_idx = j_1_idx
@@ -749,6 +748,8 @@ def chi_square_minimizer( jet_pt_chi2, jet_eta_chi2, jet_phi_chi2, jet_btag_chi2
                 jet_4_best_idx = j_4_idx
                 b_1_best_idx = b_1_idx
                 b_2_best_idx = b_2_idx
+                _cand_record.append([[b_1_best_idx, jet_1_best_idx, jet_2_best_idx, b_2_best_idx, jet_3_best_idx, jet_4_best_idx]])
+                _chi2_value.append(min_chi2)
                 _parton_jet_index = np.array([b_1_best_idx, jet_1_best_idx, jet_2_best_idx, b_2_best_idx, jet_3_best_idx, jet_4_best_idx])
             else: 
                 pass
@@ -965,6 +966,8 @@ def chi_square_minimizer( jet_pt_chi2, jet_eta_chi2, jet_phi_chi2, jet_btag_chi2
                 b_2_best_idx = b_2_idx
                 b_3_best_idx = b_3_idx
                 b_4_best_idx = b_4_idx
+                _cand_record.append([[b_1_best_idx, jet_1_best_idx, jet_2_best_idx, b_2_best_idx, jet_3_best_idx, jet_4_best_idx, b_3_best_idx, b_4_best_idx]])
+                _chi2_value.append(min_chi2)
                 _parton_jet_index = np.array([b_1_best_idx, jet_1_best_idx, jet_2_best_idx, b_2_best_idx, jet_3_best_idx, jet_4_best_idx, b_3_best_idx, b_4_best_idx])
             else: 
                 pass
@@ -1216,6 +1219,8 @@ def chi_square_minimizer( jet_pt_chi2, jet_eta_chi2, jet_phi_chi2, jet_btag_chi2
                 b_2_best_idx = b_2_idx
                 b_3_best_idx = b_3_idx
                 b_4_best_idx = b_4_idx
+                _cand_record.append([[b_1_best_idx, jet_1_best_idx, jet_2_best_idx, b_2_best_idx, jet_3_best_idx, jet_4_best_idx, b_3_best_idx, jet_5_best_idx, jet_6_best_idx, b_4_best_idx,  jet_7_best_idx, jet_8_best_idx]])
+                _chi2_value.append(min_chi2)
                 _parton_jet_index = np.array([b_1_best_idx, jet_1_best_idx, jet_2_best_idx, b_2_best_idx, jet_3_best_idx, jet_4_best_idx, b_3_best_idx, jet_5_best_idx, jet_6_best_idx, b_4_best_idx,  jet_7_best_idx, jet_8_best_idx])
             else: 
                 pass
