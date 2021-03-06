@@ -1244,90 +1244,90 @@ def chi_square_minimizer( jet_pt_chi2, jet_eta_chi2, jet_phi_chi2, jet_btag_chi2
         
         return min_chi2, np.asanyarray(_parton_jet_index, dtype=object), np.asanyarray(_jet_parton_index, dtype=object), np.asanyarray(cand_record, dtype=object), np.asanyarray(chi2_value, dtype=object)
 
-def purity_classifier(src, target, mode, model):
+def purity_classifier(prediction, truth_match, mode, model):
     if model == 'ttbar':
         if mode == "pair":
-            left_target = target[:3]
-            right_target = target[3:]
+            left_truth_match = truth_match[:3]
+            right_truth_match = truth_match[3:]
 
-            left_src = src[:3]    
-            right_src = src[3:]    
+            left_prediction = prediction[:3]    
+            right_prediction = prediction[3:]    
 
-            b_1_target = left_target[0]
-            b_2_target = right_target[0]
-            j_12_target = set(left_target[1:])
-            j_34_target = set(right_target[1:])
-            target_b_pair = [b_1_target, b_2_target]
+            b_1_truth_match = left_truth_match[0]
+            b_2_truth_match = right_truth_match[0]
+            j_12_truth_match = set(left_truth_match[1:])
+            j_34_truth_match = set(right_truth_match[1:])
+            truth_match_b_pair = [b_1_truth_match, b_2_truth_match]
 
-            b_1_src = left_src[0]
-            b_2_src = right_src[0]
-            j_12_src = set(left_src[1:])
-            j_34_src = set(right_src[1:])
-            src_b_pair = [b_1_src, b_2_src]
-
-            if src_b_pair[0] == target_b_pair[0] and src_b_pair[1] == target_b_pair[1]:
+            b_1_prediction = left_prediction[0]
+            b_2_prediction = right_prediction[0]
+            j_12_prediction = set(left_prediction[1:])
+            j_34_prediction = set(right_prediction[1:])
+            prediction_b_pair = [b_1_prediction, b_2_prediction]
+            
+            if truth_match_b_pair[0] == prediction_b_pair[0] and truth_match_b_pair[1] == prediction_b_pair[1]:
                 _case = 1
-            elif src_b_pair[0] == target_b_pair[1] and src_b_pair[1] == target_b_pair[0]:
+            elif truth_match_b_pair[0] == prediction_b_pair[1] and truth_match_b_pair[1] == prediction_b_pair[0]:
                 _case = 2
-            elif src_b_pair[0] == target_b_pair[0] and src_b_pair[1] != target_b_pair[1]:
+            elif truth_match_b_pair[0] == prediction_b_pair[0] and truth_match_b_pair[1] != prediction_b_pair[1]:
                 _case = 3
-            elif src_b_pair[0] != target_b_pair[0] and src_b_pair[1] == target_b_pair[1]:
+            elif truth_match_b_pair[0] != prediction_b_pair[0] and truth_match_b_pair[1] == prediction_b_pair[1]:
                 _case = 4
-            elif src_b_pair[0] == target_b_pair[1] and src_b_pair[1] != target_b_pair[0]:
+            elif truth_match_b_pair[0] == prediction_b_pair[1] and truth_match_b_pair[1] != prediction_b_pair[0]:
                 _case = 5
-            elif src_b_pair[0] != target_b_pair[1] and src_b_pair[1] == target_b_pair[0]:
+            elif truth_match_b_pair[0] != prediction_b_pair[1] and truth_match_b_pair[1] == prediction_b_pair[0]:
                 _case = 6
             else: 
                 _case = 7
-
+            
             if _case == 1:
-                if j_12_src == j_12_target and j_34_src == j_34_target:
+                if j_12_truth_match == j_12_prediction and j_34_truth_match == j_34_prediction:
                     _correct_left = _correct_right = 1
-                elif j_12_src != j_12_target and j_34_src == j_34_target:
+                elif j_12_truth_match != j_12_prediction and j_34_truth_match == j_34_prediction:
                     _correct_left = 0 
                     _correct_right = 1
-                elif j_12_src == j_12_target and j_34_src != j_34_target:
+                elif j_12_truth_match == j_12_prediction and j_34_truth_match != j_34_prediction:
                     _correct_left = 1
                     _correct_right = 0
-                elif j_12_src != j_12_target and j_34_src != j_34_target:
+                elif j_12_truth_match != j_12_prediction and j_34_truth_match != j_34_prediction:
                     _correct_left = _correct_right = 0
                 else:
                     print("Error occur in function.")
 
             elif _case == 2:
-                if j_12_src == j_34_target and j_34_src == j_12_target:
+                if j_12_truth_match == j_34_prediction and j_34_truth_match == j_12_prediction:
                     _correct_left = _correct_right = 1
-                elif j_12_src != j_34_target and j_34_src == j_12_target:
+                elif j_12_truth_match != j_34_prediction and j_34_truth_match == j_12_prediction:
                     _correct_left = 0 
                     _correct_right = 1
-                elif j_12_src == j_34_target and j_34_src != j_12_target:
+                elif j_12_truth_match == j_34_prediction and j_34_truth_match != j_12_prediction:
                     _correct_left = 1
                     _correct_right = 0
-                elif j_12_src != j_34_target and j_34_src != j_12_target:
+                elif j_12_truth_match != j_34_prediction and j_34_truth_match != j_12_prediction:
                     _correct_left = _correct_right = 0
                 else:
                     print("Error occur in function.")
             elif _case == 3:
                 _correct_right = 0
-                if j_12_src == j_12_target:
+                if j_12_truth_match == j_12_prediction:
                     _correct_left = 1
                 else:
                     _correct_left = 0
             elif _case == 4:
                 _correct_left = 0
-                if j_34_src == j_34_target:
+                if j_34_truth_match == j_34_prediction:
                     _correct_right = 1
                 else:
                     _correct_right = 0
             elif _case == 5:
                 _correct_right = 0
-                if j_12_src == j_34_target:
+                if j_12_truth_match == j_34_prediction:
                     _correct_left = 1
                 else:
                     _correct_left = 0
             elif _case == 6:
                 _correct_left = 0
-                if j_34_src == j_12_target:
+                if j_34_truth_match == j_12_prediction:
                     _correct_right = 1
                 else:
                     _correct_right = 0
@@ -1337,27 +1337,28 @@ def purity_classifier(src, target, mode, model):
                 pass
 
             return _correct_left, _correct_right
+        
         elif mode == "left":
-            left_src = set(src[:3])
-            left_target = set(target[:3])
-            right_target = set(target[3:])
+            left_truth_match = set(truth_match[:3])
+            left_prediction = set(prediction[:3])
+            right_prediction = set(prediction[3:])
 
-            if left_src == left_target: 
+            if left_truth_match == left_prediction: 
                 _correct_left = 1
-            elif left_src == right_target: 
+            elif left_truth_match == right_prediction: 
                 _correct_left = 1
             else: 
                 _correct_left = 0
                 
             return _correct_left
         elif mode == "right":
-            right_src = set(src[3:])
-            right_target = set(target[3:])
-            left_target = set(target[:3])
-
-            if right_src == right_target: 
+            right_truth_match = set(truth_match[3:])
+            right_prediction = set(prediction[3:])
+            left_prediction = set(prediction[:3])
+            
+            if right_truth_match == right_prediction: 
                 _correct_right = 1
-            elif  right_src == left_target: 
+            elif  right_truth_match == left_prediction: 
                 _correct_right = 1
             else: 
                 _correct_right = 0
