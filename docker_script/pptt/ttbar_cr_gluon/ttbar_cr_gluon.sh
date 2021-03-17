@@ -14,8 +14,8 @@ awk -v seedval=$SEED -F"=" 'BEGIN{OFS=FS} $1=="set iseed "{$2=" "seedval}1' CR_g
 awk -v seedval=$SEED -F"=" 'BEGIN{OFS=FS} $1=="set iseed "{$2=" "seedval}1' CR_gluon_move_first_round.txt > CR_gluon_move_first_round2.txt && mv -f CR_gluon_move_first_round2.txt CR_gluon_move_first_round.txt
 
 # Create output directory and log our config
-mkdir -p /home/david/mass_generation;
-/bin/cp pptt.txt /home/david/mass_generation/
+mkdir -p /home/david/mass_generation_cr_gluon;
+/bin/cp pptt.txt /home/david/mass_generation_cr_gluon/
 
 # Start the simulation
 ./run.sh
