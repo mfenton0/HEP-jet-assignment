@@ -16,13 +16,13 @@ for i in {1..9};do
        	then
 		echo $i
         ./bin/mg5_aMC CR_gluon_move_first_round.txt >> $LOG_FILE_PATH/log.txt
-		python3 $ANALYSIS_SCRIPT_PATH/main.py -p 1 -u parse -m ttbar -i $ROOT_FILE_PATH/run_0$i/tag_1_delphes_events.root -o /home/david/mass_generation/event_record_top_FHD_$i.npz -s 1 >> $LOG_FILE_PATH/log.txt
+		python3 $ANALYSIS_SCRIPT_PATH/main.py -p 1 -u parse -m ttbar -i $ROOT_FILE_PATH/run_0$i/tag_1_delphes_events.root -o /home/david/mass_generation/event_record_top_FHD_cr_gluon_$i.npz -s 1 >> $LOG_FILE_PATH/log.txt
 		rm $ROOT_FILE_PATH/run_0$i/*
 	else
  		echo $i
 		awk -F"=" 'BEGIN{OFS=FS} $1=="set iseed "{$2=" "$2+1}1' pptt.txt > pptt2.txt && mv -f pptt2.txt pptt.txt
 		./bin/mg5_aMC CR_gluon_move.txt >> $LOG_FILE_PATH/log.txt
-		python3 $ANALYSIS_SCRIPT_PATH/main.py -p 1 -u parse -m ttbar -i $ROOT_FILE_PATH/run_0$i/tag_1_delphes_events.root -o /home/david/mass_generation/event_record_top_FHD_$i.npz -s 1 >> $LOG_FILE_PATH/log.txt
+		python3 $ANALYSIS_SCRIPT_PATH/main.py -p 1 -u parse -m ttbar -i $ROOT_FILE_PATH/run_0$i/tag_1_delphes_events.root -o /home/david/mass_generation/event_record_top_FHD_cr_gluon_$i.npz -s 1 >> $LOG_FILE_PATH/log.txt
 		rm $ROOT_FILE_PATH/run_0$i/*
 	fi 		
 done
@@ -30,6 +30,6 @@ for i in {10..100};do
 	echo $i
 	awk -F"=" 'BEGIN{OFS=FS} $1=="set iseed "{$2=" "$2+1}1' pptt.txt > pptt2.txt && mv -f pptt2.txt pptt.txt
     ./bin/mg5_aMC CR_gluon_move.txt >> $LOG_FILE_PATH/log.txt
-	python3 $ANALYSIS_SCRIPT_PATH/main.py -p 1 -u parse -m ttbar -i $ROOT_FILE_PATH/run_$i/tag_1_delphes_events.root -o /home/david/mass_generation/event_record_top_FHD_$i.npz -s 1 >> $LOG_FILE_PATH/log.txt
+	python3 $ANALYSIS_SCRIPT_PATH/main.py -p 1 -u parse -m ttbar -i $ROOT_FILE_PATH/run_$i/tag_1_delphes_events.root -o /home/david/mass_generation/event_record_top_FHD_cr_gluon_$i.npz -s 1 >> $LOG_FILE_PATH/log.txt
 	rm $ROOT_FILE_PATH/run_$i/*
 done
