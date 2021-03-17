@@ -1,0 +1,11 @@
+set nb_core 1
+launch /home/david/pptt_cr_qcd
+shower=Pythia8
+detector=Delphes
+analysis=OFF
+done
+/MG5_aMC_v2_7_3/pythia8_card_qcd_inspire.dat
+Delphes/cards/delphes_card_ATLAS.tcl
+set iseed = 2
+set nevents = 10000
+done
