@@ -22,5 +22,5 @@ do
 		-v $HOME/docker_$j:/home/david \
 		-v $HOME/workplace:/home/workplace \
 		alan200276/centos:SVJsimulation \
-		/bin/bash -c /home/workplace/HEP-jet-assignment/docker_script/ttbar.sh
+		/bin/bash -c /home/workplace/HEP-jet-assignment/docker_script/pptt/ttbar_FHD/ttbar.sh
 done
