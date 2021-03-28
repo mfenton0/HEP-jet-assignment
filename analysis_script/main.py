@@ -23,16 +23,17 @@ def main():
     parser.add_argument("-p", "--num_process", dest="process", default=1, type=int, help="Number of extra process for accelerating speed.")
     parser.add_argument("-e", "--exrta_option", dest="extra", default="normal", help="Extra option for used.")
     parser.add_argument("-t", "--target_file", dest="target", help="target file for computing purity")
-    
+    parser.add_argument("-g", "--shower-generator", dest="generator", default="py8", help="type of generator.")
+
     args = parser.parse_args()
     
 
     if args.usage == "cutflow":
         cutflow(args.input, args.output, args.model, args.config, args.single)
     elif args.usage == "parse":
-        parse(args.input, args.output, args.model, args.single, args.process)
+        parse(args.input, args.output, args.model, args.single, args.process, args.generator)
     elif args.usage == "chi2":
-        chi2(args.input, args.output, args.model, args.single, args.process, args.extra)
+        chi2(args.input, args.output, args.model, args.single, args.process, args.extra, args.generator)
     elif args.usage == "chi2_from_npz":
         chi2_from_npz(args.input, args.output, args.model, args.single, args.process, args.extra)
     elif args.usage == "purity":
@@ -40,7 +41,7 @@ def main():
     elif args.usage == "fitting":
         fitting(args.input, args.output, args.model, args.single)
     elif args.usage == 'background':
-        background(args.input, args.output, args.model, args.single, args.process, args.extra)
+        background(args.input, args.output, args.model, args.single, args.process, args.extra, args.generator)
     else: 
         print("Please select a correct usage.\n1. cutflow\n2. parse")
 

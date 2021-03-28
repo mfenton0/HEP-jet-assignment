@@ -120,7 +120,14 @@ class property_for_Missing_ET():
         MissingET_df = pd.DataFrame(MissingET_dict)
         return MissingET_df
 
-def chi2(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS, EXTRA):
+def chi2(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS, EXTRA, GENERATOR):
+    
+    if GENERATOR == 'py8':
+        STATUS_CODE = 22
+    elif GENERATOR == 'herwig7':
+        STATUS_CODE = 11
+    else: 
+        print("Please select a correct shower generator. 1. py8, 2. herwig7.")
     
     PID = pdgid()
 
@@ -457,8 +464,8 @@ def chi2(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS, EXTRA):
         for i in range(len(particle.event)):
             if marker_event[i] == 1:
                 _index.append(i)
-                _src_top.append([particle.dataframelize(i), PID.top, 22, MODEL])
-                _src_anti_top.append([particle.dataframelize(i), PID.anti_top, 22, MODEL])
+                _src_top.append([particle.dataframelize(i), PID.top, STATUS_CODE, MODEL])
+                _src_anti_top.append([particle.dataframelize(i), PID.anti_top, STATUS_CODE, MODEL])
         print("Using {0} process for accelerating speed.".format(PROCESS))
         with mp.Pool(PROCESS) as p:
             _result_top = p.starmap(particle_tracing, _src_top)
@@ -516,9 +523,9 @@ def chi2(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS, EXTRA):
         for i in range(len(particle.event)):
             if marker_event[i] == 1:
                 _index.append(i)
-                _src_top.append([particle.dataframelize(i), PID.top, 22, MODEL])
-                _src_anti_top.append([particle.dataframelize(i), PID.anti_top, 22, MODEL])
-                _src_higgs.append([particle.dataframelize(i), PID.higgs, 22, MODEL])
+                _src_top.append([particle.dataframelize(i), PID.top, STATUS_CODE, MODEL])
+                _src_anti_top.append([particle.dataframelize(i), PID.anti_top, STATUS_CODE, MODEL])
+                _src_higgs.append([particle.dataframelize(i), PID.higgs, STATUS_CODE, MODEL])
         print("Using {0} process for accelerating speed.".format(PROCESS))
         with mp.Pool(PROCESS) as p:
             _result_top = p.starmap(particle_tracing, _src_top)
@@ -586,8 +593,8 @@ def chi2(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS, EXTRA):
         for i in range(len(particle.event)):
             if marker_event[i] == 1:
                 _index.append(i)
-                _src_top.append([particle.dataframelize(i), PID.top, 22, MODEL])
-                _src_anti_top.append([particle.dataframelize(i), PID.anti_top, 22, MODEL])
+                _src_top.append([particle.dataframelize(i), PID.top, STATUS_CODE, MODEL])
+                _src_anti_top.append([particle.dataframelize(i), PID.anti_top, STATUS_CODE, MODEL])
         print("Using {0} process for accelerating speed.".format(PROCESS))
         with mp.Pool(PROCESS) as p:
             _result_top = p.starmap(particle_tracing, _src_top)
