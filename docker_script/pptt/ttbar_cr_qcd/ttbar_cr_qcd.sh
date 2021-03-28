@@ -14,8 +14,8 @@ awk -v seedval=$SEED -F"=" 'BEGIN{OFS=FS} $1=="set iseed "{$2=" "seedval}1' CR_q
 awk -v seedval=$SEED -F"=" 'BEGIN{OFS=FS} $1=="set iseed "{$2=" "seedval}1' CR_qcd_inspire_first_round.txt > CR_qcd_inspire_first_round2.txt && mv -f CR_qcd_inspire_first_round2.txt CR_qcd_inspire_first_round.txt
 
 # Create output directory and log our config
-mkdir -p /home/david/mass_generation_cr_qcd;
-/bin/cp pptt.txt /home/david/mass_generation_cr_qcd/
+mkdir -p /home/david/mass_generation;
+/bin/cp pptt.txt /home/david/mass_generation/
 
 # Start the simulation
 ./run.sh
