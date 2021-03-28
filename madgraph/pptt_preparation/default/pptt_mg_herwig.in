@@ -1,0 +1,140 @@
+# -*- ThePEG-repository -*-
+
+##################################################
+## Collider type
+##################################################
+
+read snippets/PPCollider.in
+
+##################################################
+## Process selection
+##################################################
+
+# loading "LesHouches.so" library 
+library LesHouches.so
+
+# inserting the lhe file
+cd /Herwig/EventHandlers
+create ThePEG::LesHouchesFileReader myReader
+set myReader:FileName /MAP_VOLUME_FOR_CONTAINER/pptt/Events/run_04/unweighted_events.lhe
+create ThePEG::Cuts /Herwig/Cuts/NoCuts 
+set myReader:Cuts /Herwig/Cuts/NoCuts
+set myReader:CacheFileName /MAP_VOLUME_FOR_CONTAINER/pptt/cache_pptt_herwig.tmp
+set myReader:MaxScan 5
+
+create ThePEG::LesHouchesEventHandler myLesHouchesHandler
+#Angular-ordered shower
+set myLesHouchesHandler:CascadeHandler /Herwig/Shower/ShowerHandler  
+
+set myLesHouchesHandler:HadronizationHandler /Herwig/Hadronization/ClusterHadHandler
+set myLesHouchesHandler:DecayHandler /Herwig/Decays/DecayHandler
+
+insert myLesHouchesHandler:LesHouchesReaders 0 myReader
+set myLesHouchesHandler:PartonExtractor /Herwig/Partons/PPExtractor
+set myLesHouchesHandler:WeightOption VarNegWeight
+set myReader:WeightWarnings false
+
+##################################################
+# PDFs
+##################################################
+
+set myReader:InitPDFs 0
+set myReader:MomentumTreatment RescaleEnergy # momentum conservation
+
+cd /Herwig/Partons
+create ThePEG::LHAPDF myPDFset ThePEGLHAPDF.so
+set myPDFset:PDFName NNPDF23_lo_as_0130_qed
+#set myPDFset:PDFName MMHT2014lo68cl
+set myPDFset:RemnantHandler HadronRemnants
+set /Herwig/EventHandlers/myReader:PDFA myPDFset
+set /Herwig/EventHandlers/myReader:PDFB myPDFset
+
+##################################################
+# physics parameters
+##################################################
+
+cd /Herwig/Generators
+set EventGenerator:EventHandler:LuminosityFunction:Energy 13000.*GeV
+# set EventGenerator:EventHandler:CascadeHandler:MPIHandlerNULL
+set /Herwig/Shower/ShowerHandler:HardEmission 0
+# set /Herwig/Shower/PartnerFinder:QEDPartner IIandFF
+
+#set EventHandler:CascadeHandler /Herwig/Shower/ShowerHandler
+set /Herwig/Shower/ShowerHandler:RenormalizationScaleFactor 1
+set /Herwig/Shower/ShowerHandler:FactorizationScaleFactor 1
+#set /Herwig/Shower/ShowerHandler:HardScaleFactor x
+
+
+##################################################
+## Scale choice
+## See the documentation for more options
+##################################################
+
+cd /Herwig/MatrixElements/Matchbox
+set Factory:ScaleChoice Scales/SHatScale
+
+##################################################
+## Matching and shower selection
+##################################################
+
+read Matchbox/MCatLO-DefaultShower.in
+# read Matchbox/MCatNLO-DefaultShower.in
+
+##################################################
+## Handlers
+##################################################
+
+cd /Herwig/Generators
+set EventGenerator:EventHandler /Herwig/EventHandlers/myLesHouchesHandler
+# set EventGenerator:EventHandler:CascadeHandler NULL
+# set EventGenerator:EventHandler:HadronizationHandler NULL
+# set EventGenerator:EventHandler:DecayHandler NULL
+# set /Herwig/Analysis/Basics:CheckQuark 0
+set /Herwig/Shower/ShowerHandler:Interactions QCDandQED #options: QCD, QED and QCDandQED
+
+#Herwig 7.0 the angular-ordered shower includes spin correlations in the collinear limit, as well as azimuthal correlations for multiple soft gluon emissions
+#set /Herwig/Shower/ShowerHandler:SpinCorrelations No  
+
+
+# set /Herwig/Particles/W-:Stable Stable
+# set /Herwig/Particles/W+:Stable Stable
+# set /Herwig/Particles/Z0:Stable Stable
+set EventGenerator:EventHandler:StatLevel Full
+
+##################################################
+## Analyses
+##################################################
+
+#cd /Herwig/Analysis
+#insert Rivet:Analyses 0 ATLAS_2012_I1082936
+#insert /Herwig/Generators/EventGenerator:AnalysisHandlers 0 Rivet
+
+##################################################
+## Save the generator
+##################################################
+
+do /Herwig/MatrixElements/Matchbox/Factory:ProductionMode
+
+
+##################################################
+# Technical parameters for this run
+##################################################
+cd /Herwig/Generators
+insert EventGenerator:AnalysisHandlers 0 /Herwig/Analysis/HepMCFile
+
+#set EventGenerator:NumberOfEvents 1000
+#set EventGenerator:RandomNumberGenerator:Seed 1
+set EventGenerator:DebugLevel 0
+set EventGenerator:EventHandler:StatLevel Full
+set EventGenerator:PrintEvent 100
+set EventGenerator:MaxErrors 1000
+
+
+set /Herwig/Analysis/HepMCFile:PrintEvent 100
+set /Herwig/Analysis/HepMCFile:Format GenEvent
+set /Herwig/Analysis/HepMCFile:Units GeV_mm
+set /Herwig/Analysis/HepMCFile:Filename /MAP_VOLUME_FOR_CONTAINER/pptt/Events/run_04/pptt_angular_run_04.hepmc
+
+saverun pptt_mg_herwig EventGenerator
+#run pptt_angular EventGeneratori
+
