@@ -6,7 +6,7 @@ export MKL_NUM_THREADS=1
 export NUMEXPR_NUM_THREADS=1
 export OMP_NUM_THREADS=1
 
-mkdir -p /mass_generation
+mkdir -p /home/david/mass_generation
 
 ANALYSIS_SCRIPT_PATH='/workplace/HEP-jet-assignment/analysis_script'
 ROOT_FILE_PATH='/home/david/pptt/Events'
@@ -29,7 +29,7 @@ for i in {1..9};do
 		echo "Running Herwig showering."
 		Herwig run pptt_mg_herwig.run -N 10000 -s $SEED -d 1 >> $LOG_FILE_PATH/log.txt
 		echo "Translating hepmc file to root file."
-		/delphes/DelphesHepMC /MG5_aMC_v2_7_3/Delphes/cards/delphes_card_ATLAS.tcl $ROOT_FILE_PATH/run_0$i/herwig_run_0$i.root  $ROOT_FILE_PATH/run_0$i/pptt_angular_run_0$i.hepmc
+		/MG5_aMC_v2_7_3/Delphes/DelphesHepMC /MG5_aMC_v2_7_3/Delphes/cards/delphes_card_ATLAS.tcl $ROOT_FILE_PATH/run_0$i/herwig_run_0$i.root  $ROOT_FILE_PATH/run_0$i/pptt_angular_run_0$i.hepmc
 		echo "Parsing root file generate by pythia8 showering."
 		python3 $ANALYSIS_SCRIPT_PATH/main.py -p 1 -u parse -m ttbar -i $ROOT_FILE_PATH/run_0$i/tag_1_delphes_events.root -o /home/david/mass_generation/event_record_top_FHD_$i.npz -s 1 >> $LOG_FILE_PATH/log.txt
 		echo "Parsing root file generate by Herwig showering."
@@ -50,7 +50,7 @@ for i in {1..9};do
 		echo "Running Herwig showering."
 		Herwig run pptt_mg_herwig.run -N 10000 -s $(( $SEED + $i )) -d 1 >> $LOG_FILE_PATH/log.txt
 		echo "Translating hepmc file to root file."
-		/delphes/DelphesHepMC /MG5_aMC_v2_7_3/Delphes/cards/delphes_card_ATLAS.tcl $ROOT_FILE_PATH/run_0$i/herwig_run_0$i.root  $ROOT_FILE_PATH/run_0$i/pptt_angular_run_0$i.hepmc
+		/MG5_aMC_v2_7_3/Delphes/DelphesHepMC /MG5_aMC_v2_7_3/Delphes/cards/delphes_card_ATLAS.tcl $ROOT_FILE_PATH/run_0$i/herwig_run_0$i.root  $ROOT_FILE_PATH/run_0$i/pptt_angular_run_0$i.hepmc
 		echo "Parsing root file generate by pythia8 showering."
 		python3 $ANALYSIS_SCRIPT_PATH/main.py -p 1 -u parse -m ttbar -i $ROOT_FILE_PATH/run_0$i/tag_1_delphes_events.root -o /home/david/mass_generation/event_record_top_FHD_$i.npz -s 1 >> $LOG_FILE_PATH/log.txt
 		echo "Parsing root file generate by Herwig showering."
@@ -73,7 +73,7 @@ for i in {10..100};do
 	echo "Running Herwig showering."
         Herwig run pptt_mg_herwig.run -N 10000 -s $(( $SEED + $i )) -d 1 >> $LOG_FILE_PATH/log.txt
 	echo "Translating hepmc file to root file."
-	/delphes/DelphesHepMC /MG5_aMC_v2_7_3/Delphes/cards/delphes_card_ATLAS.tcl run_$i.root  $ROOT_FILE_PATH/run_$i/pptt_angular_run_$i.hepmc
+	/MG5_aMC_v2_7_3/Delphes/DelphesHepMC /MG5_aMC_v2_7_3/Delphes/cards/delphes_card_ATLAS.tcl run_$i.root  $ROOT_FILE_PATH/run_$i/pptt_angular_run_$i.hepmc
 	echo "Parsing root file generate by pythia8 showering."
 	python3 $ANALYSIS_SCRIPT_PATH/main.py -p 1 -u parse -m ttbar -i $ROOT_FILE_PATH/run_$i/tag_1_delphes_events.root -o /home/david/mass_generation/event_record_top_FHD_$i.npz -s 1 >> $LOG_FILE_PATH/log.txt
 	echo "Parsing root file generate by Herwig showering."
