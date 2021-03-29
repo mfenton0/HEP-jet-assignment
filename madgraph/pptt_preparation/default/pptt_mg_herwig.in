@@ -16,10 +16,10 @@ library LesHouches.so
 # inserting the lhe file
 cd /Herwig/EventHandlers
 create ThePEG::LesHouchesFileReader myReader
-set myReader:FileName /MAP_VOLUME_FOR_CONTAINER/pptt/Events/run_04/unweighted_events.lhe
+set myReader:FileName /home/david/pptt/Events/run_04/unweighted_events.lhe
 create ThePEG::Cuts /Herwig/Cuts/NoCuts 
 set myReader:Cuts /Herwig/Cuts/NoCuts
-set myReader:CacheFileName /MAP_VOLUME_FOR_CONTAINER/pptt/cache_pptt_herwig.tmp
+set myReader:CacheFileName /home/david/pptt/cache_pptt_herwig.tmp
 set myReader:MaxScan 5
 
 create ThePEG::LesHouchesEventHandler myLesHouchesHandler
@@ -126,14 +126,14 @@ insert EventGenerator:AnalysisHandlers 0 /Herwig/Analysis/HepMCFile
 #set EventGenerator:RandomNumberGenerator:Seed 1
 set EventGenerator:DebugLevel 0
 set EventGenerator:EventHandler:StatLevel Full
-set EventGenerator:PrintEvent 1000
+set EventGenerator:PrintEvent 10000
 set EventGenerator:MaxErrors 10000
 
 
 set /Herwig/Analysis/HepMCFile:PrintEvent 10000
 set /Herwig/Analysis/HepMCFile:Format GenEvent
 set /Herwig/Analysis/HepMCFile:Units GeV_mm
-set /Herwig/Analysis/HepMCFile:Filename /MAP_VOLUME_FOR_CONTAINER/pptt/Events/run_04/pptt_angular_run_04.hepmc
+set /Herwig/Analysis/HepMCFile:Filename /home/david/pptt/Events/run_04/pptt_angular_run_04.hepmc
 
 saverun pptt_mg_herwig EventGenerator
 #run pptt_angular EventGeneratori
