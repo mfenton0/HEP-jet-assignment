@@ -467,8 +467,8 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS, GENERATOR):
         for i in range(len(particle.event)):
             if marker_event[i] == 1:
                 _index.append(i)
-                _src_top.append([particle.dataframelize(i), PID.top, STATUS_CODE, MODEL])
-                _src_anti_top.append([particle.dataframelize(i), PID.anti_top, STATUS_CODE, MODEL])
+                _src_top.append([particle.dataframelize(i), PID.top, STATUS_CODE, MODEL, GENERATOR])
+                _src_anti_top.append([particle.dataframelize(i), PID.anti_top, STATUS_CODE, MODEL, GENERATOR])
         print("Using {0} process for accelerating speed.".format(PROCESS))
         with mp.Pool(PROCESS) as p:
             _result_top = p.starmap(particle_tracing, _src_top)
@@ -525,9 +525,9 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS, GENERATOR):
         for i in range(len(particle.event)):
             if marker_event[i] == 1:
                 _index.append(i)
-                _src_top.append([particle.dataframelize(i), PID.top, STATUS_CODE, MODEL])
-                _src_anti_top.append([particle.dataframelize(i), PID.anti_top, STATUS_CODE, MODEL])
-                _src_higgs.append([particle.dataframelize(i), PID.higgs, STATUS_CODE, MODEL])
+                _src_top.append([particle.dataframelize(i), PID.top, STATUS_CODE, MODEL, GENERATOR])
+                _src_anti_top.append([particle.dataframelize(i), PID.anti_top, STATUS_CODE, MODEL, GENERATOR])
+                _src_higgs.append([particle.dataframelize(i), PID.higgs, STATUS_CODE, MODEL, GENERATOR])
         print("Using {0} process for accelerating speed.".format(PROCESS))
         with mp.Pool(PROCESS) as p:
             _result_top = p.starmap(particle_tracing, _src_top)
@@ -596,8 +596,8 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS, GENERATOR):
         for i in range(len(particle.event)):
             if marker_event[i] == 1:
                 _index.append(i)
-                _src_top.append([particle.dataframelize(i), PID.top, STATUS_CODE, MODEL])
-                _src_anti_top.append([particle.dataframelize(i), PID.anti_top, STATUS_CODE, MODEL])
+                _src_top.append([particle.dataframelize(i), PID.top, STATUS_CODE, MODEL, GENERATOR])
+                _src_anti_top.append([particle.dataframelize(i), PID.anti_top, STATUS_CODE, MODEL, GENERATOR])
         print("Using {0} process for accelerating speed.".format(PROCESS))
         with mp.Pool(PROCESS) as p:
             _result_top = p.starmap(particle_tracing, _src_top)
