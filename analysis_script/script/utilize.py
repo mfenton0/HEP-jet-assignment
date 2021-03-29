@@ -223,26 +223,35 @@ def shifted_particle_tracing(dataset, PID_daughter, idx):
     if (dataset.iloc[idx,6] == PID_daughter):
         return dataset.iloc[idx,4]
 
-def particle_tracing(dataset, PID, STATUS, MODEL):
+def particle_tracing(dataset, PID, STATUS, MODEL, GENERATOR):
     if MODEL == 'ttbar' or MODEL == 'ttH' or MODEL == "ttbar_lep_right" or MODEL == "ttbar_lep_left":
         for i in range(len(dataset)):
             if(dataset.iloc[i,1] == STATUS and dataset.iloc[i,6] == PID ): 
                 daughter_index = int(dataset.iloc[i,0])
         if( dataset.iloc[daughter_index,6] == PID ):
             shifted_particle_index = dataset.iloc[daughter_index, 4]
+        if GENERATOR == 'py8':
+            while dataset.iloc[shifted_particle_index,6] == PID:
+                init_shifted_particle_index = shifted_particle_index
+                shifted_particle_index = shifted_particle_tracing(dataset, PID, init_shifted_particle_index)     
+            
+            dauthter_idx_1 = dataset.iloc[init_shifted_particle_index, 4]
+            daughter_pid_1 = dataset.iloc[dauthter_idx_1, 6]
 
+            dauthter_idx_2 = dataset.iloc[init_shifted_particle_index, 5]
+            daughter_pid_2 = dataset.iloc[dauthter_idx_2, 6]
+            
+            return init_shifted_particle_index, dauthter_idx_1, daughter_pid_1, dauthter_idx_2, daughter_pid_2
+        elif GENERATOR == 'herwig7':
+            init_shifted_particle_index = daughter_index
 
-        while dataset.iloc[shifted_particle_index,6] == PID:
-            init_shifted_particle_index = shifted_particle_index
-            shifted_particle_index = shifted_particle_tracing(dataset, PID, init_shifted_particle_index)       
+            dauthter_idx_1 = dataset.iloc[init_shifted_particle_index, 4]
+            daughter_pid_1 = dataset.iloc[dauthter_idx_1, 6]
 
-        dauthter_idx_1 = dataset.iloc[init_shifted_particle_index, 4]
-        daughter_pid_1 = dataset.iloc[dauthter_idx_1, 6]
+            dauthter_idx_2 = dataset.iloc[init_shifted_particle_index, 5]
+            daughter_pid_2 = dataset.iloc[dauthter_idx_2, 6]
 
-        dauthter_idx_2 = dataset.iloc[init_shifted_particle_index, 5]
-        daughter_pid_2 = dataset.iloc[dauthter_idx_2, 6]
-
-        return init_shifted_particle_index, dauthter_idx_1, daughter_pid_1, dauthter_idx_2, daughter_pid_2
+            return init_shifted_particle_index, dauthter_idx_1, daughter_pid_1, dauthter_idx_2, daughter_pid_2
     elif MODEL == 'four_top':
         daughter_index = []
         for i in range(len(dataset)):
