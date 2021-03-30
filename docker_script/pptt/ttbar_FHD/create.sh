@@ -19,8 +19,8 @@ do
 
 	docker run \
 		-d \
+		-v $HOME/workplace:/workplace \
 		-v $HOME/docker_$j:/home/david \
-		-v $HOME/workplace:/home/workplace \
 		alan200276/centos:SVJsimulation \
-		/bin/bash -c /home/workplace/HEP-jet-assignment/docker_script/pptt/ttbar_FHD/ttbar.sh
+		/bin/bash -c /workplace/HEP-jet-assignment/docker_script/pptt/ttbar_FHD/ttbar.sh
 done
