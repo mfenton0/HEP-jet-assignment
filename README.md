@@ -7,7 +7,7 @@ HEP jet assignment - Data preparation
 ![Pandas](https://img.shields.io/badge/pandas-1.0.5-blue)
 ![Uproot](https://img.shields.io/badge/uproot-3.11.7-blue)
 ![tqdm](https://img.shields.io/badge/tqdm-4.54.1-blue)
-[![Docker image](https://img.shields.io/badge/Docker%20Image-stable-orange)](https://hub.docker.com/layers/109102354/davidho9717/centos/SVJsimulation-cdr/images/sha256-01f8a8f229cc71a4d68697a4cbb4fd36b38e3c02af6469b5afc16c0a3aaff586?context=explore)
+[![Docker image](https://img.shields.io/badge/Docker%20Image-stable-orange)](https://hub.docker.com/layers/davidho9717/ubuntu/HEPSimulation/images/sha256-9bea959f0b8e0cc68ae752d00eeb69a5ee01c118a5d48ba2f3db17ee122aec67?context=repo)
 
 ## Abstract 
 This is a repository for the jet assignment project using state-of-the-art Machine Learning method.
