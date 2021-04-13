@@ -12,7 +12,7 @@ class Lepton():
         self.electron_pt = data.array("Electron.PT")
         self.electron_eta = data.array('Electron.Eta')
         self.electron_phi = data.array('Electron.Phi')
-        self.Muon_pt = data.array("Electron.PT")
+        self.Muon_pt = data.array("Muon.PT")
         self.Muon_eta = data.array('Muon.Eta')
         self.Muon_phi = data.array('Muon.Phi')
         
