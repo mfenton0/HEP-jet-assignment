@@ -1,5 +1,6 @@
 .idea/
 analysis_script/parse_uproot_v3.ipynb
+./JetEvaluator/*
 ./analysis_script/event_records_testing.h5
 analysis_script/evaluate_new_with_JES/      
 analysis_script/evaluate_new_wout_JES/      
