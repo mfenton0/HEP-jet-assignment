@@ -337,10 +337,9 @@ def deltaR_matching(NUM_OF_PARTON, NUM_OF_JET, PARTON_ETA, PARTON_PHI, JET_ETA, 
     """
     
     _dR_between_parton_jet = []
-
-    _parton_jet_index = [int(999999999*i/i) for i in range(1, NUM_OF_PARTON+1)]
-    _jet_parton_index = [int(999999999*i/i) for i in range(1, NUM_OF_JET+1)]
-
+    
+    _parton_jet_index = np.full(NUM_OF_PARTON, -1)
+    _jet_parton_index = np.full(NUM_OF_JET, -1)
     
     _jet_to_parton_list = np.zeros(len(PARTON_ETA))
     _parton_to_jet_list = np.zeros(len(JET_ETA))
@@ -537,17 +536,12 @@ def deltaR_matching(NUM_OF_PARTON, NUM_OF_JET, PARTON_ETA, PARTON_PHI, JET_ETA, 
                 _jet_parton_index[int(m)] = _parton_to_jet_list[k]
             else: pass
 
-    for l in range(NUM_OF_JET):
-        if _jet_parton_index[l] > NUM_OF_PARTON:
-            _jet_parton_index[l] = 'nan'
-    for l in range(NUM_OF_PARTON): 
-        if _parton_jet_index[l] > NUM_OF_JET:
-            _parton_jet_index[l] = 'Nan'
     
-    return np.asanyarray(_jet_parton_index, dtype=object), np.asanyarray(_parton_jet_index, dtype=object)
+    return _jet_parton_index, _parton_jet_index
 
 def barcode_recorder(SOURCE, MODEL):
-    _jet_barcode = [0*i for i in range(len(SOURCE))]
+    _jet_barcode = np.zeros(len(SOURCE))
+
     # print(_jet_barcode)
     if MODEL == "ttbar":
         barcode = np.array([34, 40, 40, 17, 20, 20])
@@ -556,7 +550,7 @@ def barcode_recorder(SOURCE, MODEL):
                 if SOURCE[i] == int(j):
                     _jet_barcode[i] = barcode[int(j)]
                 else :
-                    _jet_barcode[i] = 'Nan'
+                    _jet_barcode[i] = -1
     elif MODEL == "ttH":
         barcode = np.array([68, 80, 80, 34, 40, 40, 1, 1])
         for i in range(len(SOURCE)):
@@ -564,7 +558,7 @@ def barcode_recorder(SOURCE, MODEL):
                 if SOURCE[i] == int(j):
                     _jet_barcode[i] = barcode[int(j)]
                 else :
-                    _jet_barcode[i] = 'Nan'
+                    _jet_barcode[i] = -1
 
     elif MODEL == "four_top":
         barcode = np.array([2056, 2176, 2176, 516, 576, 576, 1028, 1056, 1056, 257, 272, 272])
@@ -573,7 +567,7 @@ def barcode_recorder(SOURCE, MODEL):
                 if SOURCE[i] == int(j):
                     _jet_barcode[i] = barcode[int(j)]
                 else :
-                    _jet_barcode[i] = 'Nan'
+                    _jet_barcode[i] = -1
     elif MODEL == 'ttbar_lep_left': 
         barcode = np.array([34, 17, 20, 20])
         for i in range(len(SOURCE)):
@@ -581,7 +575,7 @@ def barcode_recorder(SOURCE, MODEL):
                 if SOURCE[i] == int(j):
                     _jet_barcode[i] = barcode[int(j)]
                 else :
-                    _jet_barcode[i] = 'Nan'
+                    _jet_barcode[i] = -1
     elif MODEL == 'ttbar_lep_right': 
         barcode = np.array([34, 40, 40, 17])
         for i in range(len(SOURCE)):
@@ -589,11 +583,11 @@ def barcode_recorder(SOURCE, MODEL):
                 if SOURCE[i] == int(j):
                     _jet_barcode[i] = barcode[int(j)]
                 else :
-                    _jet_barcode[i] = 'Nan'
+                    _jet_barcode[i] = -1
     else:
         print("Please select a correct model.")
     
-    return np.asanyarray(_jet_barcode, dtype=object)
+    return _jet_barcode
 
 def chi_square_minimizer( jet_pt_chi2, jet_eta_chi2, jet_phi_chi2, jet_btag_chi2, jet_mass_chi2, MODEL, EXTRA):
     
