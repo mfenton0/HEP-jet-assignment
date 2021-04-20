@@ -1365,6 +1365,8 @@ def purity_classifier(prediction, truth_match, mode, model):
             return  _correct_right
         else: 
             print("Error occur in function")
+    elif MODEL == "ttH":
+        pass
     else: 
         print("Please select a available model. (Only ttbar model(fully hadronic decay) available currently.)")
 
