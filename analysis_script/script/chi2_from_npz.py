@@ -109,6 +109,8 @@ def chi2_from_npz(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS,EXTRA):
             parton_phi=file['parton_phi'][:]
             parton_mass=file['parton_mass'][:]
             N_match_top_in_event=file['N_match_top_in_event'][:]
+            if MODEL == 'ttH':
+                N_match_higgs_in_event = file['N_match_higgs_in_event'][:]
     elif int(SINGLE) != 1 and bool(SINGLE.isdigit) == True:
         files = os.listdir(INPUT_FILE)
         num_of_files = len(files)
@@ -133,6 +135,8 @@ def chi2_from_npz(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS,EXTRA):
                         parton_phi=file['parton_phi'][:]
                         parton_mass=file['parton_mass'][:]
                         N_match_top_in_event=file['N_match_top_in_event'][:]
+                        if MODEL == 'ttH':
+                            N_match_higgs_in_event = file['N_match_higgs_in_event'][:]
                     pbar.update(1) 
                 else:
                     print("Loading root file from {0}.".format(os.path.join(INPUT_FILE, files[i])))
@@ -152,6 +156,8 @@ def chi2_from_npz(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS,EXTRA):
                         parton_phi=np.concatenate((parton_phi,file['parton_phi'][:]))
                         parton_mass=np.concatenate((parton_mass,file['parton_mass'][:]))
                         N_match_top_in_event=np.concatenate((N_match_top_in_event,file['N_match_top_in_event'][:]))
+                        if MODEL == 'ttH':
+                            N_match_higgs_in_event=np.concatenate((N_match_higgs_in_event,file['N_match_higgs_in_event'][:]))
                     
                     pbar.update(1)
             except:
@@ -306,24 +312,31 @@ def chi2_from_npz(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS,EXTRA):
                             cand_list=cand_list,
                             chi2_value_list=chi2_value_list)
                            
-#     elif MODEL == 'ttH':
-#         np.savez_compressed(OUTPUT_FILE, 
-#                             jet_parton_index=jet_parton_index,
-#                             jet_barcode=jet_barcode,
-#                             jet_pt=jet_pt,
-#                             jet_eta=jet_eta,
-#                             jet_phi=jet_phi,
-#                             jet_mass=jet_mass,
-#                             jet_btag=jet_btag,
-#                             parton_jet_index=parton_jet_index,
-#                             parton_pdgid=parton_pdgid,
-#                             parton_barcode=parton_barcode,
-#                             parton_pt=parton_pt,
-#                             parton_eta=parton_eta,
-#                             parton_phi=parton_phi,
-#                             parton_mass=parton_mass,
-#                             N_match_top_in_event=N_match_top_in_event,
-#                             N_match_higgs_in_event=N_match_higgs_in_event)
+    elif MODEL == 'ttH':
+        np.savez_compressed(OUTPUT_FILE, 
+                            jet_parton_index=jet_parton_index,
+                            jet_parton_index_chi2=jet_parton_index_chi2,
+                            jet_barcode=jet_barcode,
+                            jet_pt=jet_pt,
+                            jet_eta=jet_eta,
+                            jet_phi=jet_phi,
+                            jet_mass=jet_mass,
+                            jet_btag=jet_btag,
+                            parton_jet_index=parton_jet_index,
+                            parton_jet_index_chi2=parton_jet_index_chi2,
+                            parton_pdgid=parton_pdgid,
+                            parton_barcode=parton_barcode,
+                            parton_pt=parton_pt,
+                            parton_eta=parton_eta,
+                            parton_phi=parton_phi,
+                            parton_mass=parton_mass,
+                            N_match_top_in_event=N_match_top_in_event,
+                            N_match_top_in_event_chi2=N_match_top_in_event_chi2,
+                            N_match_higgs_in_event=N_match_higgs_in_event,
+                            min_chi2_value=min_chi2_value, 
+                            cand_list=cand_list,
+                            chi2_value_list=chi2_value_list)
+
 #     elif MODEL == 'ttbar_lep_left' or MODEL == 'ttbar_lep_right':
 #         np.savez_compressed(OUTPUT_FILE, 
 #                             jet_parton_index=jet_parton_index,
