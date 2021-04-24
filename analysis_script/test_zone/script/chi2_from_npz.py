@@ -4,15 +4,16 @@ Institute: National Tsing Hua university, Department of Physics, Hsinchu, Taiwan
 Mail: davidho@gapp.nthu.edu.tw
 """
 #Import packages
-import uproot, time
+import uproot
 import pandas as pd 
 import numpy as np 
-from script.particle_properties_uproot import particle_properties  #import particle properties helper function from particle_properties.py
-from script.jet_properties_uproot import jet_properties  #import jet properties helper function from jet_properties.py
-import h5py, sys, traceback, os, tqdm
-from script.MissingET import Missing_ET
-from script.lepton import Lepton
-from script.utilize import delta_R, deltaPhi, pdgid, event_selection, quark_finder, particle_tracing, deltaR_matching, barcode_recorder, chi_square_minimizer, deltaPhi
+from script.particle import particle_properties  #import particle properties helper function from particle_properties.py
+from script.jet import jet_properties  #import jet properties helper function from jet_properties.py
+from script.MissingET import Missing_ET_properties
+from script.electron import electron_properties
+from script.muon import muon_properties
+import h5py, sys, traceback, os, tqdm, time
+from script.utilize import delta_R, deltaPhi, pdgid, event_selection, quark_finder, deltaPhi, particle_tracing, chi_square_minimizer
 import multiprocessing as mp
 
 def chi2_from_npz(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS,EXTRA):
@@ -91,7 +92,7 @@ def chi2_from_npz(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS,EXTRA):
         NUM_OF_DAUGHTER = 12
     else:
         print("Please select a correct model.")
-#     print(SINGLE, bool(SINGLE.isdigit) )
+        
     if int(SINGLE) == 1:
         with np.load(INPUT_FILE, allow_pickle=True) as file:
             jet_parton_index=file['jet_parton_index'][:]
@@ -101,6 +102,7 @@ def chi2_from_npz(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS,EXTRA):
             jet_phi=file['jet_phi'][:]
             jet_mass=file['jet_mass'][:]
             jet_btag=file['jet_btag'][:]
+            jet_num_of_jets=file['jet_num_of_jets'][:]
             parton_jet_index=file['parton_jet_index'][:]
             parton_pdgid=file['parton_pdgid'][:]
             parton_barcode=file['parton_barcode'][:]
@@ -125,6 +127,7 @@ def chi2_from_npz(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS,EXTRA):
                         jet_phi=file['jet_phi'][:]
                         jet_mass=file['jet_mass'][:]
                         jet_btag=file['jet_btag'][:]
+                        jet_num_of_jets=file['jet_num_of_jets'][:]
                         parton_jet_index=file['parton_jet_index'][:]
                         parton_pdgid=file['parton_pdgid'][:]
                         parton_barcode=file['parton_barcode'][:]
@@ -144,6 +147,7 @@ def chi2_from_npz(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS,EXTRA):
                         jet_phi=np.concatenate((jet_phi,file['jet_phi'][:]))
                         jet_mass=np.concatenate((jet_mass,file['jet_mass'][:]))
                         jet_btag=np.concatenate((jet_btag,file['jet_btag'][:]))
+                        jet_num_of_jets=np.concatenate((jet_num_of_jets,file['jet_num_of_jets'][:]))
                         parton_jet_index=np.concatenate((parton_jet_index,file['parton_jet_index'][:]))
                         parton_pdgid=np.concatenate((parton_pdgid,file['parton_pdgid'][:]))
                         parton_barcode=np.concatenate((parton_barcode,file['parton_barcode'][:]))
@@ -163,46 +167,35 @@ def chi2_from_npz(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS,EXTRA):
     print("Starting chi-square matching.")
     print("+------------------------------------------------------------------------------------------------------+")
     start = time.time()
-    min_chi2_value = []
-    jet_parton_index_chi2 = []
-    parton_jet_index_chi2 = []
-    chi2_value_list = []
-    cand_list = []
-    _src_chi2 = []
-    for i in range(len(jet_pt)):
-        _src_chi2.append([jet_pt[i], jet_eta[i], jet_phi[i], jet_btag[i], jet_mass[i], MODEL, EXTRA])
+
+    _src_chi2 = [list([jet_pt[i], jet_eta[i], jet_phi[i], jet_btag[i], jet_mass[i], MODEL, EXTRA, jet_num_of_jets[i]]) for i in range(len(jet_pt))]
+    
     print("Using {0} process for accelerating speed.".format(PROCESS))
     with mp.Pool(PROCESS) as p:
         _result_chi2 = p.starmap(chi_square_minimizer, _src_chi2)
         p.close()
         p.join()
-    for i in range(len(_result_chi2)):
-        if _result_chi2[i][0] == -1 :
-            print("+++++++++++++++++++++++++++++++++++++")
-            print('An error occur!')
-            print("Ebvent number: {0}, chi2 vslue: {1}, _tmp_parton_jet_index: {2}, _ttmp_jet_parton_index: {3}".format(i, _result_chi2[i][0], _result_chi2[i][1], _result_chi2[i][2]))
-            print("+++++++++++++++++++++++++++++++++++++")
-        if _result_chi2[i][0] != -1 :
-            min_chi2_value.append(_result_chi2[i][0])
-            jet_parton_index_chi2.append(_result_chi2[i][2])
-            parton_jet_index_chi2.append(_result_chi2[i][1])
-            cand_list.append(_result_chi2[i][3])
-            chi2_value_list.append(_result_chi2[i][4])
+    _result_chi2 = np.array(_result_chi2)
+
+    min_chi2_value = _result_chi2[:, 0]
+    parton_jet_index_chi2 = np.array([ x for x in _result_chi2[:, 1]])
+    jet_parton_index_chi2 = np.array([ x for x in _result_chi2[:, 2]])
+    smallest_10_chi2_candidate = np.array([ x for x in _result_chi2[:, 3]])
+    smallest_10_chi2_value = np.array([ x for x in _result_chi2[:, 4]])
+    if (min_chi2_value == -1).sum() != 0: print("There exist some events failed to compute chi-square reconstuction.")
         
     print("+------------------------------------------------------------------------------------------------------+")
     print("Chi-square matching finished. Cost: {0:.1f} s".format(time.time() - start))
     print("+------------------------------------------------------------------------------------------------------+")
-    jet_parton_index_chi2 = np.asanyarray(jet_parton_index_chi2, dtype=object)
-    parton_jet_index_chi2 = np.asanyarray(parton_jet_index_chi2, dtype=object)
     
     print("+------------------------------------------------------------------------------------------------------+")
     print("Recording barcode information.")
     print("+------------------------------------------------------------------------------------------------------+")
     
-    jet_barcode_chi2 = []
-    for i in tqdm.trange(len(jet_pt)):
-        _jet_barcode_chi2 = barcode_recorder(jet_parton_index_chi2[i], MODEL)
-        jet_barcode_chi2.append(_jet_barcode_chi2)
+    jet_barcode_chi2 = jet_parton_index_chi2.copy()
+
+    for i in range(len(barcode)):
+        jet_barcode_chi2 = np.where(jet_barcode_chi2 == i, barcode[i], jet_barcode_chi2) 
 
     print("+------------------------------------------------------------------------------------------------------+")
     print("Barcode information has beed record.")
@@ -303,8 +296,8 @@ def chi2_from_npz(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS,EXTRA):
                             N_match_top_in_event=N_match_top_in_event,
                             N_match_top_in_event_chi2=N_match_top_in_event_chi2,
                             min_chi2_value=min_chi2_value, 
-                            cand_list=cand_list,
-                            chi2_value_list=chi2_value_list)
+                            smallest_10_chi2_candidate=smallest_10_chi2_candidate,
+                            smallest_10_chi2_value=smallest_10_chi2_value)
                            
 #     elif MODEL == 'ttH':
 #         np.savez_compressed(OUTPUT_FILE, 
