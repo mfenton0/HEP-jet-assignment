@@ -1,6 +1,5 @@
 # from .fitting import fitting
-# from .parse import parse
-# from .chi2 import chi2
+from .chi2 import chi2
 # from .cutflow import cutflow
 # from .purity import purity
 # from .background import background
@@ -10,4 +9,4 @@ from .particle import particle_properties
 from .MissingET import Missing_ET_properties
 from .electron import electron_properties
 from .muon import muon_properties
-
+from .parse import parse 
