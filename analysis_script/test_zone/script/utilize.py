@@ -749,7 +749,7 @@ def chi_square_minimizer( jet_pt_chi2, jet_eta_chi2, jet_phi_chi2, jet_btag_chi2
         smallest_10_chi2_value = _chi2_value[smallest_10_idx]
         smallest_10_chi2_candidate = np.array([ x for x in _cand_record[smallest_10_idx]])
 
-        min_chi2 = ten_smallest_chi2[0]
+        min_chi2 = smallest_10_chi2_value[0]
 
         _jet_parton_index = np.full(len(jet_pt_chi2), -1)
         _parton_jet_index = np.array(_cand_record[smallest_10_idx[0]])
@@ -958,7 +958,7 @@ def chi_square_minimizer( jet_pt_chi2, jet_eta_chi2, jet_phi_chi2, jet_btag_chi2
         smallest_10_chi2_value = _chi2_value[smallest_10_idx]
         smallest_10_chi2_candidate = np.array([ x for x in _cand_record[smallest_10_idx]])
 
-        min_chi2 = ten_smallest_chi2[0]
+        min_chi2 = smallest_10_chi2_value[0]
 
         _jet_parton_index = np.full(len(jet_pt_chi2), -1)
         _parton_jet_index = np.array(_cand_record[smallest_10_idx[0]])
@@ -1197,7 +1197,7 @@ def chi_square_minimizer( jet_pt_chi2, jet_eta_chi2, jet_phi_chi2, jet_btag_chi2
         smallest_10_chi2_value = _chi2_value[smallest_10_idx]
         smallest_10_chi2_candidate = np.array([ x for x in _cand_record[smallest_10_idx]])
 
-        min_chi2 = ten_smallest_chi2[0]
+        min_chi2 = smallest_10_chi2_value[0]
 
         _jet_parton_index = np.full(len(jet_pt_chi2), -1)
         _parton_jet_index = np.array(_cand_record[smallest_10_idx[0]])
