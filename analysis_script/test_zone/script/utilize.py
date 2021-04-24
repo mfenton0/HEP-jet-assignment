@@ -539,57 +539,6 @@ def deltaR_matching(NUM_OF_PARTON, NUM_OF_JET, PARTON_ETA, PARTON_PHI, JET_ETA, 
     
     return _jet_parton_index, _parton_jet_index
 
-# def barcode_recorder(SOURCE, MODEL):
-#     _jet_barcode = np.zeros(len(SOURCE))
-
-#     # print(_jet_barcode)
-#     if MODEL == "ttbar":
-#         barcode = np.array([34, 40, 40, 17, 20, 20])
-#         for i in range(len(SOURCE)):
-#             for j in range(len(barcode)):
-#                 # print(SOURCE[i])
-#                 if SOURCE[i] == int(j):
-#                     _jet_barcode[i] = barcode[int(j)]
-#                 else :
-#                     _jet_barcode[i] = -1
-#     elif MODEL == "ttH":
-#         barcode = np.array([68, 80, 80, 34, 40, 40, 1, 1])
-#         for i in range(len(SOURCE)):
-#             for j in range(len(barcode)):
-#                 if SOURCE[i] == int(j):
-#                     _jet_barcode[i] = barcode[int(j)]
-#                 else :
-#                     _jet_barcode[i] = -1
-
-#     elif MODEL == "four_top":
-#         barcode = np.array([2056, 2176, 2176, 516, 576, 576, 1028, 1056, 1056, 257, 272, 272])
-#         for i in range(len(SOURCE)):
-#             for j in range(len(barcode)):
-#                 if SOURCE[i] == int(j):
-#                     _jet_barcode[i] = barcode[int(j)]
-#                 else :
-#                     _jet_barcode[i] = -1
-#     elif MODEL == 'ttbar_lep_left': 
-#         barcode = np.array([34, 17, 20, 20])
-#         for i in range(len(SOURCE)):
-#             for j in range(len(barcode)):
-#                 if SOURCE[i] == int(j):
-#                     _jet_barcode[i] = barcode[int(j)]
-#                 else :
-#                     _jet_barcode[i] = -1
-#     elif MODEL == 'ttbar_lep_right': 
-#         barcode = np.array([34, 40, 40, 17])
-#         for i in range(len(SOURCE)):
-#             for j in range(len(barcode)):
-#                 if SOURCE[i] == int(j):
-#                     _jet_barcode[i] = barcode[int(j)]
-#                 else :
-#                     _jet_barcode[i] = -1
-#     else:
-#         print("Please select a correct model.")
-    
-#     return _jet_barcode
-
 def chi_square_minimizer( jet_pt_chi2, jet_eta_chi2, jet_phi_chi2, jet_btag_chi2, jet_mass_chi2, MODEL, EXTRA, NUM_OF_JETS):
     
     jet_btag_chi2 = jet_btag_chi2[:NUM_OF_JETS]
