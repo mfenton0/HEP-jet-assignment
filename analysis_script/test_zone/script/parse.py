@@ -7,122 +7,19 @@ Mail: davidho@gapp.nthu.edu.tw
 import uproot
 import pandas as pd 
 import numpy as np 
-from .particle_properties_uproot import particle_properties  #import particle properties helper function from particle_properties.py
-from .jet_properties_uproot import jet_properties  #import jet properties helper function from jet_properties.py
-from .MissingET import Missing_ET
-from .lepton import Lepton
+from script.particle import particle_properties  #import particle properties helper function from particle_properties.py
+from script.jet import jet_properties  #import jet properties helper function from jet_properties.py
+from script.MissingET import Missing_ET_properties
+from script.electron import electron_properties
+from script.muon import muon_properties
 import h5py, sys, traceback, os, tqdm, time
-from .utilize import delta_R, deltaPhi, pdgid, event_selection, quark_finder, particle_tracing, deltaR_matching, barcode_recorder, deltaPhi
+from script.utilize import delta_R, deltaPhi, pdgid, event_selection, quark_finder, deltaR_matching, deltaPhi, particle_tracing
 import multiprocessing as mp
 
-class properties_for_particle():
-    def __init__(self, event, pt, eta, phi, pid, M1, M2, D1, D2, status, rapidity, mass, charge):
-        self.event = event
-        self.pt = pt
-        self.eta = eta
-        self.phi = phi
-        self.pid = pid
-        self.M1 = M1
-        self.M2 = M2
-        self.D1 = D1
-        self.D2 = D2
-        self.status = status
-        self.rapidity = rapidity
-        self.mass = mass
-        self.charge = charge
-    def dataframelize(self, index):
-
-        idx = np.linspace(0, len( self.pt[index])-1, num = len( self.pt[index]) )
-
-        patron_dict = {
-                "Index": idx,
-                "Status":  self.status[index],
-                "Mother_1":  self.M1[index],
-                "Mother_2":  self.M2[index],
-                "Daughter_1":  self.D1[index],
-                "Daughter_2":  self.D2[index],
-                "PID":  self.pid[index],
-                "PT":  self.pt[index],
-                "Eta":  self.eta[index],
-                "Phi":  self.phi[index],
-                "Mass":  self.mass[index]
-            }
-        patron_df = pd.DataFrame(patron_dict)
-        return patron_df
-
-class properties_for_jet():
-    def __init__(self, event, pt, eta, phi, btag, area, mass, charge):
-        self.event = event
-        self.pt = pt
-        self.eta = eta
-        self.phi = phi
-        self.btag = btag
-        self.area = area
-        self.mass = mass
-        self.charge = charge
-    def dataframelize(self, index):
-
-        idx = np.linspace(0, len( self.pt[index])-1, num = len( self.pt[index]) )
-
-        jet_dict = {
-                "Index": idx,
-                "PT":  self.pt[index],
-                "Eta":  self.eta[index],
-                "Phi":  self.phi[index],
-                "Mass":  self.mass[index],
-                "Btag": self.btag[index],
-                "Area": self.area[index]
-            }
-        jet_df = pd.DataFrame(jet_dict)
-        return jet_df
-
-class property_for_lepton():
-    def __init__(self, e_pt, e_eta, e_phi, m_pt, m_eta, m_phi):
-        self.electron_pt = e_pt
-        self.electron_eta = e_eta
-        self.electron_phi = e_phi
-        self.Muon_pt = m_pt
-        self.Muon_eta = m_eta
-        self.Muon_phi = m_phi
-        
-    def dataframelize(self, index):
-
-        idx = np.linspace(0, len( self.electron_pt[index])-1, num = len( self.electron_pt[index]) )
-
-        Lepton_dict = {
-                "Index": idx,
-                "Electron_pt":  self.electron_pt[index],
-                "Electron_eta":  self.electron_eta[index],
-                "Electron_phi":  self.electron_phi[index],
-                "Muon_pt":  self.Muon_pt[index],
-                "Muon_eta":  self.Muon_eta[index],
-                "Muon_phi":  self.Muon_phi[index],
-            }
-        Lepton_df = pd.DataFrame(Lepton_dict)
-        return Lepton_df
-
-class property_for_Missing_ET():
-    def __init__(self, met, eta, phi):
-        self.MET = met
-        self.eta = eta
-        self.phi = phi
-        
-    def dataframelize(self, index):
-
-        idx = np.linspace(0, len( self.MET[index])-1, num = len( self.MET[index]) )
-
-        MissingET_dict = {
-                "Index": idx,
-                "MET":  self.MET[index],
-                "Eta":  self.eta[index],
-                "Phi":  self.phi[index],
-
-            }
-        MissingET_df = pd.DataFrame(MissingET_dict)
-        return MissingET_df
-
 def parse(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS, GENERATOR):
-    
+
+    PID = pdgid()
+    # Setting `STATUS_CODE` for different shower generator.
     if GENERATOR == 'py8':
         STATUS_CODE = 22
     elif GENERATOR == 'herwig7':
@@ -130,117 +27,9 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS, GENERATOR):
     else: 
         print("Please select a correct shower generator. 1. py8, 2. herwig7.")
 
+    MAX_NUM_OF_JETS = 20
 
-    PID = pdgid()
-
-    if int(SINGLE) == 1:
-        try:
-            print("Loading root file from {0}.".format(INPUT_FILE))
-            data  = uproot.open(INPUT_FILE)['Delphes']
-        except:
-            print('Please check input file path.')
-        particle = particle_properties(data)
-        jet = jet_properties(data)
-        lepton = Lepton(data)
-        missing_et = Missing_ET(data)
-
-    elif int(SINGLE) != 1 and bool(SINGLE.isdigit) == True:
-        _data = []
-        files = os.listdir(INPUT_FILE)
-        num_of_files = len(files)
-        pbar = tqdm.tqdm(total=num_of_files)
-        for a in files:
-            try:
-                print("Loading root file from {0}.".format(os.path.join(INPUT_FILE, a)))
-                tmp = uproot.open(os.path.join(INPUT_FILE, a))['Delphes']
-                _data.append(tmp)
-                pbar.update(1) 
-            except:
-                print('Please check input file path.')
-        
-        for i in tqdm.trange(num_of_files):
-            tmp_particle = particle_properties(_data[i])
-            tmp_jet = jet_properties(_data[i])
-            tmp_lepton = Lepton(_data[i])
-            tmp_missing_et = Missing_ET(_data[i])
-
-            if i == 0 :
-                _particle_event = tmp_particle.event
-                _particle_pt = tmp_particle.pt
-                _particle_eta = tmp_particle.eta
-                _particle_phi = tmp_particle.phi
-                _particle_pid = tmp_particle.pid
-                _particle_M1 = tmp_particle.M1
-                _particle_M2 = tmp_particle.M2
-                _particle_D1 = tmp_particle.D1
-                _particle_D2 = tmp_particle.D2
-                _particle_status = tmp_particle.status
-                _particle_rapidity = tmp_particle.rapidity
-                _particle_mass = tmp_particle.mass
-                _particle_charge = tmp_particle.charge
-
-                _jet_event = tmp_jet.event
-                _jet_pt = tmp_jet.pt
-                _jet_eta = tmp_jet.eta
-                _jet_phi = tmp_jet.phi
-                _jet_btag = tmp_jet.btag
-                _jet_area = tmp_jet.area
-                _jet_mass = tmp_jet.mass
-                _jet_charge = tmp_jet.charge
-
-                _lepton_electron_pt = tmp_lepton.electron_pt
-                _lepton_electron_eta = tmp_lepton.electron_eta
-                _lepton_electron_phi = tmp_lepton.electron_phi
-                _lepton_muon_pt = tmp_lepton.Muon_pt
-                _lepton_muon_eta = tmp_lepton.Muon_eta
-                _lepton_muon_phi = tmp_lepton.Muon_phi
-
-                _missing_et_met = tmp_missing_et.MET
-                _missing_et_eta = tmp_missing_et.eta
-                _missing_et_phi = tmp_missing_et.phi
-            else :
-                _particle_event = np.concatenate((_particle_event, tmp_particle.event))
-                _particle_pt = np.concatenate((_particle_pt, tmp_particle.pt))
-                _particle_eta = np.concatenate((_particle_eta, tmp_particle.eta))
-                _particle_phi = np.concatenate((_particle_phi, tmp_particle.phi))
-                _particle_pid = np.concatenate((_particle_pid, tmp_particle.pid))
-                _particle_M1 = np.concatenate((_particle_M1, tmp_particle.M1))
-                _particle_M2 = np.concatenate((_particle_M2, tmp_particle.M2))
-                _particle_D1 = np.concatenate((_particle_D1, tmp_particle.D1))
-                _particle_D2 = np.concatenate((_particle_D2, tmp_particle.D2))
-                _particle_status = np.concatenate((_particle_status, tmp_particle.status))
-                _particle_rapidity = np.concatenate((_particle_rapidity, tmp_particle.rapidity))
-                _particle_mass = np.concatenate((_particle_mass, tmp_particle.mass))
-                _particle_charge = np.concatenate((_particle_charge, tmp_particle.charge))
-
-                _jet_event = np.concatenate((_jet_event, tmp_jet.event))
-                _jet_pt = np.concatenate((_jet_pt, tmp_jet.pt))
-                _jet_eta = np.concatenate((_jet_eta, tmp_jet.eta))
-                _jet_phi = np.concatenate((_jet_phi, tmp_jet.phi))
-                _jet_btag = np.concatenate((_jet_btag, tmp_jet.btag))
-                _jet_area = np.concatenate((_jet_area, tmp_jet.area))
-                _jet_mass = np.concatenate((_jet_mass, tmp_jet.mass))
-                _jet_charge = np.concatenate((_jet_charge, tmp_jet.charge))
-                
-                _lepton_electron_pt = np.concatenate((_lepton_electron_pt, tmp_lepton.electron_pt))
-                _lepton_electron_eta = np.concatenate((_lepton_electron_eta, tmp_lepton.electron_eta))
-                _lepton_electron_phi = np.concatenate((_lepton_electron_phi, tmp_lepton.electron_phi))
-                _lepton_muon_pt = np.concatenate((_lepton_muon_pt, tmp_lepton.Muon_pt))
-                _lepton_muon_eta = np.concatenate((_lepton_muon_eta, tmp_lepton.Muon_eta))
-                _lepton_muon_phi = np.concatenate((_lepton_muon_phi, tmp_lepton.Muon_phi))
-
-                _missing_et_met = np.concatenate((_missing_et_met, tmp_missing_et.MET))
-                _missing_et_eta = np.concatenate((_missing_et_eta, tmp_missing_et.eta))
-                _missing_et_phi = np.concatenate((_missing_et_phi, tmp_missing_et.phi))
-
-        particle = properties_for_particle(_particle_event, _particle_pt, _particle_eta, _particle_phi, _particle_pid, _particle_M1, _particle_M2, _particle_D1, _particle_D2, _particle_status, _particle_rapidity, _particle_mass, _particle_charge)
-        jet = properties_for_jet(_jet_event, _jet_pt, _jet_eta, _jet_phi, _jet_btag, _jet_area, _jet_mass, _jet_charge)
-        lepton = property_for_lepton(_lepton_electron_pt, _lepton_electron_eta, _lepton_electron_phi, _lepton_muon_pt, _lepton_muon_eta, _lepton_muon_phi)
-        missing_et = property_for_Missing_ET(_missing_et_met, _missing_et_eta, _missing_et_phi)
-    else:
-        print("Please inpurt a correct mode.\n1.-s 1\n2.-s > 1")
-
-    
+    # Setting barcode, `NUM_OF_PARTON`, and `NUM_OF_DAUGHTER` for different model
     if MODEL == "ttbar":
         """
         Barcode system
@@ -317,158 +106,215 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS, GENERATOR):
     else:
         print("Please select a correct model.")
 
-    tmp_lepton_pt = []
-    tmp_lepton_eta = []
-    tmp_lepton_phi = []
-    tmp_lepton_pdgid = []
+    print("+------------------------------------------------------------------------------------------------------+")
+    print("Start loading dataset.")
+    print("+------------------------------------------------------------------------------------------------------+")
+    if SINGLE:
+        data = uproot.open(INPUT_FILE)['Delphes']
+        particle = particle_properties(data)
+        jet = jet_properties(data)
+        if MODEL == 'ttbar_lep_left' or MODEL == "ttbar_lep_right":
+            electron = electron_properties(data)
+            muon = muon_properties(data)
+            missing_et = Missing_ET_properties(data)
+    else: 
+        files = os.listdir(INPUT_FILE)
+        PATH = []
+        for a in files:
+            PATH.append(os.path.join(INPUT_FILE, a))
+        particle = particle_properties(PATH, single=False)
+        jet = jet_properties(PATH, single=False)
+        if MODEL == 'ttbar_lep_left' or MODEL == "ttbar_lep_right":
+            electron = electron_properties(PATH, single=False)
+            muon = muon_properties(PATH, single=False)
+            missing_et = Missing_ET_properties(PATH, single=False)
+    print("+------------------------------------------------------------------------------------------------------+")
+    print("Dataset loaded.")
+    print("+------------------------------------------------------------------------------------------------------+")
 
-    for i in range(len(lepton.electron_pt)):
-        _lepton_pt = []
-        _lepton_eta = []
-        _lepton_phi = []
-        _lepton_pdgid = []
-        if len(lepton.electron_pt[i]) != 0:
-            for a, b, c in zip(lepton.electron_pt[i], lepton.electron_eta[i], lepton.electron_phi[i]):
-                _lepton_pt.append(a)
-                _lepton_eta.append(b)
-                _lepton_phi.append(c)
-                _lepton_pdgid.append(11)
-        else:
-            pass
-        if len(lepton.Muon_pt[i]) != 0:
-            for a, b, c in zip(lepton.Muon_pt[i], lepton.Muon_eta[i], lepton.Muon_phi[i]):
-                _lepton_pt.append(a)
-                _lepton_eta.append(b)
-                _lepton_phi.append(c)
-                _lepton_pdgid.append(13)
-        else:
-            pass
-        if len(lepton.electron_pt[i]) == 0 and len(lepton.Muon_pt[i]) == 0:
-            _lepton_pt.append(0)
-            _lepton_eta.append(0)
-            _lepton_phi.append(0)
-            _lepton_pdgid.append(0)
-        else: pass
-        tmp_lepton_pt.append(np.asanyarray(_lepton_pt, dtype=object))
-        tmp_lepton_eta.append(np.asanyarray(_lepton_eta, dtype=object))
-        tmp_lepton_phi.append(np.asanyarray(_lepton_phi, dtype=object))
-        tmp_lepton_pdgid.append(np.asanyarray(_lepton_pdgid, dtype=object))
-
-    #Mark which jet in each event pass the selection.
     print("+------------------------------------------------------------------------------------------------------+")
     print("Start jet selection.")
     print("+------------------------------------------------------------------------------------------------------+")
-    marker_event, marker_jet, marker_btag = event_selection(jet.pt, jet.eta, jet.phi, jet.btag, tmp_lepton_pt, tmp_lepton_eta, tmp_lepton_phi, MODEL)
+    if MODEL == 'ttbar':
+        # Find the event that exists at least 2 b-jet passed the selection
+        btag_passed = np.where(((jet.btag == 1) & (jet.pt >= 25) & (np.abs(jet.eta) < 2.5) ).sum() >= 2)
+        # Find the event that exists at least 6 non b-jet passed the selection
+        non_btag_passed = np.where(((jet.pt >= 25) & (np.abs(jet.eta) < 2.5) ).sum() >= 6)
+        # Combine the result above 
+        passed = np.intersect1d(btag_passed[0], non_btag_passed[0])
+    elif MODEL == 'four_top':
+        # Find the event that exists at least 2 b-jet passed the selection
+        btag_passed = np.where(((jet.btag == 1) & (jet.pt >= 25) & (np.abs(jet.eta) < 2.5) ).sum() >= 2)
+        # Find the event that exists at least 12 non b-jet passed the selection
+        non_btag_passed = np.where(((jet.pt >= 25) & (np.abs(jet.eta) < 2.5) ).sum() >= 12)
+        # Combine the result above 
+        passed = np.intersect1d(btag_passed[0], non_btag_passed[0])
+    elif MODEL == 'ttH':
+        # Find the event that exists at least 2 b-jet passed the selection
+        btag_passed = np.where(((jet.btag == 1) & (jet.pt >= 25) & (np.abs(jet.eta) < 2.5) ).sum() >= 2)
+        # Find the event that exists at least 8 non b-jet passed the selection
+        non_btag_passed = np.where(((jet.pt >= 25) & (np.abs(jet.eta) < 2.5) ).sum() >= 8)
+        # Combine the result above 
+        passed = np.intersect1d(btag_passed[0], non_btag_passed[0])
+    elif MODEL == 'ttbar_lep_left' or MODEL == "ttbar_lep_right":
+        marker_lepton = []
+        marker_event = []
+        marker_jet = []
+        marker_btag = []
+        print("Start jet marking.")
+        for i in tqdm.trange(len(jet.pt)):
+            _marker_event = []
+            _marker_jet = []
+            _marker_btag = []
+            for j in range(len(jet.pt[i])):
+                if jet.btag[i][j] == 1 and jet.pt[i][j] > 25 and np.abs(jet.eta[i][j]) < 2.5:
+                    _marker_btag.append(1) 
+                else: 
+                    _marker_btag.append(0) 
+            
+                if jet.pt[i][j] > 25 and np.abs(jet.eta[i][j]) <= 2.5:
+                    _marker_jet.append(1)
+                else:
+                    _marker_jet.append(0)
+            marker_jet.append(np.asanyarray(_marker_jet, dtype=object))
+            marker_btag.append(np.asanyarray(_marker_btag, dtype=object))
+        
+        marker_jet = np.asanyarray(marker_jet, dtype=object)
+        marker_btag = np.asanyarray(marker_btag, dtype=object)
+        
+        #Remove electron from jets catogary
+        for i in range(len(jet.pt)):
+            
+            for j in range(len(jet.pt[i])):
+                for k in range(len(electron.pt[i])):
+                    if delta_R(jet.eta[i][j], jet.phi[i][j], electron.eta[i][k], electron.phi[i][k]) < 0.4:
+                        marker_jet[i][j] = 0
+                    else : pass 
+        
+        for i in tqdm.trange(len(electron.eta)):
+            _marker_lepton = []
+            for j in range(len(electron.eta[i])):
+                if electron.pt[i][j] > 25 and np.abs(electron.eta[i][j]) < 2.5:
+                    _marker_lepton.append(1)
+                else :
+                    _marker_lepton.append(0)
+            for j in range(len(muon.eta[i])):
+                if muon.pt[i][j] > 25 and np.abs(muon.eta[i][j]) < 2.5:
+                    _marker_lepton.append(1)
+                else :
+                    _marker_lepton.append(0)
+            marker_lepton.append(np.asanyarray(_marker_lepton, dtype=object))
+        marker_lepton = np.asanyarray(marker_lepton, dtype=object)
+        print("Start event marking.")
+        for i in tqdm.trange(len(jet.pt)):
+            if np.sum(marker_jet[i] == 1) >= 4 and np.sum(marker_btag[i] == 1) >= 2 and np.sum(marker_lepton[i] ==1) == 1 and len(marker_lepton[i]) == 1:
+                marker_event.append(1)
+            else:
+                marker_event.append(0)
+        marker_event = np.asanyarray(marker_event, dtype=object)
+        passed = np.where(marker_event == 1)[0]
+        del marker_jet, marker_btag, marker_lepton, marker_event
     print("+------------------------------------------------------------------------------------------------------+")
-    print("Jet selection doen. {0} events has been selected.".format(np.sum(marker_event == 1)))
+    print("Jet selection done. {0} events has been selected.".format(len(passed)))
     print("+------------------------------------------------------------------------------------------------------+")
 
     print("+------------------------------------------------------------------------------------------------------+")
     print("Recording the kinematics variables of jets in the selected event.")
     print("+------------------------------------------------------------------------------------------------------+")
-    #Record the kinematical variables of jet in the selected event.
-    jet_pt = []
-    jet_eta = []
-    jet_phi = []
-    jet_mass = []
-    jet_btag = []
-
     if MODEL == 'ttbar_lep_left' or MODEL == "ttbar_lep_right":
-        lepton_pt = []
-        lepton_eta = []
-        lepton_phi = []
-        lepton_pdgid = []
-        for i in tqdm.trange(len(tmp_lepton_pt)):
-            if marker_event[i] == 1:
-                if MODEL == 'ttbar_lep_left' or MODEL == "ttbar_lep_right":
-                    lepton_pt_tmp = []
-                    lepton_eta_tmp = []
-                    lepton_phi_tmp = []
-                    lepton_pdgid_tmp = []
-                    for j in range(len(tmp_lepton_pt[i])):
-                        lepton_pt_tmp.append(tmp_lepton_pt[i][j])
-                        lepton_eta_tmp.append(tmp_lepton_eta[i][j])
-                        lepton_phi_tmp.append(tmp_lepton_phi[i][j])
-                        lepton_pdgid_tmp.append(tmp_lepton_pdgid[i][j])
-                    lepton_pt.append(np.asanyarray(lepton_pt_tmp, dtype=object))
-                    lepton_eta.append(np.asanyarray(lepton_eta_tmp, dtype=object))
-                    lepton_phi.append(np.asanyarray(lepton_phi_tmp, dtype=object))
-                    lepton_pdgid.append(np.asanyarray(lepton_pdgid_tmp, dtype=object))
-        lepton_pt = np.asanyarray(lepton_pt, dtype=object)
-        lepton_eta = np.asanyarray(lepton_eta, dtype=object)
-        lepton_phi = np.asanyarray(lepton_phi, dtype=object)
-        lepton_pdgid = np.asanyarray(lepton_pdgid, dtype=object)
+        # Initialize the numpy.ndarray for jet, leptons, and MET
+        jet_pt = np.zeros((len(passed), MAX_NUM_OF_JETS))
+        jet_eta = np.zeros((len(passed), MAX_NUM_OF_JETS))
+        jet_phi = np.zeros((len(passed), MAX_NUM_OF_JETS))
+        jet_mass = np.zeros((len(passed), MAX_NUM_OF_JETS))
+        jet_btag = np.zeros((len(passed), MAX_NUM_OF_JETS), dtype=np.int8)
+        jet_num_of_jets = np.zeros((len(passed)), dtype=np.int8)
+        
+        # Since we require only 1 lepton can exists in each event, so we don't need second dimension.
+        lepton_pt = np.zeros((len(passed)))
+        lepton_eta = np.zeros((len(passed)))
+        lepton_phi = np.zeros((len(passed)))
+        lepton_pdgid = np.zeros((len(passed)))
 
-    for i in tqdm.trange(len(jet.event)):
-        if marker_event[i] == 1:
-            jet_pt_tmp = []
-            jet_eta_tmp = []
-            jet_phi_tmp = []
-            jet_mass_tmp = []
-            jet_btag_tmp = []
-            
-            if MODEL == 'ttbar_lep_left' or MODEL == "ttbar_lep_right":
-                #Lepton signal removal for ttbar semi-leptonic model
-                if len(tmp_lepton_eta[i]) != 1:
-                    print(i, len(tmp_lepton_eta[i]), len(tmp_lepton_eta[i]), len(tmp_lepton_phi[i]), tmp_lepton_pt[i], tmp_lepton_eta[i])
-                for j in range(len(jet.pt[i])):
-                    if delta_R(jet.eta[i][j], jet.phi[i][j], tmp_lepton_eta[i][0], tmp_lepton_phi[i][0]) > 0.4:
-                        jet_pt_tmp.append(jet.pt[i][j])
-                        jet_eta_tmp.append(jet.eta[i][j])
-                        jet_phi_tmp.append(jet.phi[i][j])
-                        jet_mass_tmp.append(jet.mass[i][j])
-                        jet_btag_tmp.append(jet.btag[i][j])
-                    else : pass 
+        # Since the stucture of MET only have 1 element in each event, so we don't need second dimension.
+        MET = np.zeros((len(passed)))
+        MET_ETA = np.zeros((len(passed)))
+        MET_PHI = np.zeros((len(passed)))
+
+        # Storing MissingET data
+        for i in range(len(passed)):
+            idx = int(passed[i])
+            MET[i] = missing_et.MET[idx]
+            MET_ETA[i] = missing_et.eta[idx]
+            MET_PHI[i] = missing_et.phi[idx]
+
+        # Storing lepton data
+        for i in tqdm.trange(len(passed)):
+            idx = int(passed[i])
+            if len(electron.pt[idx]) != 0 and len(muon.pt[idx]) == 0:
+                lepton_pt[i] = electron.pt[idx][0]
+                lepton_eta[i] = electron.eta[idx][0]
+                lepton_phi[i] = electron.phi[idx][0]
+                lepton_pdgid[i] = PID.electron
+            elif len(electron.pt[idx]) == 0 and len(muon.pt[idx]) != 0: 
+                lepton_pt[i] = muon.pt[idx][0]
+                lepton_eta[i] = muon.eta[idx][0]
+                lepton_phi[i] = muon.phi[idx][0]
+                lepton_pdgid[i] = PID.muon
             else: 
-                for j in range(len(jet.pt[i])):
-                    jet_pt_tmp.append(jet.pt[i][j])
-                    jet_eta_tmp.append(jet.eta[i][j])
-                    jet_phi_tmp.append(jet.phi[i][j])
-                    jet_mass_tmp.append(jet.mass[i][j])
-                    jet_btag_tmp.append(jet.btag[i][j])
-                    
-            jet_pt.append(jet_pt_tmp)
-            jet_eta.append(jet_eta_tmp)
-            jet_phi.append(jet_phi_tmp)
-            jet_mass.append(jet_mass_tmp)
-            jet_btag.append(jet_btag_tmp)
-        if MODEL == 'ttbar_lep_left' or MODEL == "ttbar_lep_right":
-            lepton_pt = np.asanyarray(lepton_pt, dtype=object)
-            lepton_eta = np.asanyarray(lepton_eta, dtype=object)
-            lepton_phi = np.asanyarray(lepton_phi, dtype=object)
-            lepton_pdgid = np.asanyarray(lepton_pdgid, dtype=object)
+                print(f"There exist more than 1 leptons in event {idx}, please check your selection.")
 
-    MET = []
-    MET_ETA = []
-    MET_PHI = []
-    for i in range(len(missing_et.MET)):
-        if marker_event[i] == 1:
-             for a, b, c in zip(missing_et.MET[i], missing_et.eta[i], missing_et.phi[i]):
-                MET.append(a)
-                MET_ETA.append(b)
-                MET_PHI.append(c)
-    MET = np.asanyarray(MET, dtype=object)
-    MET_ETA = np.asanyarray(MET_ETA, dtype=object)
-    MET_PHI = np.asanyarray(MET_PHI, dtype=object)
+        # Storing jet data with lepton-jet removal (cut: deltaR(jet, lepton) > 0.4)
+        for i in tqdm.trange(len(passed)):
+            idx = int(passed[i])
+            for j in range(len(jet.pt[idx])):
+                if delta_R(jet.eta[idx][j], jet.phi[idx][j], lepton_eta[i], lepton_phi[i]) > 0.4: 
+                    jet_pt[i][j] = jet.pt[idx][j]
+                    jet_eta[i][j] = jet.eta[idx][j]
+                    jet_phi[i][j] = jet.phi[idx][j]
+                    jet_mass[i][j] = jet.mass[idx][j]
+                    jet_btag[i][j] = jet.btag[idx][j]
+                else: 
+                    jet_pt[i][j] = -100
+                    jet_eta[i][j] = -100
+                    jet_phi[i][j] = -100
+                    jet_mass[i][j] = -100
+                    jet_btag[i][j] = -100
+            jet_num_of_jets[i] = jet.num_of_jets[idx]
+            
+    else:
+        # Initialize the numpy.ndarray for jet
+        jet_pt = np.zeros((len(passed), MAX_NUM_OF_JETS))
+        jet_eta = np.zeros((len(passed), MAX_NUM_OF_JETS))
+        jet_phi = np.zeros((len(passed), MAX_NUM_OF_JETS))
+        jet_mass = np.zeros((len(passed), MAX_NUM_OF_JETS))
+        jet_btag = np.zeros((len(passed), MAX_NUM_OF_JETS), dtype=np.int8)
+        jet_num_of_jets = np.zeros((len(passed)), dtype=np.int8)
+
+        # Storing jet data
+        for i in tqdm.trange(len(passed)):
+            idx = int(passed[i])
+            for j in range(len(jet.pt[idx])):
+                jet_pt[i][j] = jet.pt[idx][j]
+                jet_eta[i][j] = jet.eta[idx][j]
+                jet_phi[i][j] = jet.phi[idx][j]
+                jet_mass[i][j] = jet.mass[idx][j]
+                jet_btag[i][j] = jet.btag[idx][j]
+            jet_num_of_jets[i] = jet.num_of_jets[idx]
     print("+------------------------------------------------------------------------------------------------------+")
     print("Finished to record the kinematics variables of jets in the selected event.")
     print("+------------------------------------------------------------------------------------------------------+")
-    
+
     print("+------------------------------------------------------------------------------------------------------+")
     print("Starting parton tracing and looking for its daughter.")
     print("+------------------------------------------------------------------------------------------------------+")
     #Particle tracing and daughter finding section
     start = time.time()
     if MODEL == 'ttbar' or MODEL == 'ttbar_lep_left' or MODEL =='ttbar_lep_right':
+        
+        _src_top  = [ list([particle.dataframelize(i), PID.top, STATUS_CODE, MODEL]) for i in passed ]
+        _src_anti_top  = [ list([particle.dataframelize(i), PID.anti_top, STATUS_CODE, MODEL]) for i in passed ]
 
-        top_idx, top_daughter_idx_1, top_daughter_pid_1, top_daughter_idx_2, top_daughter_pid_2 = [], [], [], [], []
-        top_bar_idx, top_bar_daughter_idx_1, top_bar_daughter_pid_1, top_bar_daughter_idx_2, top_bar_daughter_pid_2 = [], [], [], [], []
-        _src_top, _src_anti_top, _index  = [], [], []
-        for i in range(len(particle.event)):
-            if marker_event[i] == 1:
-                _index.append(i)
-                _src_top.append([particle.dataframelize(i), PID.top, STATUS_CODE, MODEL])
-                _src_anti_top.append([particle.dataframelize(i), PID.anti_top, STATUS_CODE, MODEL])
         print("Using {0} process for accelerating speed.".format(PROCESS))
         with mp.Pool(PROCESS) as p:
             _result_top = p.starmap(particle_tracing, _src_top)
@@ -480,25 +326,27 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS, GENERATOR):
             p.close()
             p.join()
         print("Anti-Top tracing finished.")
-        for i in range(len(_result_top)):
-            top_idx.append(_result_top[i][0])
-            top_daughter_idx_1.append(_result_top[i][1])
-            top_daughter_pid_1.append(_result_top[i][2])
-            top_daughter_idx_2.append(_result_top[i][3])
-            top_daughter_pid_2.append(_result_top[i][4])
-            top_bar_idx.append(_result_anti_top[i][0])
-            top_bar_daughter_idx_1.append(_result_anti_top[i][1])
-            top_bar_daughter_pid_1.append(_result_anti_top[i][2])
-            top_bar_daughter_idx_2.append(_result_anti_top[i][3])
-            top_bar_daughter_pid_2.append(_result_anti_top[i][4])
+        _result_top = np.array(_result_top)
+        _result_anti_top = np.array(_result_anti_top)
 
-        _src_top_d, _src_anti_top_d = [], []
-        parton_array = np.zeros([ len(_index) , NUM_OF_DAUGHTER, 7])
+        # top_idx = _result_top[:,0]
+        top_daughter_idx_1 = _result_top[:,1]
+        # top_daughter_pid_1 = _result_top[:,2]
+        top_daughter_idx_2 = _result_top[:,3]
+        # top_daughter_pid_2 = _result_top[:,4]
+        
+        # top_bar_idx = _result_anti_top[:,0]
+        top_bar_daughter_idx_1 = _result_anti_top[:,1]
+        # top_bar_daughter_pid_1 = _result_anti_top[:,2]
+        top_bar_daughter_idx_2 = _result_anti_top[:,3]
+        # top_bar_daughter_pid_2 = _result_anti_top[:,4]
 
-        for i in range(len(_index)):
-            j = _index[i]
-            _src_top_d.append([particle.dataframelize(j), top_daughter_idx_1[i], top_daughter_idx_2[i]])
-            _src_anti_top_d.append([particle.dataframelize(j), top_bar_daughter_idx_1[i], top_bar_daughter_idx_2[i]])
+        del _src_top, _src_anti_top
+
+
+        _src_top_d, _src_anti_top_d = [list([particle.dataframelize(passed[i]), top_daughter_idx_1[i], top_daughter_idx_2[i]]) for i in range(len(passed))], [list([particle.dataframelize(passed[i]), top_bar_daughter_idx_1[i], top_bar_daughter_idx_2[i]]) for i in range(len(passed))]
+        parton_array = np.zeros([ len(passed) , NUM_OF_DAUGHTER])
+
         with mp.Pool(PROCESS) as p:
             _result_top = p.starmap(quark_finder, _src_top_d)
             p.close()
@@ -509,25 +357,30 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS, GENERATOR):
             p.close()
             p.join()
         print("Daughter of Anti-Top's daughter found.")
-        
-        for i in range(len(_index)):
-            parton_array[i][0][0], parton_array[i][1][0], parton_array[i][2][0] = _result_top[i][0], _result_top[i][1], _result_top[i][2]
-            parton_array[i][3][0], parton_array[i][4][0], parton_array[i][5][0] = _result_anti_top[i][0], _result_anti_top[i][1], _result_anti_top[i][2]
+        _result_top = np.array(_result_top)
+        _result_anti_top = np.array(_result_anti_top)
+
+        del _src_anti_top_d, _src_top_d
+
+
+        parton_array[:, 0] = _result_top[:, 0]
+        parton_array[:, 1] = _result_top[:, 1]
+        parton_array[:, 2] = _result_top[:, 2]
+        parton_array[:, 3] = _result_anti_top[:, 0]
+        parton_array[:, 4] = _result_anti_top[:, 1]
+        parton_array[:, 5] = _result_anti_top[:, 2]
+
         print("+------------------------------------------------------------------------------------------------------+")
         print("Parton tracing section complete. The daughter of W+/W- and bbbar has been found. Cost: {0:.1f} s".format(time.time()-start))
         print("+------------------------------------------------------------------------------------------------------+")
+
     elif MODEL == 'ttH':
-        top_idx, top_daughter_idx_1, top_daughter_pid_1, top_daughter_idx_2, top_daughter_pid_2 = [], [], [], [], []
-        top_bar_idx, top_bar_daughter_idx_1, top_bar_daughter_pid_1, top_bar_daughter_idx_2, top_bar_daughter_pid_2 = [], [], [], [], []
-        higgs_idx, higgs_daughter_idx_1, higgs_daughter_pid_1, higgs_daughter_idx_2, higgs_daughter_pid_2 = [], [], [], [], []
-        _src_top, _src_anti_top, _src_higgs, _index  = [], [], [], []
         
-        for i in range(len(particle.event)):
-            if marker_event[i] == 1:
-                _index.append(i)
-                _src_top.append([particle.dataframelize(i), PID.top, STATUS_CODE, MODEL])
-                _src_anti_top.append([particle.dataframelize(i), PID.anti_top, STATUS_CODE, MODEL])
-                _src_higgs.append([particle.dataframelize(i), PID.higgs, STATUS_CODE, MODEL])
+        _src_top  = [ list([particle.dataframelize(i), PID.top, STATUS_CODE, MODEL]) for i in passed ]
+        _src_anti_top  = [ list([particle.dataframelize(i), PID.anti_top, STATUS_CODE, MODEL]) for i in passed ]
+        _src_higgs  = [ list([particle.dataframelize(i), PID.higgs, STATUS_CODE, MODEL]) for i in passed ]
+
+
         print("Using {0} process for accelerating speed.".format(PROCESS))
         with mp.Pool(PROCESS) as p:
             _result_top = p.starmap(particle_tracing, _src_top)
@@ -544,31 +397,25 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS, GENERATOR):
             p.close()
             p.join()
         print("Higgs tracing finished.")
-        
-        for i in range(len(_index)):
-            top_idx.append(_result_top[i][0])
-            top_daughter_idx_1.append(_result_top[i][1])
-            top_daughter_pid_1.append(_result_top[i][2])
-            top_daughter_idx_2.append(_result_top[i][3])
-            top_daughter_pid_2.append(_result_top[i][4])
-            top_bar_idx.append(_result_anti_top[i][0])
-            top_bar_daughter_idx_1.append(_result_anti_top[i][1])
-            top_bar_daughter_pid_1.append(_result_anti_top[i][2])
-            top_bar_daughter_idx_2.append(_result_anti_top[i][3])
-            top_bar_daughter_pid_2.append(_result_anti_top[i][4])
-            higgs_idx.append(_result_h[i][0])
-            higgs_daughter_idx_1.append(_result_h[i][1])
-            higgs_daughter_pid_1.append(_result_h[i][2])
-            higgs_daughter_idx_2.append(_result_h[i][3])
-            higgs_daughter_pid_2.append(_result_h[i][4])
-        
-        _src_top_d, _src_anti_top_d  = [], []
-        parton_array = np.zeros([ len(_index) , NUM_OF_DAUGHTER, 7])
+        _result_top = np.array(_result_top)
+        _result_anti_top = np.array(_result_anti_top)
+        _result_h = np.array(_result_h)
 
-        for i in range(len(_index)):
-            j = _index[i]
-            _src_top_d.append([particle.dataframelize(j), top_daughter_idx_1[i], top_daughter_idx_2[i]])
-            _src_anti_top_d.append([particle.dataframelize(j), top_bar_daughter_idx_1[i], top_bar_daughter_idx_2[i]])
+        # top_idx = _result_top[:,0]
+        top_daughter_idx_1 = _result_top[:,1]
+        # top_daughter_pid_1 = _result_top[:,2]
+        top_daughter_idx_2 = _result_top[:,3]
+        # top_daughter_pid_2 = _result_top[:,4]
+        
+        # top_bar_idx = _result_anti_top[:,0]
+        top_bar_daughter_idx_1 = _result_anti_top[:,1]
+        # top_bar_daughter_pid_1 = _result_anti_top[:,2]
+        top_bar_daughter_idx_2 = _result_anti_top[:,3]
+        # top_bar_daughter_pid_2 = _result_anti_top[:,4]
+
+        _src_top_d, _src_anti_top_d = [list([particle.dataframelize(passed[i]), top_daughter_idx_1[i], top_daughter_idx_2[i]]) for i in range(len(passed))], [list([particle.dataframelize(passed[i]), top_bar_daughter_idx_1[i], top_bar_daughter_idx_2[i]]) for i in range(len(passed))]
+        parton_array = np.zeros([ len(passed) , NUM_OF_DAUGHTER])
+
         with mp.Pool(PROCESS) as p:
             _result_top = p.starmap(quark_finder, _src_top_d)
             p.close()
@@ -579,25 +426,27 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS, GENERATOR):
             p.close()
             p.join()
         print("Daughter of Anti-Top's daughter found.")
-        for i in range(len(_index)):
-            parton_array[i][0][0], parton_array[i][1][0], parton_array[i][2][0] = _result_top[i][0], _result_top[i][1], _result_top[i][2]
-            parton_array[i][3][0], parton_array[i][4][0], parton_array[i][5][0] = _result_anti_top[i][0], _result_anti_top[i][1], _result_anti_top[i][2]
-            parton_array[i][6][0], parton_array[i][7][0] = higgs_daughter_idx_1[i], higgs_daughter_idx_2[i]
+        _result_top = np.array(_result_top)
+        _result_anti_top = np.array(_result_anti_top)
+
+        del _src_anti_top_d, _src_top_d
+
+        parton_array[:, 0] = _result_top[:, 0]
+        parton_array[:, 1] = _result_top[:, 1]
+        parton_array[:, 2] = _result_top[:, 2]
+        parton_array[:, 3] = _result_anti_top[:, 0]
+        parton_array[:, 4] = _result_anti_top[:, 1]
+        parton_array[:, 5] = _result_anti_top[:, 2]
+        parton_array[:, 6], parton_array[:, 7] = _result_h[:,1], _result_h[:,3]
         print("+------------------------------------------------------------------------------------------------------+")
         print("Parton tracing section complete. The daughter of W+/W-, bbbar, and Higgs has been found. Cost: {0:.1f} s".format(time.time()-start))
         print("+------------------------------------------------------------------------------------------------------+")
+
     elif MODEL == 'four_top':
-        top_1_idx, top_1_daughter_idx_1, top_1_daughter_pid_1, top_1_daughter_idx_2, top_1_daughter_pid_2 = [], [], [], [], []
-        top_2_idx, top_2_daughter_idx_1, top_2_daughter_pid_1, top_2_daughter_idx_2, top_2_daughter_pid_2 = [], [], [], [], []
-        top_1_bar_idx, top_1_bar_daughter_idx_1, top_1_bar_daughter_pid_1, top_1_bar_daughter_idx_2, top_1_bar_daughter_pid_2 = [], [], [], [], []
-        top_2_bar_idx, top_2_bar_daughter_idx_1, top_2_bar_daughter_pid_1, top_2_bar_daughter_idx_2, top_2_bar_daughter_pid_2 = [], [], [], [], []
-        
-        _src_top, _src_anti_top, _index  = [], [], []
-        for i in range(len(particle.event)):
-            if marker_event[i] == 1:
-                _index.append(i)
-                _src_top.append([particle.dataframelize(i), PID.top, STATUS_CODE, MODEL])
-                _src_anti_top.append([particle.dataframelize(i), PID.anti_top, STATUS_CODE, MODEL])
+
+        _src_top  = [ list([particle.dataframelize(i), PID.top, STATUS_CODE, MODEL]) for i in passed ]
+        _src_anti_top  = [ list([particle.dataframelize(i), PID.anti_top, STATUS_CODE, MODEL]) for i in passed ]
+
         print("Using {0} process for accelerating speed.".format(PROCESS))
         with mp.Pool(PROCESS) as p:
             _result_top = p.starmap(particle_tracing, _src_top)
@@ -609,38 +458,38 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS, GENERATOR):
             p.close()
             p.join()
         print("Anti-Top tracing finished.")
-        for i in range(len(_index)):
-            top_1_idx.append(_result_top[i][0])
-            top_2_idx.append(_result_top[i][1])
-            top_1_daughter_idx_1.append(_result_top[i][2])
-            top_1_daughter_pid_1.append(_result_top[i][3]) 
-            top_1_daughter_idx_2.append(_result_top[i][4])
-            top_1_daughter_pid_2.append(_result_top[i][5])
-            top_2_daughter_idx_1.append(_result_top[i][6]) 
-            top_2_daughter_pid_1.append(_result_top[i][7])
-            top_2_daughter_idx_2.append(_result_top[i][8])
-            top_2_daughter_pid_2.append(_result_top[i][9])
-            top_1_bar_idx.append(_result_anti_top[i][0])
-            top_2_bar_idx.append(_result_anti_top[i][1])
-            top_1_bar_daughter_idx_1.append(_result_anti_top[i][2]) 
-            top_1_bar_daughter_pid_1.append(_result_anti_top[i][3])
-            top_1_bar_daughter_idx_2.append(_result_anti_top[i][4])
-            top_1_bar_daughter_pid_2.append(_result_anti_top[i][5])
-            top_2_bar_daughter_idx_1.append(_result_anti_top[i][6]) 
-            top_2_bar_daughter_pid_1.append(_result_anti_top[i][7])
-            top_2_bar_daughter_idx_2.append(_result_anti_top[i][8])
-            top_2_bar_daughter_pid_2.append(_result_anti_top[i][9])
-        
-        _src_top_d_1, _src_top_d_2, _src_anti_top_d_1, _src_anti_top_d_2 = [], [], [], []
-        
-        parton_array = np.zeros([ len(_index) , NUM_OF_DAUGHTER, 7])
+        _result_top = np.array(_result_top)
+        _result_anti_top = np.array(_result_anti_top)
 
-        for i in range(len(_index)):
-            j = _index[i]
-            _src_top_d_1.append([particle.dataframelize(j), top_1_daughter_idx_1[i], top_1_daughter_idx_2[i]])
-            _src_top_d_2.append([particle.dataframelize(j), top_2_daughter_idx_1[i], top_2_daughter_idx_2[i]])
-            _src_anti_top_d_1.append([particle.dataframelize(j), top_1_bar_daughter_idx_1[i], top_1_bar_daughter_idx_2[i]])
-            _src_anti_top_d_2.append([particle.dataframelize(j), top_2_bar_daughter_idx_1[i], top_2_bar_daughter_idx_2[i]])
+        del _src_top, _src_anti_top
+
+        # top_1_idx = _result_top[:,0]
+        # top_2_idx = _result_top[:,1]
+        top_1_daughter_idx_1 = _result_top[:,2]
+        # top_1_daughter_pid_1 = _result_top[:,3]
+        top_1_daughter_idx_2 = _result_top[:,4]
+        # top_1_daughter_pid_2 = _result_top[:,5]
+        top_2_daughter_idx_1 = _result_top[:,6]
+        # top_2_daughter_pid_1 = _result_top[:,7]
+        top_2_daughter_idx_2 = _result_top[:,8]
+        # top_2_daughter_pid_2 = _result_top[:,9]
+
+        # top_1_bar_idx = _result_anti_top[:,0]
+        # top_2_bar_idx = _result_anti_top[:,1]
+        top_1_bar_daughter_idx_1 = _result_anti_top[:,2]
+        # top_1_bar_daughter_pid_1 = _result_anti_top[:,3]
+        top_1_bar_daughter_idx_2 = _result_anti_top[:,4]
+        # top_1_bar_daughter_pid_2 = _result_anti_top[:,5]
+        top_2_bar_daughter_idx_1 = _result_anti_top[:,6]
+        # top_2_bar_daughter_pid_1 = _result_anti_top[:,7]
+        top_2_bar_daughter_idx_2 = _result_anti_top[:,8]
+        # top_2_bar_daughter_pid_2 = _result_anti_top[:,9]
+        
+        _src_top_d_1, _src_top_d_2 = [list([particle.dataframelize(passed[i]), top_1_daughter_idx_1[i], top_1_daughter_idx_2[i]]) for i in range(len(passed))], [list([particle.dataframelize(passed[i]), top_2_daughter_idx_1[i], top_2_daughter_idx_2[i]]) for i in range(len(passed))]
+        _src_anti_top_d_1, _src_anti_top_d_2 = [list([particle.dataframelize(passed[i]), top_1_bar_daughter_idx_1[i], top_1_bar_daughter_idx_2[i]]) for i in range(len(passed))], [list([particle.dataframelize(passed[i]), top_2_bar_daughter_idx_1[i], top_2_bar_daughter_idx_2[i]]) for i in range(len(passed))]
+        
+        parton_array = np.zeros([ len(passed) , NUM_OF_DAUGHTER])
+
         with mp.Pool(PROCESS) as p:
             _result_top_1 = p.starmap(quark_finder, _src_top_d_1)
             p.close()
@@ -661,167 +510,144 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS, GENERATOR):
             p.close()
             p.join()
         print("Daughter of Anti-Top_2's daughter found.") 
-        for i in range(len(_index)):
-            parton_array[i][0][0], parton_array[i][1][0], parton_array[i][2][0] = _result_top_1[i][0], _result_top_1[i][1], _result_top_1[i][2]
-            parton_array[i][3][0], parton_array[i][4][0], parton_array[i][5][0] = _result_top_2[i][0], _result_top_2[i][1], _result_top_2[i][2]
-            parton_array[i][6][0], parton_array[i][7][0], parton_array[i][8][0] = _result_anti_top_1[i][0], _result_anti_top_1[i][1], _result_anti_top_1[i][2]
-            parton_array[i][9][0], parton_array[i][10][0], parton_array[i][11][0] = _result_anti_top_2[i][0], _result_anti_top_2[i][1], _result_anti_top_2[i][2]
+        _result_top_1 = np.array(_result_top_1)
+        _result_top_2 = np.array(_result_top_2)
+        _result_anti_top_1 = np.array(_result_anti_top_1)
+        _result_anti_top_2 = np.array(_result_anti_top_2)
+
+        del _src_top_d_1, _src_top_d_2, _src_anti_top_d_1, _src_anti_top_d_2
+
+        parton_array[:, 0] = _result_top[:, 0]
+        parton_array[:, 1] = _result_top[:, 1]
+        parton_array[:, 2] = _result_top[:, 2]
+        parton_array[:, 3] = _result_top_2[:, 0]
+        parton_array[:, 4] = _result_top_2[:, 1]
+        parton_array[:, 5] = _result_top_2[:, 2]
+        parton_array[:, 6] = _result_anti_top_1[:, 0]
+        parton_array[:, 7] = _result_anti_top_1[:, 1]
+        parton_array[:, 8] = _result_anti_top_1[:, 2]
+        parton_array[:, 9] = _result_anti_top_2[:, 0]
+        parton_array[:, 10] = _result_anti_top_2[:, 1]
+        parton_array[:, 11] = _result_anti_top_2[:, 2]
+
         print("+------------------------------------------------------------------------------------------------------+")
         print("Parton tracing section complete. The daughter of W+/W- and bbbar has been found. Cost: {0:.1f} s".format(time.time()-start))
         print("+------------------------------------------------------------------------------------------------------+")
     else :
         print("Please select a correct model.")
 
-
-    
-
     print("+------------------------------------------------------------------------------------------------------+")
     print("Recording the kinematics variables of partons in the selected event.")
     print("+------------------------------------------------------------------------------------------------------+")
-    parton_pdgid = []
-    parton_barcode = []
-    parton_pt = []
-    parton_eta = []
-    parton_phi = []
-    parton_mass = []
+    parton_pdgid = np.zeros((len(passed), NUM_OF_DAUGHTER), dtype=np.int8)
+    parton_barcode = np.zeros((len(passed), NUM_OF_DAUGHTER), dtype=np.int8)
+    parton_pt = np.zeros((len(passed), NUM_OF_DAUGHTER))
+    parton_eta = np.zeros((len(passed), NUM_OF_DAUGHTER))
+    parton_phi = np.zeros((len(passed), NUM_OF_DAUGHTER))
+    parton_mass = np.zeros((len(passed), NUM_OF_DAUGHTER))
 
-
-    for i in tqdm.trange(len(_index)):
-        _parton_pdgid = []
-        _parton_barcode = []
-        _parton_pt = []
-        _parton_eta = []
-        _parton_phi = []
-        _parton_mass = []
+    for i in tqdm.trange(len(passed)):
+        idx = passed[i]
         for j in range(NUM_OF_DAUGHTER):
-            k = _index[i]
-            dataset = particle.dataframelize(k)
+            ix = int(parton_array[i][j])
+            # dataset = particle.dataframelize(idx)
+            parton_pdgid[i][j] = particle.pid[idx][ix]
+            parton_barcode[i][j] = barcode[j]
+            parton_pt[i][j] = particle.pt[idx][ix]
+            parton_eta[i][j] = particle.eta[idx][ix]
+            parton_phi[i][j] = particle.phi[idx][ix]
+            parton_mass[i][j] = particle.mass[idx][ix]
 
-            _parton_pdgid.append(dataset.iloc[int(parton_array[i][j][0]), 6])
-            _parton_barcode.append(barcode[j])
-            _parton_pt.append(dataset.iloc[int(parton_array[i][j][0]), 7])
-            _parton_eta.append(dataset.iloc[int(parton_array[i][j][0]), 8])
-            _parton_phi.append(dataset.iloc[int(parton_array[i][j][0]), 9])
-            _parton_mass.append(dataset.iloc[int(parton_array[i][j][0]), 10])
-
-
-        parton_pdgid.append(np.asanyarray(_parton_pdgid, dtype=object))
-        parton_barcode.append(np.asanyarray(_parton_barcode, dtype=object))
-        parton_pt.append(np.asanyarray(_parton_pt, dtype=object))
-        parton_eta.append(np.asanyarray(_parton_eta, dtype=object))
-        parton_phi.append(np.asanyarray(_parton_phi, dtype=object))
-        parton_mass.append(np.asanyarray(_parton_mass, dtype=object))
-    parton_pdgid = np.asanyarray(parton_pdgid, dtype=object)
-    parton_barcode = np.asanyarray(parton_barcode, dtype=object)
-    parton_pt = np.asanyarray(parton_pt, dtype=object)
-    parton_eta = np.asanyarray(parton_eta, dtype=object)
-    parton_phi = np.asanyarray(parton_phi, dtype=object)
-    parton_mass = np.asanyarray(parton_mass, dtype=object)
-    
-    if MODEL == 'ttbar_lep_left':
+    if MODEL == 'ttbar_lep_left' or MODEL == "ttbar_lep_right":
         print("Recording simulation lepton kinematic properties.")
-        simulation_lepton_pdgid = np.zeros(len(_index))
-        simulation_lepton_barcode = np.zeros(len(_index))
-        simulation_lepton_pt = np.zeros(len(_index))
-        simulation_lepton_eta = np.zeros(len(_index))
-        simulation_lepton_phi = np.zeros(len(_index))
-        simulation_lepton_mass = np.zeros(len(_index))
-        simulation_neutrino_pdgid = np.zeros(len(_index))
-        simulation_neutrino_barcode = np.zeros(len(_index))
-        simulation_neutrino_pt = np.zeros(len(_index))
-        simulation_neutrino_eta = np.zeros(len(_index))
-        simulation_neutrino_phi = np.zeros(len(_index))
-        simulation_neutrino_mass = np.zeros(len(_index))
-        for i in tqdm.trange(len(_index)):
-            for j in range(1,3):
-                if parton_pdgid[i][j] == -11 or parton_pdgid[i][j] == -13:
-                    simulation_lepton_pdgid[i] = parton_pdgid[i][j]
-                    simulation_lepton_barcode[i] = parton_barcode[i][j]
-                    simulation_lepton_pt[i] = parton_pt[i][j]
-                    simulation_lepton_eta[i] = parton_eta[i][j]
-                    simulation_lepton_phi[i] = parton_phi[i][j]
-                    simulation_lepton_mass[i] = parton_mass[i][j]
-                    
-                else: 
-                    simulation_neutrino_pdgid[i] = parton_pdgid[i][j]
-                    simulation_neutrino_barcode[i] = parton_barcode[i][j]
-                    simulation_neutrino_pt[i] = parton_pt[i][j]
-                    simulation_neutrino_eta[i] = parton_eta[i][j]
-                    simulation_neutrino_phi[i] = parton_phi[i][j]
-                    simulation_neutrino_mass[i] = parton_mass[i][j]
+        simulation_lepton_pdgid = np.zeros(len(passed))
+        simulation_lepton_barcode = np.zeros(len(passed))
+        simulation_lepton_pt = np.zeros(len(passed))
+        simulation_lepton_eta = np.zeros(len(passed))
+        simulation_lepton_phi = np.zeros(len(passed))
+        simulation_lepton_mass = np.zeros(len(passed))
+        simulation_neutrino_pdgid = np.zeros(len(passed))
+        simulation_neutrino_barcode = np.zeros(len(passed))
+        simulation_neutrino_pt = np.zeros(len(passed))
+        simulation_neutrino_eta = np.zeros(len(passed))
+        simulation_neutrino_phi = np.zeros(len(passed))
+        simulation_neutrino_mass = np.zeros(len(passed))
 
-        parton_pdgid = np.delete(parton_pdgid, [1,2], 1)
-        parton_barcode = np.delete(parton_barcode, [1,2], 1)
-        parton_pt = np.delete(parton_pt, [1,2], 1)
-        parton_eta = np.delete(parton_eta, [1,2], 1)
-        parton_phi = np.delete(parton_phi, [1,2], 1)
-        parton_mass = np.delete(parton_mass, [1,2], 1)
+        if MODEL == 'ttbar_lep_left':
+            for i in tqdm.trange(len(passed)):
+                for j in range(1,3):
+                    if parton_pdgid[i][j] == -11 or parton_pdgid[i][j] == -13:
+                        simulation_lepton_pdgid[i] = parton_pdgid[i][j]
+                        simulation_lepton_barcode[i] = parton_barcode[i][j]
+                        simulation_lepton_pt[i] = parton_pt[i][j]
+                        simulation_lepton_eta[i] = parton_eta[i][j]
+                        simulation_lepton_phi[i] = parton_phi[i][j]
+                        simulation_lepton_mass[i] = parton_mass[i][j]
+                        
+                    else: 
+                        simulation_neutrino_pdgid[i] = parton_pdgid[i][j]
+                        simulation_neutrino_barcode[i] = parton_barcode[i][j]
+                        simulation_neutrino_pt[i] = parton_pt[i][j]
+                        simulation_neutrino_eta[i] = parton_eta[i][j]
+                        simulation_neutrino_phi[i] = parton_phi[i][j]
+                        simulation_neutrino_mass[i] = parton_mass[i][j]
 
-    if MODEL == "ttbar_lep_right":
-        print("Recording simulation lepton kinematic properties.")
-        simulation_lepton_pdgid = np.zeros(len(_index))
-        simulation_lepton_barcode = np.zeros(len(_index))
-        simulation_lepton_pt = np.zeros(len(_index))
-        simulation_lepton_eta = np.zeros(len(_index))
-        simulation_lepton_phi = np.zeros(len(_index))
-        simulation_lepton_mass = np.zeros(len(_index))
-        simulation_neutrino_pdgid = np.zeros(len(_index))
-        simulation_neutrino_barcode = np.zeros(len(_index))
-        simulation_neutrino_pt = np.zeros(len(_index))
-        simulation_neutrino_eta = np.zeros(len(_index))
-        simulation_neutrino_phi = np.zeros(len(_index))
-        simulation_neutrino_mass = np.zeros(len(_index))
-        for i in tqdm.trange(len(_index)):
-            for j in range(4,6):
-                if parton_pdgid[i][j] == 11 or parton_pdgid[i][j] == 13:
-                    simulation_lepton_pdgid[i] = parton_pdgid[i][j]
-                    simulation_lepton_barcode[i] = parton_barcode[i][j]
-                    simulation_lepton_pt[i] = parton_pt[i][j]
-                    simulation_lepton_eta[i] = parton_eta[i][j]
-                    simulation_lepton_phi[i] = parton_phi[i][j]
-                    simulation_lepton_mass[i] = parton_mass[i][j]
-                else: 
-                    simulation_neutrino_pdgid[i] = parton_pdgid[i][j]
-                    simulation_neutrino_barcode[i] = parton_barcode[i][j]
-                    simulation_neutrino_pt[i] = parton_pt[i][j]
-                    simulation_neutrino_eta[i] = parton_eta[i][j]
-                    simulation_neutrino_phi[i] = parton_phi[i][j]
-                    simulation_neutrino_mass[i] = parton_mass[i][j]
-        parton_pdgid = np.delete(parton_pdgid, [4, 5], 1)
-        parton_barcode = np.delete(parton_barcode, [4, 5], 1)
-        parton_pt = np.delete(parton_pt, [4, 5], 1)
-        parton_eta = np.delete(parton_eta, [4, 5], 1)
-        parton_phi = np.delete(parton_phi, [4, 5], 1)
-        parton_mass = np.delete(parton_mass, [4, 5], 1)
+            parton_pdgid = np.delete(parton_pdgid, [1,2], 1)
+            parton_barcode = np.delete(parton_barcode, [1,2], 1)
+            parton_pt = np.delete(parton_pt, [1,2], 1)
+            parton_eta = np.delete(parton_eta, [1,2], 1)
+            parton_phi = np.delete(parton_phi, [1,2], 1)
+            parton_mass = np.delete(parton_mass, [1,2], 1)
+
+        elif MODEL == "ttbar_lep_right":
+            for i in tqdm.trange(len(passed)):
+                for j in range(4,6):
+                    if parton_pdgid[i][j] == 11 or parton_pdgid[i][j] == 13:
+                        simulation_lepton_pdgid[i] = parton_pdgid[i][j]
+                        simulation_lepton_barcode[i] = parton_barcode[i][j]
+                        simulation_lepton_pt[i] = parton_pt[i][j]
+                        simulation_lepton_eta[i] = parton_eta[i][j]
+                        simulation_lepton_phi[i] = parton_phi[i][j]
+                        simulation_lepton_mass[i] = parton_mass[i][j]
+                    else: 
+                        simulation_neutrino_pdgid[i] = parton_pdgid[i][j]
+                        simulation_neutrino_barcode[i] = parton_barcode[i][j]
+                        simulation_neutrino_pt[i] = parton_pt[i][j]
+                        simulation_neutrino_eta[i] = parton_eta[i][j]
+                        simulation_neutrino_phi[i] = parton_phi[i][j]
+                        simulation_neutrino_mass[i] = parton_mass[i][j]
+            parton_pdgid = np.delete(parton_pdgid, [4, 5], 1)
+            parton_barcode = np.delete(parton_barcode, [4, 5], 1)
+            parton_pt = np.delete(parton_pt, [4, 5], 1)
+            parton_eta = np.delete(parton_eta, [4, 5], 1)
+            parton_phi = np.delete(parton_phi, [4, 5], 1)
+            parton_mass = np.delete(parton_mass, [4, 5], 1)
+        else: 
+            print("Wrong model, please check your model setting.")
     print("+------------------------------------------------------------------------------------------------------+")
     print("Finished to record the kinematics variables of partons in the selected event.")
     print("+------------------------------------------------------------------------------------------------------+")
-
     
     print("+------------------------------------------------------------------------------------------------------+")
     print("Starting parton-jet matching.")
     print("+------------------------------------------------------------------------------------------------------+")
-    jet_parton_index = []
-    parton_jet_index = []
-    _src_delta_R = []
     start = time.time()
-    for i in tqdm.trange(len(jet_pt)):
-        _src_delta_R.append([NUM_OF_PARTON, len(jet_pt[i]), parton_eta[i], parton_phi[i], jet_eta[i], jet_phi[i], 0.4, MODEL])
+
+    _src_delta_R = [list([NUM_OF_PARTON, len(jet_pt[i]), parton_eta[i], parton_phi[i], jet_eta[i], jet_phi[i], 0.4, MODEL]) for i in range(len(jet_pt))]
     print("Using {0} process for accelerating speed.".format(PROCESS))
     with mp.Pool(PROCESS) as p:
         _result_delta_R = p.starmap(deltaR_matching, _src_delta_R)
         p.close()
         p.join()
-    
-    for i in range(len(_result_delta_R)):
-        jet_parton_index.append(_result_delta_R[i][0])
-        parton_jet_index.append(_result_delta_R[i][1])
+    _result_delta_R = np.array(_result_delta_R)
+
+    jet_parton_index = np.array([ a for a in _result_delta_R[:, 0]])
+    parton_jet_index = np.array([ a for a in _result_delta_R[:, 1]])
+
     print("+------------------------------------------------------------------------------------------------------+")
     print("Parton-jet matching finished. Cost: {0:.1f} s".format(time.time()-start))
     print("+------------------------------------------------------------------------------------------------------+")
-    jet_parton_index = np.asanyarray(jet_parton_index, dtype=object)
-    parton_jet_index = np.asanyarray(parton_jet_index, dtype=object)
-    
+
     if MODEL == 'ttbar_lep_left' or MODEL == "ttbar_lep_right":
         print("+------------------------------------------------------------------------------------------------------+")
         print("Starting lepton matching.")
@@ -850,16 +676,15 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS, GENERATOR):
         print("+------------------------------------------------------------------------------------------------------+")
         print("Neutrino matching finished.")
         print("+------------------------------------------------------------------------------------------------------+") 
-
     print("+------------------------------------------------------------------------------------------------------+")
     print("Recording barcode information.")
     print("+------------------------------------------------------------------------------------------------------+")
 
-    jet_barcode = []
-    for i in tqdm.trange(len(jet_pt)):
-        _jet_barcode = barcode_recorder(jet_parton_index[i], MODEL)
-        jet_barcode.append(_jet_barcode)
-    jet_barcode = np.asanyarray(jet_barcode, dtype=object)
+    jet_barcode = jet_parton_index.copy()
+
+    for i in range(len(barcode)):
+        jet_barcode = np.where(jet_barcode == i, barcode[i], jet_barcode) 
+    
     print("+------------------------------------------------------------------------------------------------------+")
     print("Barcode information has beed record.")
     print("+------------------------------------------------------------------------------------------------------+")
@@ -941,7 +766,6 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS, GENERATOR):
         print("Jet-parton matching section complete.\nFound {0} events with 1 ttbar candidate exist.\nFound {1} events with 2 ttbar candidate exist.".format( np.sum(N_match_top_in_event == 1), np.sum(N_match_top_in_event == 2) ))
         print("+------------------------------------------------------------------------------------------------------+")
     else : pass
-    
 
     print("+------------------------------------------------------------------------------------------------------+")
     print("Writing event record to the npz file.")
@@ -956,6 +780,7 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS, GENERATOR):
                             jet_phi=jet_phi,
                             jet_mass=jet_mass,
                             jet_btag=jet_btag,
+                            num_of_jets=jet_num_of_jets,
                             parton_jet_index=parton_jet_index,
                             parton_pdgid=parton_pdgid,
                             parton_barcode=parton_barcode,
@@ -973,6 +798,7 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS, GENERATOR):
                             jet_phi=jet_phi,
                             jet_mass=jet_mass,
                             jet_btag=jet_btag,
+                            num_of_jets=jet_num_of_jets,
                             parton_jet_index=parton_jet_index,
                             parton_pdgid=parton_pdgid,
                             parton_barcode=parton_barcode,
@@ -991,6 +817,7 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS, GENERATOR):
                             jet_phi=jet_phi,
                             jet_mass=jet_mass,
                             jet_btag=jet_btag,
+                            num_of_jets=jet_num_of_jets,
                             parton_jet_index=parton_jet_index,
                             parton_pdgid=parton_pdgid,
                             parton_barcode=parton_barcode,
