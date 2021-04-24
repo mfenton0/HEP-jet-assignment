@@ -696,12 +696,12 @@ def chi_square_minimizer( jet_pt_chi2, jet_eta_chi2, jet_phi_chi2, jet_btag_chi2
         smallest_10_idx = np.argsort(_chi2_value)[:10]
 
         smallest_10_chi2_value = _chi2_value[smallest_10_idx]
-        smallest_10_chi2_candidate = np.array([ x for x in _cand_record[smallest_10_idx]])
+        smallest_10_chi2_candidate = np.array([ x for x in _cand_record[smallest_10_idx]], dtype=np.int8)
 
         min_chi2 = smallest_10_chi2_value[0]
 
-        _jet_parton_index = np.full(len(jet_pt_chi2), -1)
-        _parton_jet_index = np.array(_cand_record[smallest_10_idx[0]])
+        _jet_parton_index = np.full(len(jet_pt_chi2), -1, dtype=np.int8)
+        _parton_jet_index = np.array(_cand_record[smallest_10_idx[0]], dtype=np.int8)
 
         for k in range(NUM_OF_JETS):
             for l in range(len(_parton_jet_index)):
@@ -905,12 +905,12 @@ def chi_square_minimizer( jet_pt_chi2, jet_eta_chi2, jet_phi_chi2, jet_btag_chi2
         smallest_10_idx = np.argsort(_chi2_value)[:10]
 
         smallest_10_chi2_value = _chi2_value[smallest_10_idx]
-        smallest_10_chi2_candidate = np.array([ x for x in _cand_record[smallest_10_idx]])
+        smallest_10_chi2_candidate = np.array([ x for x in _cand_record[smallest_10_idx]], dtype=np.int8)
 
         min_chi2 = smallest_10_chi2_value[0]
 
-        _jet_parton_index = np.full(len(jet_pt_chi2), -1)
-        _parton_jet_index = np.array(_cand_record[smallest_10_idx[0]])
+        _jet_parton_index = np.full(len(jet_pt_chi2), -1, dtype=np.int8)
+        _parton_jet_index = np.array(_cand_record[smallest_10_idx[0]], dtype=np.int8)
 
         for k in range(NUM_OF_JETS):
             for l in range(len(_parton_jet_index)):
@@ -1144,12 +1144,12 @@ def chi_square_minimizer( jet_pt_chi2, jet_eta_chi2, jet_phi_chi2, jet_btag_chi2
         smallest_10_idx = np.argsort(_chi2_value)[:10]
 
         smallest_10_chi2_value = _chi2_value[smallest_10_idx]
-        smallest_10_chi2_candidate = np.array([ x for x in _cand_record[smallest_10_idx]])
+        smallest_10_chi2_candidate = np.array([ x for x in _cand_record[smallest_10_idx]], dtype=np.int8)
 
         min_chi2 = smallest_10_chi2_value[0]
 
-        _jet_parton_index = np.full(len(jet_pt_chi2), -1)
-        _parton_jet_index = np.array(_cand_record[smallest_10_idx[0]])
+        _jet_parton_index = np.full(len(jet_pt_chi2), -1, dtype=np.int8)
+        _parton_jet_index = np.array(_cand_record[smallest_10_idx[0]], dtype=np.int8)
 
         for k in range(NUM_OF_JETS):
             for l in range(len(_parton_jet_index)):
