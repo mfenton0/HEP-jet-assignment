@@ -550,7 +550,6 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS, GENERATOR):
         idx = passed[i]
         for j in range(NUM_OF_DAUGHTER):
             ix = int(parton_array[i][j])
-            # dataset = particle.dataframelize(idx)
             parton_pdgid[i][j] = particle.pid[idx][ix]
             parton_barcode[i][j] = barcode[j]
             parton_pt[i][j] = particle.pt[idx][ix]
