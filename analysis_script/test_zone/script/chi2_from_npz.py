@@ -176,7 +176,7 @@ def chi2_from_npz(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS,EXTRA):
         p.close()
         p.join()
     _result_chi2 = np.array(_result_chi2)
-
+    
     min_chi2_value = _result_chi2[:, 0]
     parton_jet_index_chi2 = np.array([ x for x in _result_chi2[:, 1]])
     jet_parton_index_chi2 = np.array([ x for x in _result_chi2[:, 2]])
