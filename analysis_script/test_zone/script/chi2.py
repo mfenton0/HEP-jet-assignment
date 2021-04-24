@@ -652,9 +652,8 @@ def chi2(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS, EXTRA, GENERATOR):
     min_chi2_value = _result_chi2[:, 0]
     parton_jet_index = np.array([ x for x in _result_chi2[:, 1]])
     jet_parton_index = np.array([ x for x in _result_chi2[:, 2]])
-    cand_list = np.array([ x for x in _result_chi2[:, 3]])
-    chi2_value_list = np.array([ x for x in _result_chi2[:, 4]])
-
+    smallest_10_chi2_candidate = np.array([ x for x in _result_chi2[:, 3]])
+    smallest_10_chi2_value = np.array([ x for x in _result_chi2[:, 4]])
     if (min_chi2_value == -1).sum() != 0: print("There exist some events failed to compute chi-square reconstuction.")
         
     print("+------------------------------------------------------------------------------------------------------+")
@@ -796,8 +795,8 @@ def chi2(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS, EXTRA, GENERATOR):
                             parton_mass=parton_mass,
                             N_match_top_in_event=N_match_top_in_event,
                             min_chi2_value=min_chi2_value, 
-                            cand_list=cand_list,
-                            chi2_value_list=chi2_value_list)
+                            smallest_10_chi2_candidate=smallest_10_chi2_candidate,
+                            smallest_10_chi2_value=smallest_10_chi2_value)
     elif MODEL == 'ttH':
         np.savez_compressed(OUTPUT_FILE, 
                             jet_parton_index=jet_parton_index,
@@ -817,8 +816,8 @@ def chi2(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS, EXTRA, GENERATOR):
                             N_match_top_in_event=N_match_top_in_event,
                             N_match_higgs_in_event=N_match_higgs_in_event,
                             min_chi2_value=min_chi2_value, 
-                            cand_list=cand_list,
-                            chi2_value_list=chi2_value_list)
+                            smallest_10_chi2_candidate=smallest_10_chi2_candidate,
+                            smallest_10_chi2_value=smallest_10_chi2_value)
     elif MODEL == 'ttbar_lep_left' or MODEL == 'ttbar_lep_right':
         np.savez_compressed(OUTPUT_FILE, 
                             jet_parton_index=jet_parton_index,
@@ -856,8 +855,8 @@ def chi2(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS, EXTRA, GENERATOR):
                             simulation_lepton_mass=simulation_lepton_mass,
                             simulation_lepton_barcode=simulation_lepton_barcode,
                             min_chi2_value=min_chi2_value, 
-                            cand_list=cand_list,
-                            chi2_value_list=chi2_value_list)
+                            smallest_10_chi2_candidate=smallest_10_chi2_candidate,
+                            smallest_10_chi2_value=smallest_10_chi2_value)
 
     print("+------------------------------------------------------------------------------------------------------+")
     print("Event record has been send to {0}.npz.".format(OUTPUT_FILE))
