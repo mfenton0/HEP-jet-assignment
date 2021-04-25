@@ -8,6 +8,9 @@ import itertools, uproot, sys, os, tqdm
 import pandas as pd
 
 class pdgid():
+    """
+    This is a function for configurating PDG id.
+    """
     def __init__(self):
         self.w_plus = 24
         self.w_minus = -24
@@ -36,16 +39,30 @@ class pdgid():
         self.anti_tau = -17
         self.tau_neutrino = 18
         self.anti_tau_neutrino = -18
+        self.z_plus = 23
+        self.z_minus = -23
 
 PID = pdgid()
 
 def deltaPhi(phi1,phi2):
+    """
+    This is a function deltaPhi value between two target.
+    phi1: phi value from target one. 
+    phi2: phi value from target two. 
+    """
     phi = phi1-phi2
     while phi >= np.pi: phi -= np.pi*2.
     while phi < -np.pi: phi += np.pi*2.
     return phi
 
 def delta_R(eta1, phi1, eta2, phi2):
+    """
+    This is a function delta_R value between two target.
+    phi1: phi value from target one. 
+    eta1: eta value from target one. 
+    phi2: phi value from target two. 
+    eta2: eta value from target two. 
+    """
     return np.sqrt(deltaPhi(phi1,phi2)**2+(eta1-eta2)**2)
 
 def gaussian_fit(target):
@@ -58,11 +75,17 @@ def gaussian_fit(target):
     return mean, sigma 
 
 def shifted_particle_tracing(dataset, PID_daughter, idx):
+    """
+    This is a frunction tracing the on-flying particle. 
+    """
     if (dataset.iloc[idx,6] == PID_daughter):
         return dataset.iloc[idx,4]
 
 def particle_tracing(dataset, PID, STATUS, MODEL):
-    if MODEL == 'ttbar' or MODEL == 'ttH' or MODEL == "ttbar_lep_right" or MODEL == "ttbar_lep_left":
+    """
+    This is a function finding the daughter of origin particle.
+    """
+    if MODEL == 'ttbar' or MODEL == 'ttH' or MODEL == 'ZH' or MODEL == "ttbar_lep_right" or MODEL == "ttbar_lep_left":
         for i in range(len(dataset)):
             if(dataset.iloc[i,1] == STATUS and dataset.iloc[i,6] == PID ): 
                 daughter_index = int(dataset.iloc[i,0])
@@ -123,7 +146,9 @@ def particle_tracing(dataset, PID, STATUS, MODEL):
 #tracing the daughters
 #Input two daughter of top/top_bar and find their daughter
 def quark_finder(dataset, mother_idx_1, mother_idx_2):
-    
+    """
+    This is a function finding the daughter of bosons.
+    """
     #Specific two daughter of top
     def W_b_specifier(dataset, input_1_idx, input_2_idx):
         if dataset.iloc[int(input_1_idx),6] == PID.w_plus or dataset.iloc[int(input_1_idx),6] == PID.w_minus :
@@ -137,13 +162,11 @@ def quark_finder(dataset, mother_idx_1, mother_idx_2):
     W_boson_idx, mother_pid, b_quark_idx = W_b_specifier(dataset, mother_idx_1, mother_idx_2)
     
     #Find the two daughters of boson
-    
     daughter_1_idx = dataset.iloc[W_boson_idx, 4]
     daughter_1_pid = dataset.iloc[daughter_1_idx, 6]
     daughter_2_idx = dataset.iloc[W_boson_idx, 5]
     daughter_2_pid = dataset.iloc[daughter_2_idx, 6]
 
-    
     if daughter_1_pid == mother_pid or daughter_2_pid == mother_pid:
 
         init_idx = W_boson_idx
@@ -168,12 +191,12 @@ def quark_finder(dataset, mother_idx_1, mother_idx_2):
 
 def deltaR_matching(NUM_OF_PARTON, NUM_OF_JET, PARTON_ETA, PARTON_PHI, JET_ETA, JET_PHI, CUTS, MODEL):
     """
+    This is a function for doing delta R matching.
     PARTON_ETA: Array, a list of partons's eta in a event.
     PARTON_PHI: Array, a list of partons's phi in a event.
     JET_ETA: Array, a list of jet's eta in a event.
     JET_PHI: Array, a list of jet's phi in a event.
     """
-    
     _dR_between_parton_jet = []
     
     _parton_jet_index = np.full(NUM_OF_PARTON, -1)
@@ -181,7 +204,6 @@ def deltaR_matching(NUM_OF_PARTON, NUM_OF_JET, PARTON_ETA, PARTON_PHI, JET_ETA, 
     
     _jet_to_parton_list = np.zeros(len(PARTON_ETA))
     _parton_to_jet_list = np.zeros(len(JET_ETA))
-
 
     j = 0
     a = 0
@@ -213,8 +235,7 @@ def deltaR_matching(NUM_OF_PARTON, NUM_OF_JET, PARTON_ETA, PARTON_PHI, JET_ETA, 
     for k in range(NUM_OF_PARTON, NUM_OF_JET):
         _parton_to_jet_list[k] = 'Nan'
     
-    
-    if MODEL == 'ttbar':
+    if MODEL == 'ttbar' or MODEL == 'ZH':
         for j in range(len(JET_ETA)):
             if _parton_to_jet_list[j] == 0 :
                 _parton_jet_index[0] = int(_jet_to_parton_list[j])
@@ -378,11 +399,20 @@ def deltaR_matching(NUM_OF_PARTON, NUM_OF_JET, PARTON_ETA, PARTON_PHI, JET_ETA, 
     return _jet_parton_index, _parton_jet_index
 
 def chi_square_minimizer( jet_pt_chi2, jet_eta_chi2, jet_phi_chi2, jet_btag_chi2, jet_mass_chi2, MODEL, EXTRA, NUM_OF_JETS):
-    
+    """
+    This is a function for doing chi-square reconstruction.
+    PARTON_ETA: Array, a list of partons's eta in a event.
+    PARTON_PHI: Array, a list of partons's phi in a event.
+    JET_ETA: Array, a list of jet's eta in a event.
+    JET_PHI: Array, a list of jet's phi in a event.
+    """
     jet_btag_chi2 = jet_btag_chi2[:NUM_OF_JETS]
     num_of_btag = np.sum(jet_btag_chi2 ==1)
 
     class jet_cand_properties():
+        """
+        This is a class for storing jet candidats' properdies.
+        """
         def __init__(self, idx):
             self.idx = idx
             self.pt = jet_pt_chi2[self.idx]
@@ -473,7 +503,6 @@ def chi_square_minimizer( jet_pt_chi2, jet_eta_chi2, jet_phi_chi2, jet_btag_chi2
 
             
             for j in range(len(jet)):
-            
                 _jet_index_candidate = []
                 _jet_index_candidate.append(bjet[i][0])
                 _jet_index_candidate.append(bjet[i][1])
@@ -482,6 +511,7 @@ def chi_square_minimizer( jet_pt_chi2, jet_eta_chi2, jet_phi_chi2, jet_btag_chi2
                 _jet_index_candidate.append(jet[j][2])
                 _jet_index_candidate.append(jet[j][3])
                 jet_index_candidate.append(_jet_index_candidate)
+                
         _cand_record  = []
         _chi2_value = []
         for i in range(len(jet_index_candidate)):
@@ -933,7 +963,6 @@ def chi_square_minimizer( jet_pt_chi2, jet_eta_chi2, jet_phi_chi2, jet_btag_chi2
             j_6_idx = jet_index_candidate[i][9]
             j_7_idx = jet_index_candidate[i][10]
             j_8_idx = jet_index_candidate[i][11]
-            
 
             bjet_1 = jet_cand_properties(b_1_idx)
             bjet_2 = jet_cand_properties(b_2_idx)
@@ -947,7 +976,6 @@ def chi_square_minimizer( jet_pt_chi2, jet_eta_chi2, jet_phi_chi2, jet_btag_chi2
             jet_6 = jet_cand_properties(j_6_idx)
             jet_7 = jet_cand_properties(j_7_idx)
             jet_8 = jet_cand_properties(j_8_idx)
-            
             
             W_1_inv = cal_two_parton_inv(jet_1, jet_2)
             W_2_inv = cal_two_parton_inv(jet_3, jet_4)
