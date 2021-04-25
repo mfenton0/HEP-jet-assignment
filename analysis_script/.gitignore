@@ -15,3 +15,4 @@ parse_uproot_old.py
 .ipynb_checkpoints/
 __pycache__/
 output/ttbar_lep_output/
+test_zone/
