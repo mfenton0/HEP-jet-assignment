@@ -13,7 +13,7 @@ from script.MissingET import Missing_ET_properties
 from script.electron import electron_properties
 from script.muon import muon_properties
 import h5py, sys, traceback, os, tqdm, time
-from script.utilize import delta_R, deltaPhi, pdgid, event_selection, quark_finder, deltaR_matching, deltaPhi, particle_tracing
+from script.utilize import delta_R, deltaPhi, pdgid, quark_finder, deltaR_matching, deltaPhi, particle_tracing
 import multiprocessing as mp
 
 def parse(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS, GENERATOR):
