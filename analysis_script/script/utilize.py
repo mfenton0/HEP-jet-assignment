@@ -337,10 +337,9 @@ def deltaR_matching(NUM_OF_PARTON, NUM_OF_JET, PARTON_ETA, PARTON_PHI, JET_ETA, 
     """
     
     _dR_between_parton_jet = []
-
-    _parton_jet_index = [int(999999999*i/i) for i in range(1, NUM_OF_PARTON+1)]
-    _jet_parton_index = [int(999999999*i/i) for i in range(1, NUM_OF_JET+1)]
-
+    
+    _parton_jet_index = np.full(NUM_OF_PARTON, -1)
+    _jet_parton_index = np.full(NUM_OF_JET, -1)
     
     _jet_to_parton_list = np.zeros(len(PARTON_ETA))
     _parton_to_jet_list = np.zeros(len(JET_ETA))
@@ -537,67 +536,13 @@ def deltaR_matching(NUM_OF_PARTON, NUM_OF_JET, PARTON_ETA, PARTON_PHI, JET_ETA, 
                 _jet_parton_index[int(m)] = _parton_to_jet_list[k]
             else: pass
 
-    for l in range(NUM_OF_JET):
-        if _jet_parton_index[l] > NUM_OF_PARTON:
-            _jet_parton_index[l] = 'nan'
-    for l in range(NUM_OF_PARTON): 
-        if _parton_jet_index[l] > NUM_OF_JET:
-            _parton_jet_index[l] = 'Nan'
     
-    return np.asanyarray(_jet_parton_index, dtype=object), np.asanyarray(_parton_jet_index, dtype=object)
+    return _jet_parton_index, _parton_jet_index
 
-def barcode_recorder(SOURCE, MODEL):
-    _jet_barcode = [0*i for i in range(len(SOURCE))]
-    # print(_jet_barcode)
-    if MODEL == "ttbar":
-        barcode = np.array([34, 40, 40, 17, 20, 20])
-        for i in range(len(SOURCE)):
-            for j in range(len(barcode)):
-                if SOURCE[i] == int(j):
-                    _jet_barcode[i] = barcode[int(j)]
-                else :
-                    _jet_barcode[i] = 'Nan'
-    elif MODEL == "ttH":
-        barcode = np.array([68, 80, 80, 34, 40, 40, 1, 1])
-        for i in range(len(SOURCE)):
-            for j in range(len(barcode)):
-                if SOURCE[i] == int(j):
-                    _jet_barcode[i] = barcode[int(j)]
-                else :
-                    _jet_barcode[i] = 'Nan'
-
-    elif MODEL == "four_top":
-        barcode = np.array([2056, 2176, 2176, 516, 576, 576, 1028, 1056, 1056, 257, 272, 272])
-        for i in range(len(SOURCE)):
-            for j in range(len(barcode)):
-                if SOURCE[i] == int(j):
-                    _jet_barcode[i] = barcode[int(j)]
-                else :
-                    _jet_barcode[i] = 'Nan'
-    elif MODEL == 'ttbar_lep_left': 
-        barcode = np.array([34, 17, 20, 20])
-        for i in range(len(SOURCE)):
-            for j in range(len(barcode)):
-                if SOURCE[i] == int(j):
-                    _jet_barcode[i] = barcode[int(j)]
-                else :
-                    _jet_barcode[i] = 'Nan'
-    elif MODEL == 'ttbar_lep_right': 
-        barcode = np.array([34, 40, 40, 17])
-        for i in range(len(SOURCE)):
-            for j in range(len(barcode)):
-                if SOURCE[i] == int(j):
-                    _jet_barcode[i] = barcode[int(j)]
-                else :
-                    _jet_barcode[i] = 'Nan'
-    else:
-        print("Please select a correct model.")
+def chi_square_minimizer( jet_pt_chi2, jet_eta_chi2, jet_phi_chi2, jet_btag_chi2, jet_mass_chi2, MODEL, EXTRA, NUM_OF_JETS):
     
-    return np.asanyarray(_jet_barcode, dtype=object)
-
-def chi_square_minimizer( jet_pt_chi2, jet_eta_chi2, jet_phi_chi2, jet_btag_chi2, jet_mass_chi2, MODEL, EXTRA):
-    
-    num_of_btag = np.sum(np.array(jet_btag_chi2) ==1)
+    jet_btag_chi2 = jet_btag_chi2[:NUM_OF_JETS]
+    num_of_btag = np.sum(jet_btag_chi2 ==1)
 
     class jet_cand_properties():
         def __init__(self, idx):
@@ -645,13 +590,13 @@ def chi_square_minimizer( jet_pt_chi2, jet_eta_chi2, jet_phi_chi2, jet_btag_chi2
         sigma_W = 12.3
         sigma_t = 26.3
 
-        _parton_jet_index = np.array(['Nan', 'Nan', 'Nan', 'Nan', 'Nan', 'Nan'])
+        _parton_jet_index = np.full(6, -1)
         
         _jet_index = []
-        for i in range(len(jet_pt_chi2)):
+        for i in range(NUM_OF_JETS):
             _jet_index.append(i)
 
-        for i in range(len(jet_btag_chi2)):
+        for i in range(NUM_OF_JETS):
             if jet_btag_chi2[i] == 1:
                 _bjet_list.append(i)
             else :
@@ -736,42 +681,36 @@ def chi_square_minimizer( jet_pt_chi2, jet_eta_chi2, jet_phi_chi2, jet_btag_chi2
                 chi2_part_3 = (W_1_inv - m_W)**2
                 chi2_part_4 = (W_2_inv - m_W)**2
                 
-                chi2_tmp = chi2_part_1/sigma_t**2 + chi2_part_2/sigma_t**2  + chi2_part_3/sigma_W**2 + chi2_part_4/sigma_W**2
+                chi2_tmp = chi2_part_1/(sigma_t**2) + chi2_part_2/(sigma_t**2)  + chi2_part_3/(sigma_W**2) + chi2_part_4/(sigma_W**2)
             else: print("Please input a available extra option")
-                
             
-            if (min_chi2 < 0 or chi2_tmp < min_chi2 ):
-                min_chi2 = chi2_tmp
-                jet_1_best_idx = j_1_idx
-                jet_2_best_idx = j_2_idx
-                jet_3_best_idx = j_3_idx
-                jet_4_best_idx = j_4_idx
-                b_1_best_idx = b_1_idx
-                b_2_best_idx = b_2_idx
-                _cand_record.append([[b_1_best_idx, jet_1_best_idx, jet_2_best_idx, b_2_best_idx, jet_3_best_idx, jet_4_best_idx]])
-                _chi2_value.append(min_chi2)
-                _parton_jet_index = np.array([b_1_best_idx, jet_1_best_idx, jet_2_best_idx, b_2_best_idx, jet_3_best_idx, jet_4_best_idx])
-            else: 
-                pass
-        _jet_parton_index = [9999999*i/i for i in range(1, len(jet_pt_chi2)+1)]
-    
-        chi2_value = _chi2_value[-10:]
-        cand_record = _cand_record[-10:]
-        del _chi2_value, _cand_record
-        for k in range(len(jet_pt_chi2)):
+            _cand_record.append(list([b_1_idx, j_1_idx, j_2_idx, b_2_idx, j_3_idx, j_4_idx]))
+            _chi2_value.append(chi2_tmp)
+
+        _chi2_value = np.array(_chi2_value)
+        _cand_record = np.array([x for x in _cand_record])
+
+        not_minus_1 = _chi2_value != -1
+
+        _chi2_value =  _chi2_value[not_minus_1]
+        smallest_10_idx = np.argsort(_chi2_value)[:10]
+
+        smallest_10_chi2_value = _chi2_value[smallest_10_idx]
+        smallest_10_chi2_candidate = np.array([ x for x in _cand_record[smallest_10_idx]], dtype=np.int8)
+
+        min_chi2 = smallest_10_chi2_value[0]
+
+        _jet_parton_index = np.full(len(jet_pt_chi2), -1, dtype=np.int8)
+        _parton_jet_index = np.array(_cand_record[smallest_10_idx[0]], dtype=np.int8)
+
+        for k in range(NUM_OF_JETS):
             for l in range(len(_parton_jet_index)):
                 if _parton_jet_index[l] == int(k):
                     _jet_parton_index[k] = int(l)
                 else :
                     pass
-        
-        for k in range(len(_jet_parton_index)):
-                if _jet_parton_index[k] == 9999999:
-                    _jet_parton_index[k] = 'Nan'
-                else : 
-                    pass
-        
-        return min_chi2, np.asanyarray(_parton_jet_index, dtype=object), np.asanyarray(_jet_parton_index, dtype=object), np.asanyarray(cand_record, dtype=object), np.asanyarray(chi2_value, dtype=object)
+        del _chi2_value, _cand_record 
+        return min_chi2, _parton_jet_index, _jet_parton_index, smallest_10_chi2_candidate, smallest_10_chi2_value
         
     elif MODEL == 'ttH':
         tmp_jet_list = []
@@ -784,14 +723,14 @@ def chi_square_minimizer( jet_pt_chi2, jet_eta_chi2, jet_phi_chi2, jet_btag_chi2
         sigma_t = 28.8
         sigma_h = 22.3
 
-        _parton_jet_index = np.array(['Nan', 'Nan', 'Nan', 'Nan', 'Nan', 'Nan', 'Nan', 'Nan'])
+        _parton_jet_index = np.full(8, -1)
         
         _jet_index = []
 
-        for i in range(len(jet_pt_chi2)):
+        for i in range(NUM_OF_JETS):
             _jet_index.append(i)
 
-        for i in range(len(jet_btag_chi2)):
+        for i in range(NUM_OF_JETS):
             if jet_btag_chi2[i] == 1:
                 tmp_bjet_list.append(i)
             else :
@@ -954,42 +893,34 @@ def chi_square_minimizer( jet_pt_chi2, jet_eta_chi2, jet_phi_chi2, jet_btag_chi2
             
             chi2_tmp = chi2_part_1/(2*(sigma_t**2)) + chi2_part_2/sigma_W**2 + chi2_part_3/sigma_W**2 + (chi2_part_4)/sigma_h**2
             
+            _cand_record.append(list([b_1_idx, j_1_idx, j_2_idx, b_2_idx, j_3_idx, j_4_idx]))
             _chi2_value.append(chi2_tmp)
-            _cand_record.append([[b_1_idx, j_1_idx, j_2_idx, b_2_idx, j_3_idx, j_4_idx, b_3_idx, b_4_idx]])
-            if (min_chi2 < 0 or chi2_tmp < min_chi2 ):
-                min_chi2 = chi2_tmp
-                jet_1_best_idx = j_1_idx
-                jet_2_best_idx = j_2_idx
-                jet_3_best_idx = j_3_idx
-                jet_4_best_idx = j_4_idx
-                b_1_best_idx = b_1_idx
-                b_2_best_idx = b_2_idx
-                b_3_best_idx = b_3_idx
-                b_4_best_idx = b_4_idx
-                _cand_record.append([[b_1_best_idx, jet_1_best_idx, jet_2_best_idx, b_2_best_idx, jet_3_best_idx, jet_4_best_idx, b_3_best_idx, b_4_best_idx]])
-                _chi2_value.append(min_chi2)
-                _parton_jet_index = np.array([b_1_best_idx, jet_1_best_idx, jet_2_best_idx, b_2_best_idx, jet_3_best_idx, jet_4_best_idx, b_3_best_idx, b_4_best_idx])
-            else: 
-                pass
-        _jet_parton_index = [9999999*i/i for i in range(1, len(jet_pt_chi2)+1)]
-        
-        chi2_value = _chi2_value[-10:]
-        cand_record = _cand_record[-10:]
-        del _chi2_value, _cand_record
-        for k in range(len(jet_pt_chi2)):
+
+        _chi2_value = np.array(_chi2_value)
+        _cand_record = np.array([x for x in _cand_record])
+
+        not_minus_1 = _chi2_value != -1
+
+        _chi2_value =  _chi2_value[not_minus_1]
+        smallest_10_idx = np.argsort(_chi2_value)[:10]
+
+        smallest_10_chi2_value = _chi2_value[smallest_10_idx]
+        smallest_10_chi2_candidate = np.array([ x for x in _cand_record[smallest_10_idx]], dtype=np.int8)
+
+        min_chi2 = smallest_10_chi2_value[0]
+
+        _jet_parton_index = np.full(len(jet_pt_chi2), -1, dtype=np.int8)
+        _parton_jet_index = np.array(_cand_record[smallest_10_idx[0]], dtype=np.int8)
+
+        for k in range(NUM_OF_JETS):
             for l in range(len(_parton_jet_index)):
                 if _parton_jet_index[l] == int(k):
                     _jet_parton_index[k] = int(l)
                 else :
                     pass
-        
-        for k in range(len(_jet_parton_index)):
-                if _jet_parton_index[k] == 9999999:
-                    _jet_parton_index[k] = 'Nan'
-                else : 
-                    pass
-        
-        return min_chi2, np.asanyarray(_parton_jet_index, dtype=object), np.asanyarray(_jet_parton_index, dtype=object), np.asanyarray(cand_record, dtype=object), np.asanyarray(chi2_value, dtype=object)
+
+        del _chi2_value, _cand_record 
+        return min_chi2, _parton_jet_index, _jet_parton_index, smallest_10_chi2_candidate, smallest_10_chi2_value
     elif MODEL == "four_top":
         tmp_jet_list = []
         tmp_bjet_list = []
@@ -1000,15 +931,14 @@ def chi_square_minimizer( jet_pt_chi2, jet_eta_chi2, jet_phi_chi2, jet_btag_chi2
         sigma_W = 18.7
         sigma_t = 28.8
 
+        _parton_jet_index = np.full(12, -1)
 
-        _parton_jet_index = np.array(['Nan', 'Nan', 'Nan', 'Nan', 'Nan', 'Nan', 'Nan', 'Nan', 'Nan', 'Nan', 'Nan', 'Nan'])
-        
         _jet_index = []
 
-        for i in range(len(jet_pt_chi2)):
+        for i in range(NUM_OF_JETS):
             _jet_index.append(i)
 
-        for i in range(len(jet_btag_chi2)):
+        for i in range(NUM_OF_JETS):
             if jet_btag_chi2[i] == 1:
                 tmp_bjet_list.append(i)
             else :
@@ -1202,47 +1132,34 @@ def chi_square_minimizer( jet_pt_chi2, jet_eta_chi2, jet_phi_chi2, jet_btag_chi2
             
             chi2_tmp =  chi2_part_1/sigma_t**2 + chi2_part_2/sigma_t**2  + chi2_part_3/sigma_W**2 + chi2_part_4/sigma_W**2 +  chi2_part_5/sigma_t**2 + chi2_part_6/sigma_t**2  + chi2_part_7/sigma_W**2 + chi2_part_8/sigma_W**2
             
+            _cand_record.append(list([b_1_idx, j_1_idx, j_2_idx, b_2_idx, j_3_idx, j_4_idx]))
             _chi2_value.append(chi2_tmp)
-            _cand_record.append([[b_1_idx, j_1_idx, j_2_idx, b_2_idx, j_3_idx, j_4_idx, b_3_idx, j_5_idx, j_6_idx, b_4_idx, j_7_idx, j_8_idx]])
-            if (min_chi2 < 0 or chi2_tmp < min_chi2 ):
-                min_chi2 = chi2_tmp
-                jet_1_best_idx = j_1_idx
-                jet_2_best_idx = j_2_idx
-                jet_3_best_idx = j_3_idx
-                jet_4_best_idx = j_4_idx
-                jet_5_best_idx = j_5_idx
-                jet_6_best_idx = j_6_idx
-                jet_7_best_idx = j_7_idx
-                jet_8_best_idx = j_8_idx
-                
-                b_1_best_idx = b_1_idx
-                b_2_best_idx = b_2_idx
-                b_3_best_idx = b_3_idx
-                b_4_best_idx = b_4_idx
-                _cand_record.append([[b_1_best_idx, jet_1_best_idx, jet_2_best_idx, b_2_best_idx, jet_3_best_idx, jet_4_best_idx, b_3_best_idx, jet_5_best_idx, jet_6_best_idx, b_4_best_idx,  jet_7_best_idx, jet_8_best_idx]])
-                _chi2_value.append(min_chi2)
-                _parton_jet_index = np.array([b_1_best_idx, jet_1_best_idx, jet_2_best_idx, b_2_best_idx, jet_3_best_idx, jet_4_best_idx, b_3_best_idx, jet_5_best_idx, jet_6_best_idx, b_4_best_idx,  jet_7_best_idx, jet_8_best_idx])
-            else: 
-                pass
-        _jet_parton_index = [9999999*i/i for i in range(1, len(jet_pt_chi2)+1)]
-        
-        chi2_value = _chi2_value[-10:]
-        cand_record = _cand_record[-10:]
-        del _chi2_value, _cand_record
-        for k in range(len(jet_pt_chi2)):
+
+        _chi2_value = np.array(_chi2_value)
+        _cand_record = np.array([x for x in _cand_record])
+
+        not_minus_1 = _chi2_value != -1
+
+        _chi2_value =  _chi2_value[not_minus_1]
+        smallest_10_idx = np.argsort(_chi2_value)[:10]
+
+        smallest_10_chi2_value = _chi2_value[smallest_10_idx]
+        smallest_10_chi2_candidate = np.array([ x for x in _cand_record[smallest_10_idx]], dtype=np.int8)
+
+        min_chi2 = smallest_10_chi2_value[0]
+
+        _jet_parton_index = np.full(len(jet_pt_chi2), -1, dtype=np.int8)
+        _parton_jet_index = np.array(_cand_record[smallest_10_idx[0]], dtype=np.int8)
+
+        for k in range(NUM_OF_JETS):
             for l in range(len(_parton_jet_index)):
                 if _parton_jet_index[l] == int(k):
                     _jet_parton_index[k] = int(l)
                 else :
                     pass
-        
-        for k in range(len(_jet_parton_index)):
-                if _jet_parton_index[k] == 9999999:
-                    _jet_parton_index[k] = 'Nan'
-                else : 
-                    pass
-        
-        return min_chi2, np.asanyarray(_parton_jet_index, dtype=object), np.asanyarray(_jet_parton_index, dtype=object), np.asanyarray(cand_record, dtype=object), np.asanyarray(chi2_value, dtype=object)
+                
+        del _chi2_value, _cand_record 
+        return min_chi2, _parton_jet_index, _jet_parton_index, smallest_10_chi2_candidate, smallest_10_chi2_value
 
 def purity_classifier(prediction, truth_match, mode, model):
     if model == 'ttbar':
