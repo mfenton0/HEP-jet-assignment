@@ -6,30 +6,6 @@ Mail: davidho@gapp.nthu.edu.tw
 import numpy as np
 import pandas as pd
 import h5py, os, tqdm, sys, uproot
-from .particle_properties_uproot import particle_properties  #import particle properties helper function from particle_properties.py
-from .jet_properties_uproot import jet_properties  #import jet properties helper function from jet_properties.py
-
-
-class properties_for_jet():
-    def __init__(self, pt, eta, phi, mass):
-        self.pt = pt
-        self.eta = eta
-        self.phi = phi
-        self.mass = mass
-    def dataframelize(self, index):
-
-        idx = np.linspace(0, len( self.pt[index])-1, num = len( self.pt[index]) )
-
-        jet_dict = {
-                "Index": idx,
-                "PT":  self.pt[index],
-                "Eta":  self.eta[index],
-                "Phi":  self.phi[index],
-                "Mass":  self.mass[index],
-            }
-        jet_df = pd.DataFrame(jet_dict)
-        return jet_df
-
 
 def cal_two_jet_inv(jet1, jet2):
             part_1 = (jet1.e + jet2.e)**2
@@ -47,10 +23,11 @@ def cal_three_jet_inv(jet1, jet2, jet3):
 
 def fitting(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE):
 
-    if int(SINGLE) == 1:
+    if SINGLE:
         try:
-            print("Loading hdf5 file from {0}.".format(INPUT_FILE))
-            with h5py.File(INPUT_FILE) as f:
+            print("Loading npz file from {0}.".format(INPUT_FILE))
+            
+            with np.load(INPUT_FILE, allow_pickle=True) as f:
                 jet_parton_index = f['jet_parton_index'][:]
                 parton_jet_index = f['parton_jet_index'][:]
                 N_match_top_in_event = f['N_match_top_in_event'][:]
@@ -63,7 +40,7 @@ def fitting(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE):
         except:
             print('Please check input file path.')
 
-    elif int(SINGLE) != 1 and bool(SINGLE.isdigit) == True:
+    else :
         files = os.listdir(INPUT_FILE)
         num_of_files = len(files)
         pbar = tqdm.tqdm(total=num_of_files)
@@ -71,7 +48,7 @@ def fitting(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE):
             if i == 0:
                 try:
                     print("Loading hdf5 file from {0}.".format(files[i]))
-                    with h5py.File(files[i]) as f:
+                    with np.load(INPUT_FILE, allow_pickle=True) as f:
                         jet_parton_index = f['jet_parton_index'][:]
                         parton_jet_index = f['parton_jet_index'][:]
                         N_match_top_in_event = f['N_match_top_in_event'][:]
@@ -87,7 +64,7 @@ def fitting(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE):
             else : 
                 try:
                     print("Loading root file from {0}.".format(files[i]))
-                    with h5py.File(files[i]) as f:
+                    with np.load(INPUT_FILE, allow_pickle=True) as f:
                         jet_parton_index = np.concatenate((jet_parton_index, f['jet_parton_index'][:]))
                         parton_jet_index = np.concatenate((parton_jet_index, f['parton_jet_index'][:]))
                         N_match_top_in_event = np.concatenate((N_match_top_in_event, f['N_match_top_in_event'][:]))
@@ -100,9 +77,7 @@ def fitting(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE):
                     pbar.update(1) 
                 except:
                     print('Please check input file path.')
-    else:
-        print("Please inpurt a correct mode.\n1.-s 1\n2.-s > 1")
-    
+
     class candidate_property():
         def __init__(self, index_1, index_2):
             self.pt = jet_pt[index_1][index_2]

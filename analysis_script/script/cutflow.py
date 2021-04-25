@@ -6,77 +6,19 @@ Mail: davidho@gapp.nthu.edu.tw
 import uproot
 import pandas as pd 
 import numpy as np 
-from .particle_properties_uproot import particle_properties  #import particle properties helper function from particle_properties.py
-from .jet_properties_uproot import jet_properties  #import jet properties helper function from jet_properties.py
+from .particle import particle_properties  #import particle properties helper function from particle_properties.py
+from .jet import jet_properties  #import jet properties helper function from jet_properties.py
+from script.MissingET import Missing_ET_properties
+from script.electron import electron_properties
+from script.muon import muon_properties
 import h5py, sys, traceback, os, tqdm, configparser
-from .utilize import delta_R, deltaPhi, pdgid, event_selection, quark_finder, particle_tracing, deltaR_matching, barcode_recorder
+from .utilize import delta_R, deltaPhi, pdgid, event_selection, quark_finder, particle_tracing, deltaR_matching
 import matplotlib.pyplot as plt 
 
 left, width = .25, .5
 bottom, height = .25, .5
 right = left + width
 top = bottom + height
-
-class properties_for_particle():
-    def __init__(self, event, pt, eta, phi, pid, M1, M2, D1, D2, status, rapidity, mass, charge):
-        self.event = event
-        self.pt = pt
-        self.eta = eta
-        self.phi = phi
-        self.pid = pid
-        self.M1 = M1
-        self.M2 = M2
-        self.D1 = D1
-        self.D2 = D2
-        self.status = status
-        self.rapidity = rapidity
-        self.mass = mass
-        self.charge = charge
-    def dataframelize(self, index):
-
-        idx = np.linspace(0, len( self.pt[index])-1, num = len( self.pt[index]) )
-
-        patron_dict = {
-                "Index": idx,
-                "Status":  self.status[index],
-                "Mother_1":  self.M1[index],
-                "Mother_2":  self.M2[index],
-                "Daughter_1":  self.D1[index],
-                "Daughter_2":  self.D2[index],
-                "PID":  self.pid[index],
-                "PT":  self.pt[index],
-                "Eta":  self.eta[index],
-                "Phi":  self.phi[index],
-                "Mass":  self.mass[index]
-            }
-        patron_df = pd.DataFrame(patron_dict)
-        return patron_df
-
-class properties_for_jet():
-    def __init__(self, event, pt, eta, phi, btag, area, mass, charge):
-        self.event = event
-        self.pt = pt
-        self.eta = eta
-        self.phi = phi
-        self.btag = btag
-        self.area = area
-        self.mass = mass
-        self.charge = charge
-    def dataframelize(self, index):
-
-        idx = np.linspace(0, len( self.pt[index])-1, num = len( self.pt[index]) )
-
-        jet_dict = {
-                "Index": idx,
-                "PT":  self.pt[index],
-                "Eta":  self.eta[index],
-                "Phi":  self.phi[index],
-                "Mass":  self.mass[index],
-                "Btag": self.btag[index],
-                "Area": self.area[index]
-            }
-        jet_df = pd.DataFrame(jet_dict)
-        return jet_df
 
 def cutflow(INPUT_FILE, OUTPUT_FILE, MODEL, CONFIG, SINGLE):
     
@@ -127,15 +69,14 @@ def cutflow(INPUT_FILE, OUTPUT_FILE, MODEL, CONFIG, SINGLE):
         print("Please input a number of cuts within 1 ~ 5.")
     
 
-    if int(SINGLE) == 1:
-        try:
-            print("Loading root file from {0}.".format(INPUT_FILE))
-            data  = uproot.open(INPUT_FILE)['Delphes']
-        except:
-            print('Please check input file path.')
-
+    if SINGLE:
+        data = uproot.open(INPUT_FILE)['Delphes']
         particle = particle_properties(data)
         jet = jet_properties(data)
+        if MODEL == 'ttbar_lep_left' or MODEL == "ttbar_lep_right":
+            electron = electron_properties(data)
+            muon = muon_properties(data)
+            missing_et = Missing_ET_properties(data)
 
         if num_of_cuts == 1:
             marker_event_C1 = []
@@ -411,88 +352,27 @@ def cutflow(INPUT_FILE, OUTPUT_FILE, MODEL, CONFIG, SINGLE):
         print("C3: {0}.".format(np.sum(marker_event_C3 == 1)))
         print("C4: {0}.".format(np.sum(marker_event_C4 == 1)))
         print("C5: {0}.".format(np.sum(marker_event_C5 == 1)))
-
         print("+------------------------------------------------------------------------------------------------------+")
-    elif int(SINGLE) != 1 and bool(SINGLE.isdigit) == True:
-        _data = []
-        particle = []
-        jet = []
+    else :
         files = os.listdir(INPUT_FILE)
-        num_of_files = len(files)
-        pbar = tqdm.tqdm(total=num_of_files)
+        PATH = []
         for a in files:
-            try:
-                print("Loading root file from {0}.".format(os.path.join(INPUT_FILE, a)))
-                tmp = uproot.open(os.path.join(INPUT_FILE, a))['Delphes']
-                _data.append(tmp)
-                pbar.update(1) 
-            except:
-                print('Please check input file path.')
-        
-        for i in tqdm.trange(num_of_files):
-            tmp_particle = particle_properties(_data[i])
-            tmp_jet = jet_properties(_data[i])
-
-            if i == 0 :
-                _particle_event = tmp_particle.event
-                _particle_pt = tmp_particle.pt
-                _particle_eta = tmp_particle.eta
-                _particle_phi = tmp_particle.phi
-                _particle_pid = tmp_particle.pid
-                _particle_M1 = tmp_particle.M1
-                _particle_M2 = tmp_particle.M2
-                _particle_D1 = tmp_particle.D1
-                _particle_D2 = tmp_particle.D2
-                _particle_status = tmp_particle.status
-                _particle_rapidity = tmp_particle.rapidity
-                _particle_mass = tmp_particle.mass
-                _particle_charge = tmp_particle.charge
-
-                _jet_event = tmp_jet.event
-                _jet_pt = tmp_jet.pt
-                _jet_eta = tmp_jet.eta
-                _jet_phi = tmp_jet.phi
-                _jet_btag = tmp_jet.btag
-                _jet_area = tmp_jet.area
-                _jet_mass = tmp_jet.mass
-                _jet_charge = tmp_jet.charge
-                
-            else :
-                _particle_event = np.concatenate((_particle_event, tmp_particle.event))
-                _particle_pt = np.concatenate((_particle_pt, tmp_particle.pt))
-                _particle_eta = np.concatenate((_particle_eta, tmp_particle.eta))
-                _particle_phi = np.concatenate((_particle_phi, tmp_particle.phi))
-                _particle_pid = np.concatenate((_particle_pid, tmp_particle.pid))
-                _particle_M1 = np.concatenate((_particle_M1, tmp_particle.M1))
-                _particle_M2 = np.concatenate((_particle_M2, tmp_particle.M2))
-                _particle_D1 = np.concatenate((_particle_D1, tmp_particle.D1))
-                _particle_D2 = np.concatenate((_particle_D2, tmp_particle.D2))
-                _particle_status = np.concatenate((_particle_status, tmp_particle.status))
-                _particle_rapidity = np.concatenate((_particle_rapidity, tmp_particle.rapidity))
-                _particle_mass = np.concatenate((_particle_mass, tmp_particle.mass))
-                _particle_charge = np.concatenate((_particle_charge, tmp_particle.charge))
-
-                _jet_event = np.concatenate((_jet_event, tmp_jet.event))
-                _jet_pt = np.concatenate((_jet_pt, tmp_jet.pt))
-                _jet_eta = np.concatenate((_jet_eta, tmp_jet.eta))
-                _jet_phi = np.concatenate((_jet_phi, tmp_jet.phi))
-                _jet_btag = np.concatenate((_jet_btag, tmp_jet.btag))
-                _jet_area = np.concatenate((_jet_area, tmp_jet.area))
-                _jet_mass = np.concatenate((_jet_mass, tmp_jet.mass))
-                _jet_charge = np.concatenate((_jet_charge, tmp_jet.charge))
-
-        clustered_particle_data = properties_for_particle(_particle_event, _particle_pt, _particle_eta, _particle_phi, _particle_pid, _particle_M1, _particle_M2, _particle_D1, _particle_D2, _particle_status, _particle_rapidity, _particle_mass, _particle_charge)
-
-        clustered_jet_data = properties_for_jet(_jet_event, _jet_pt, _jet_eta, _jet_phi, _jet_btag, _jet_area, _jet_mass, _jet_charge)
+            PATH.append(os.path.join(INPUT_FILE, a))
+        particle = particle_properties(PATH, single=False)
+        jet = jet_properties(PATH, single=False)
+        if MODEL == 'ttbar_lep_left' or MODEL == "ttbar_lep_right":
+            electron = electron_properties(PATH, single=False)
+            muon = muon_properties(PATH, single=False)
+            missing_et = Missing_ET_properties(PATH, single=False)
         
         if num_of_cuts == 1:
             marker_event_C1 = []
             marker_jet = []
             marker_bjet = []
-            for i in range(len(clustered_particle_data.event)):
+            for i in range(len(particle.event)):
                 marker_event_C1.append(0)
-                marker_jet.append(np.zeros([len(clustered_jet_data.pt[i])]))
-                marker_bjet.append(np.zeros([len(clustered_jet_data.pt[i])]))
+                marker_jet.append(np.zeros([len(jet.pt[i])]))
+                marker_bjet.append(np.zeros([len(jet.pt[i])]))
             
             marker_event_C1 = np.asanyarray(marker_event_C1, dtype=object)
             marker_jet = np.asanyarray(marker_jet, dtype=object)
@@ -503,11 +383,11 @@ def cutflow(INPUT_FILE, OUTPUT_FILE, MODEL, CONFIG, SINGLE):
             marker_event_C2 = []
             marker_jet = []
             marker_bjet = []
-            for i in range(len(clustered_particle_data.event)):
+            for i in range(len(particle.event)):
                 marker_event_C1.append(0)
                 marker_event_C2.append(0)
-                marker_jet.append(np.zeros([len(clustered_jet_data.pt[i])]))
-                marker_bjet.append(np.zeros([len(clustered_jet_data.pt[i])]))
+                marker_jet.append(np.zeros([len(jet.pt[i])]))
+                marker_bjet.append(np.zeros([len(jet.pt[i])]))
             
             marker_event_C1 = np.asanyarray(marker_event_C1, dtype=object)
             marker_event_C2 = np.asanyarray(marker_event_C2, dtype=object)
@@ -520,12 +400,12 @@ def cutflow(INPUT_FILE, OUTPUT_FILE, MODEL, CONFIG, SINGLE):
             marker_event_C3 = []
             marker_jet = []
             marker_bjet = []
-            for i in range(len(clustered_particle_data.event)):
+            for i in range(len(particle.event)):
                 marker_event_C1.append(0)
                 marker_event_C2.append(0)
                 marker_event_C3.append(0)
-                marker_jet.append(np.zeros([len(clustered_jet_data.pt[i])]))
-                marker_bjet.append(np.zeros([len(clustered_jet_data.pt[i])]))
+                marker_jet.append(np.zeros([len(jet.pt[i])]))
+                marker_bjet.append(np.zeros([len(jet.pt[i])]))
             
             marker_event_C1 = np.asanyarray(marker_event_C1, dtype=object)
             marker_event_C2 = np.asanyarray(marker_event_C2, dtype=object)
@@ -541,13 +421,13 @@ def cutflow(INPUT_FILE, OUTPUT_FILE, MODEL, CONFIG, SINGLE):
             marker_jet = []
             marker_bjet = []
 
-            for i in range(len(clustered_particle_data.event)):
+            for i in range(len(particle.event)):
                 marker_event_C1.append(0)
                 marker_event_C2.append(0)
                 marker_event_C3.append(0)
                 marker_event_C4.append(0)
-                marker_jet.append(np.zeros([len(clustered_jet_data.pt[i])]))
-                marker_bjet.append(np.zeros([len(clustered_jet_data.pt[i])]))
+                marker_jet.append(np.zeros([len(jet.pt[i])]))
+                marker_bjet.append(np.zeros([len(jet.pt[i])]))
             marker_event_C1 = np.asanyarray(marker_event_C1, dtype=object)
             marker_event_C2 = np.asanyarray(marker_event_C2, dtype=object)
             marker_event_C3 = np.asanyarray(marker_event_C3, dtype=object)
@@ -562,14 +442,14 @@ def cutflow(INPUT_FILE, OUTPUT_FILE, MODEL, CONFIG, SINGLE):
             marker_event_C5 = []
             marker_jet = []
             marker_bjet = []
-            for i in range(len(clustered_particle_data.event)):
+            for i in range(len(particle.event)):
                 marker_event_C1.append(0)
                 marker_event_C2.append(0)
                 marker_event_C3.append(0)
                 marker_event_C4.append(0)
                 marker_event_C5.append(0)
-                marker_jet.append(np.zeros([len(clustered_jet_data.pt[i])]))
-                marker_bjet.append(np.zeros([len(clustered_jet_data.pt[i])]))
+                marker_jet.append(np.zeros([len(jet.pt[i])]))
+                marker_bjet.append(np.zeros([len(jet.pt[i])]))
             marker_event_C1 = np.asanyarray(marker_event_C1, dtype=object)
             marker_event_C2 = np.asanyarray(marker_event_C2, dtype=object)
             marker_event_C3 = np.asanyarray(marker_event_C3, dtype=object)
@@ -581,17 +461,17 @@ def cutflow(INPUT_FILE, OUTPUT_FILE, MODEL, CONFIG, SINGLE):
             print("Please input a number of cuts within 1 ~ 5.")
         
 
-        for i in tqdm.trange(len(clustered_particle_data.event)):
-            for j in range(len(clustered_jet_data.pt[i])):
-                if clustered_jet_data.btag[i][j] == 1 and clustered_jet_data.pt[i][j] > pt_cuts and np.abs(clustered_jet_data.eta[i][j]) < eta_cuts:
+        for i in tqdm.trange(len(particle.event)):
+            for j in range(len(jet.pt[i])):
+                if jet.btag[i][j] == 1 and jet.pt[i][j] > pt_cuts and np.abs(jet.eta[i][j]) < eta_cuts:
                     marker_bjet[i][j] = 1 
                 else: pass 
             
-                if clustered_jet_data.pt[i][j] > pt_cuts and np.abs(clustered_jet_data.eta[i][j]) <= eta_cuts:
+                if jet.pt[i][j] > pt_cuts and np.abs(jet.eta[i][j]) <= eta_cuts:
                     marker_jet[i][j] = 1
                 else: pass 
 
-        for i in tqdm.trange(len(clustered_particle_data.event)):
+        for i in tqdm.trange(len(particle.event)):
             if num_of_cuts == 1:
                 if np.sum(marker_jet[i] == 1) >= jet_C1 and np.sum(marker_bjet[i] == 1) >= bjet_C1:
                     marker_event_C1[i] = 1 
@@ -747,8 +627,6 @@ def cutflow(INPUT_FILE, OUTPUT_FILE, MODEL, CONFIG, SINGLE):
 
         print("+------------------------------------------------------------------------------------------------------+")
 
-    else:
-        print("Please inpurt a correct mode.\n1.-s 1\n2.-s > 1")
     
     
 
