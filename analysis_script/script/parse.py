@@ -103,6 +103,19 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS, GENERATOR):
         barcode = np.array([2056, 2176, 2176, 516, 576, 576, 1028, 1056, 1056, 257, 272, 272])
         NUM_OF_PARTON = 12
         NUM_OF_DAUGHTER = 12
+    elif MODEL == "ZH":
+        """
+        Barcode system
+        Z H W+ W- b b~ 
+        0 0  0  0  0 0
+        daughter of higgs and W+: 011000 ----> 24
+        daughter of higgs and W-: 010100 ----> 20
+        daughter of Z and b: 100010 ----> 34
+        daughter of Z and b~: 100001 ----> 33
+        """
+        barcode = np.array([24, 24, 20, 20, 34, 33])
+        NUM_OF_PARTON = 6
+        NUM_OF_DAUGHTER = 6
     else:
         print("Please select a correct model.")
 
@@ -135,7 +148,7 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS, GENERATOR):
     print("+------------------------------------------------------------------------------------------------------+")
     print("Start jet selection.")
     print("+------------------------------------------------------------------------------------------------------+")
-    if MODEL == 'ttbar':
+    if MODEL == 'ttbar' or MODEL == 'ZH':
         # Find the event that exists at least 2 b-jet passed the selection
         btag_passed = np.where(((jet.btag == 1) & (jet.pt >= 25) & (np.abs(jet.eta) < 2.5) ).sum() >= 2)
         # Find the event that exists at least 6 non b-jet passed the selection
@@ -351,12 +364,12 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS, GENERATOR):
             _result_top = p.starmap(quark_finder, _src_top_d)
             p.close()
             p.join()
-        print("Daughter of Top's daughter found.")
+        print("Daughter of Top's daughters found.")
         with mp.Pool(PROCESS) as p:
             _result_anti_top = p.starmap(quark_finder, _src_anti_top_d)
             p.close()
             p.join()
-        print("Daughter of Anti-Top's daughter found.")
+        print("Daughter of Anti-Top's daughters found.")
         _result_top = np.array(_result_top)
         _result_anti_top = np.array(_result_anti_top)
 
@@ -420,12 +433,12 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS, GENERATOR):
             _result_top = p.starmap(quark_finder, _src_top_d)
             p.close()
             p.join()
-        print("Daughter of Top's daughter found.")
+        print("Daughter of Top's daughters found.")
         with mp.Pool(PROCESS) as p:
             _result_anti_top = p.starmap(quark_finder, _src_anti_top_d)
             p.close()
             p.join()
-        print("Daughter of Anti-Top's daughter found.")
+        print("Daughter of Anti-Top's daughters found.")
         _result_top = np.array(_result_top)
         _result_anti_top = np.array(_result_anti_top)
 
@@ -494,22 +507,22 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS, GENERATOR):
             _result_top_1 = p.starmap(quark_finder, _src_top_d_1)
             p.close()
             p.join()
-        print("Daughter of Top_1's daughter found.") 
+        print("Daughter of Top_1's daughters found.") 
         with mp.Pool(PROCESS) as p:
             _result_top_2 = p.starmap(quark_finder, _src_top_d_2)
             p.close()
             p.join()
-        print("Daughter of Top_2's daughter found.") 
+        print("Daughter of Top_2's daughters found.") 
         with mp.Pool(PROCESS) as p:
             _result_anti_top_1 = p.starmap(quark_finder, _src_anti_top_d_1)
             p.close()
             p.join()
-        print("Daughter of Anti-Top_1's daughter found.") 
+        print("Daughter of Anti-Top_1's daughters found.") 
         with mp.Pool(PROCESS) as p:
             _result_anti_top_2 = p.starmap(quark_finder, _src_anti_top_d_2)
             p.close()
             p.join()
-        print("Daughter of Anti-Top_2's daughter found.") 
+        print("Daughter of Anti-Top_2's daughters found.") 
         _result_top_1 = np.array(_result_top_1)
         _result_top_2 = np.array(_result_top_2)
         _result_anti_top_1 = np.array(_result_anti_top_1)
@@ -532,6 +545,60 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS, GENERATOR):
 
         print("+------------------------------------------------------------------------------------------------------+")
         print("Parton tracing section complete. The daughter of W+/W- and bbbar has been found. Cost: {0:.1f} s".format(time.time()-start))
+        print("+------------------------------------------------------------------------------------------------------+")
+    elif MODEL == 'ZH':
+        
+        _src_Z  = [ list([particle.dataframelize(i), PID.z_plus, STATUS_CODE, MODEL]) for i in passed ]
+        _src_higgs  = [ list([particle.dataframelize(i), PID.higgs, STATUS_CODE, MODEL]) for i in passed ]
+
+
+        print("Using {0} process for accelerating speed.".format(PROCESS))
+        with mp.Pool(PROCESS) as p:
+            _result_z = p.starmap(particle_tracing, _src_Z)
+            p.close()
+            p.join()
+        print("Z tracing finished.")
+        with mp.Pool(PROCESS) as p:
+            _result_h = p.starmap(particle_tracing, _src_higgs)
+            p.close()
+            p.join()
+        print("Higgs tracing finished.")
+        _result_z = np.array(_result_z)
+        _result_h = np.array(_result_h)
+
+        z_idx = _result_z[:,0]
+        z_daughter_idx_1 = _result_z[:,1]
+        # z_daughter_pid_1 = _result_z[:,2]
+        z_daughter_idx_2 = _result_z[:,3]
+        # z_daughter_pid_2 = _result_z[:,4]
+
+        h_idx = _result_h[:,0]
+        h_daughter_idx_1 = _result_h[:,1]
+        # h_daughter_pid_1 = _result_h[:,2]
+        h_daughter_idx_2 = _result_h[:,3]
+        # h_daughter_pid_2 = _result_h[:,4]
+
+        _src_h_d = [list([particle.dataframelize(passed[i]), h_daughter_idx_1[i], h_daughter_idx_2[i]]) for i in range(len(passed))]
+        parton_array = np.zeros([ len(passed) , NUM_OF_DAUGHTER])
+
+        with mp.Pool(PROCESS) as p:
+            _result_h = p.starmap(quark_finder, _src_h_d)
+            p.close()
+            p.join()
+        print("Daughter of Higgs's daughters found.")
+        _result_top = np.array(_result_top)
+        _result_anti_top = np.array(_result_anti_top)
+
+        del _src_anti_top_d, _src_top_d
+
+        parton_array[:, 0] = _result_h[:, 0]
+        parton_array[:, 1] = _result_h[:, 1]
+        parton_array[:, 2] = _result_h[:, 2]
+        parton_array[:, 3] = _result_h[:, 0]
+        parton_array[:, 4] = _result_z[:, 1]
+        parton_array[:, 5] = _result_z[:, 3]
+        print("+------------------------------------------------------------------------------------------------------+")
+        print("Parton tracing section complete. The daughter of W+/W-, bbbar, and Higgs has been found. Cost: {0:.1f} s".format(time.time()-start))
         print("+------------------------------------------------------------------------------------------------------+")
     else :
         print("Please select a correct model.")
