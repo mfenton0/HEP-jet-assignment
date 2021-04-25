@@ -4,14 +4,12 @@ Institute: National Tsing Hua university, Department of Physics, Hsinchu, Taiwan
 Mail: davidho@gapp.nthu.edu.tw
 """
 #Import packages
-from script import cutflow, parse, chi2, fitting, background, purity, chi2_from_npz
+from script import cutflow, parse, chi2, chi2_from_npz, fitting 
 import h5py, sys, traceback, os, tqdm
 from argparse import ArgumentParser
 import multiprocessing as mp
 
 def main():
-    
-    cpus = mp.cpu_count()
     
     parser = ArgumentParser()
     parser.add_argument("-u", "--usage", dest="usage", help="Define the purpose to run.")
@@ -36,12 +34,12 @@ def main():
         chi2(args.input, args.output, args.model, args.single, args.process, args.extra, args.generator)
     elif args.usage == "chi2_from_npz":
         chi2_from_npz(args.input, args.output, args.model, args.single, args.process, args.extra)
-    elif args.usage == "purity":
-        purity(args.input, args.target, args.output, args.model, args.single)
+    # elif args.usage == "purity":
+    #     purity(args.input, args.target, args.output, args.model, args.single)
     elif args.usage == "fitting":
         fitting(args.input, args.output, args.model, args.single)
-    elif args.usage == 'background':
-        background(args.input, args.output, args.model, args.single, args.process, args.extra, args.generator)
+    # elif args.usage == 'background':
+    #     background(args.input, args.output, args.model, args.single, args.process, args.extra, args.generator)
     else: 
         print("Please select a correct usage.\n1. cutflow\n2. parse")
 
