@@ -93,7 +93,7 @@ def chi2_from_npz(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS,EXTRA):
     else:
         print("Please select a correct model.")
         
-    if int(SINGLE) == 1:
+    if SINGLE:
         with np.load(INPUT_FILE, allow_pickle=True) as file:
             jet_parton_index=file['jet_parton_index'][:]
             jet_barcode=file['jet_barcode'][:]
@@ -111,7 +111,7 @@ def chi2_from_npz(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS,EXTRA):
             parton_phi=file['parton_phi'][:]
             parton_mass=file['parton_mass'][:]
             N_match_top_in_event=file['N_match_top_in_event'][:]
-    elif int(SINGLE) != 1 and bool(SINGLE.isdigit) == True:
+    else :
         files = os.listdir(INPUT_FILE)
         num_of_files = len(files)
         pbar = tqdm.tqdm(total=num_of_files)
@@ -160,8 +160,6 @@ def chi2_from_npz(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS,EXTRA):
                     pbar.update(1)
             except:
                 print('Please check input file path.')
-    else: 
-        print("Please input a vaild 'SINGLE' argument.")
         
     print("+------------------------------------------------------------------------------------------------------+")
     print("Starting chi-square matching.")
