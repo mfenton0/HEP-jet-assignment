@@ -13,7 +13,7 @@ from script.MissingET import Missing_ET_properties
 from script.electron import electron_properties
 from script.muon import muon_properties
 import h5py, sys, traceback, os, tqdm, time
-from script.utilize import delta_R, deltaPhi, pdgid, event_selection, quark_finder, deltaPhi, particle_tracing, chi_square_minimizer
+from script.utilize import delta_R, deltaPhi, pdgid, quark_finder, deltaPhi, particle_tracing, chi_square_minimizer
 import multiprocessing as mp
 
 def chi2_from_npz(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS,EXTRA):
