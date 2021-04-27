@@ -21,7 +21,7 @@ class Missing_ET_properties():
             self.phi = data.array('MissingET.Phi')
         else: 
             num_of_files = len(data)
-            count = 0
+            count = 1
             _data = []
             for a in data:
                 try:

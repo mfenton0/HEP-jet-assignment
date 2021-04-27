@@ -22,7 +22,7 @@ class electron_properties():
         else:
             print("Loading electron information.")
             num_of_files = len(data)
-            count = 0
+            count = 1
             _data = []
             for a in data:
                 try:

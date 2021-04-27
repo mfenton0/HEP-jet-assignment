@@ -33,7 +33,7 @@ class particle_properties():
         else: 
             num_of_files = len(data)
             _data = []
-            count = 0
+            count = 1
             for a in data:
                 try:
                     print(f"Padding root file from {a}. Progress: {count}/{num_of_files}.")
