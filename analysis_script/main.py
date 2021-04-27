@@ -25,15 +25,19 @@ def main():
 
     args = parser.parse_args()
     
+    if args.single == str(True):
+        args.single = True
+    else: 
+        args.single = False
 
     if args.usage == "cutflow":
         cutflow(args.input, args.output, args.model, args.config, args.single)
     elif args.usage == "parse":
-        parse(args.input, args.output, args.model, args.single, args.process, args.generator)
+        parse(args.input, args.output, args.model, args.process, args.generator, args.single)
     elif args.usage == "chi2":
-        chi2(args.input, args.output, args.model, args.single, args.process, args.extra, args.generator)
+        chi2(args.input, args.output, args.model, args.process, args.extra, args.generator, args.single)
     elif args.usage == "chi2_from_npz":
-        chi2_from_npz(args.input, args.output, args.model, args.single, args.process, args.extra)
+        chi2_from_npz(args.input, args.output, args.model, args.process, args.extra, args.single)
     # elif args.usage == "purity":
     #     purity(args.input, args.target, args.output, args.model, args.single)
     elif args.usage == "fitting":

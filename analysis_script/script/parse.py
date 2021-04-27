@@ -16,7 +16,7 @@ import h5py, sys, traceback, os, tqdm, time
 from script.utilize import delta_R, deltaPhi, pdgid, quark_finder, deltaR_matching, deltaPhi, particle_tracing
 import multiprocessing as mp
 
-def parse(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS, GENERATOR):
+def parse(INPUT_FILE, OUTPUT_FILE, MODEL, PROCESS, GENERATOR, SINGLE=True):
 
     PID = pdgid()
     # Setting `STATUS_CODE` for different shower generator.
@@ -122,6 +122,7 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS, GENERATOR):
     print("+------------------------------------------------------------------------------------------------------+")
     print("Start loading dataset.")
     print("+------------------------------------------------------------------------------------------------------+")
+    print(SINGLE)
     if SINGLE:
         data = uproot.open(INPUT_FILE)['Delphes']
         particle = particle_properties(data)
