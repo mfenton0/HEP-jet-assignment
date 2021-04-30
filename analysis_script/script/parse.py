@@ -587,10 +587,9 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, PROCESS, GENERATOR, SINGLE=True):
             p.close()
             p.join()
         print("Daughter of Higgs's daughters found.")
-        _result_top = np.array(_result_top)
-        _result_anti_top = np.array(_result_anti_top)
+        _result_h = np.array(_result_h)
 
-        del _src_anti_top_d, _src_top_d
+        del _src_h_d
 
         parton_array[:, 0] = _result_h[:, 0]
         parton_array[:, 1] = _result_h[:, 1]
@@ -832,6 +831,16 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, PROCESS, GENERATOR, SINGLE=True):
         print("+------------------------------------------------------------------------------------------------------+")
         print("Jet-parton matching section complete.\nFound {0} events with 1 ttbar candidate exist.\nFound {1} events with 2 ttbar candidate exist.".format( np.sum(N_match_top_in_event == 1), np.sum(N_match_top_in_event == 2) ))
         print("+------------------------------------------------------------------------------------------------------+")
+    elif MODEL == 'ZH':
+        target_Z = jet_parton_index[:, :4]
+        target_H = jet_parton_index[:, 4:]
+        check_Z = (target_Z == -1).sum(1)
+        check_H = (target_H == -1).sum(1)
+        check_Z = np.where(check_Z >=1, 1, check_Z)
+        check_H = np.where(check_H >=1, 1, check_H)
+        Num_of_matched_Z = ~check_Z 
+        Num_of_matched_H = ~check_H
+
     else : pass
 
     print("+------------------------------------------------------------------------------------------------------+")
@@ -856,6 +865,26 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, PROCESS, GENERATOR, SINGLE=True):
                             parton_phi=parton_phi,
                             parton_mass=parton_mass,
                             N_match_top_in_event=N_match_top_in_event)
+    if MODEL == 'ZH':
+        np.savez_compressed(OUTPUT_FILE, 
+                            jet_parton_index=jet_parton_index,
+                            jet_barcode=jet_barcode,
+                            jet_pt=jet_pt,
+                            jet_eta=jet_eta,
+                            jet_phi=jet_phi,
+                            jet_mass=jet_mass,
+                            jet_btag=jet_btag,
+                            jet_num_of_jets=jet_num_of_jets,
+                            parton_jet_index=parton_jet_index,
+                            parton_pdgid=parton_pdgid,
+                            parton_barcode=parton_barcode,
+                            parton_pt=parton_pt,
+                            parton_eta=parton_eta,
+                            parton_phi=parton_phi,
+                            parton_mass=parton_mass,
+                            # Num_of_matched_Z=Num_of_matched_Z,
+                            # Num_of_matched_H=Num_of_matched_H,
+                            )
     elif MODEL == 'ttH':
         np.savez_compressed(OUTPUT_FILE, 
                             jet_parton_index=jet_parton_index,
