@@ -25,10 +25,10 @@ def main():
 
     args = parser.parse_args()
     
-    if args.single == str(True):
-        args.single = True
-    else: 
+    if args.single == str(False):
         args.single = False
+    else: 
+        args.single = True
 
     if args.usage == "cutflow":
         cutflow(args.input, args.output, args.model, args.config, args.single)
