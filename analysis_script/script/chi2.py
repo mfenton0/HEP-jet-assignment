@@ -13,7 +13,7 @@ from script.MissingET import Missing_ET_properties
 from script.electron import electron_properties
 from script.muon import muon_properties
 import h5py, sys, traceback, os, tqdm, time
-from script.utilize import delta_R, deltaPhi, pdgid, quark_finder, deltaPhi, particle_tracing, chi_square_minimizer
+from script.utilize import delta_R, deltaPhi, pdgid, quark_finder, deltaPhi, particle_tracing, chi_square_minimizer, event_selection
 import multiprocessing as mp
 
 def chi2(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS, EXTRA, GENERATOR):
@@ -132,87 +132,25 @@ def chi2(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS, EXTRA, GENERATOR):
     print("+------------------------------------------------------------------------------------------------------+")
 
     print("+------------------------------------------------------------------------------------------------------+")
-    print("Start jet selection.")
+    print("Start event selection.")
     print("+------------------------------------------------------------------------------------------------------+")
-    if MODEL == 'ttbar':
-        # Find the event that exists at least 2 b-jet passed the selection
-        btag_passed = np.where(((jet.btag == 1) & (jet.pt >= 25) & (np.abs(jet.eta) < 2.5) ).sum() >= 2)
-        # Find the event that exists at least 6 non b-jet passed the selection
-        non_btag_passed = np.where(((jet.pt >= 25) & (np.abs(jet.eta) < 2.5) ).sum() >= 6)
-        # Combine the result above 
-        passed = np.intersect1d(btag_passed[0], non_btag_passed[0])
-    elif MODEL == 'four_top':
-        # Find the event that exists at least 2 b-jet passed the selection
-        btag_passed = np.where(((jet.btag == 1) & (jet.pt >= 25) & (np.abs(jet.eta) < 2.5) ).sum() >= 2)
-        # Find the event that exists at least 12 non b-jet passed the selection
-        non_btag_passed = np.where(((jet.pt >= 25) & (np.abs(jet.eta) < 2.5) ).sum() >= 12)
-        # Combine the result above 
-        passed = np.intersect1d(btag_passed[0], non_btag_passed[0])
-    elif MODEL == 'ttH':
-        # Find the event that exists at least 2 b-jet passed the selection
-        btag_passed = np.where(((jet.btag == 1) & (jet.pt >= 25) & (np.abs(jet.eta) < 2.5) ).sum() >= 2)
-        # Find the event that exists at least 8 non b-jet passed the selection
-        non_btag_passed = np.where(((jet.pt >= 25) & (np.abs(jet.eta) < 2.5) ).sum() >= 8)
-        # Combine the result above 
-        passed = np.intersect1d(btag_passed[0], non_btag_passed[0])
-    elif MODEL == 'ttbar_lep_left' or MODEL == "ttbar_lep_right":
-        marker_lepton = []
-        marker_event = []
-        marker_jet = []
-        marker_btag = []
-        print("Start jet marking.")
-        for i in tqdm.trange(len(jet.pt)):
-            _marker_event = []
-            _marker_jet = []
-            _marker_btag = []
-            for j in range(len(jet.pt[i])):
-                if jet.btag[i][j] == 1 and jet.pt[i][j] > 25 and np.abs(jet.eta[i][j]) < 2.5:
-                    _marker_btag.append(1) 
-                else: 
-                    _marker_btag.append(0) 
-            
-                if jet.pt[i][j] > 25 and np.abs(jet.eta[i][j]) <= 2.5:
-                    _marker_jet.append(1)
-                else:
-                    _marker_jet.append(0)
-            marker_jet.append(np.asanyarray(_marker_jet, dtype=object))
-            marker_btag.append(np.asanyarray(_marker_btag, dtype=object))
-        
-        marker_jet = np.asanyarray(marker_jet, dtype=object)
-        marker_btag = np.asanyarray(marker_btag, dtype=object)
-        
-        #Remove electron from jets catogary
-        for i in range(len(jet.pt)):
-            
-            for j in range(len(jet.pt[i])):
-                for k in range(len(electron.pt[i])):
-                    if delta_R(jet.eta[i][j], jet.phi[i][j], electron.eta[i][k], electron.phi[i][k]) < 0.4:
-                        marker_jet[i][j] = 0
-                    else : pass 
-        
-        for i in tqdm.trange(len(electron.eta)):
-            _marker_lepton = []
-            for j in range(len(electron.eta[i])):
-                if electron.pt[i][j] > 25 and np.abs(electron.eta[i][j]) < 2.5:
-                    _marker_lepton.append(1)
-                else :
-                    _marker_lepton.append(0)
-            for j in range(len(muon.eta[i])):
-                if muon.pt[i][j] > 25 and np.abs(muon.eta[i][j]) < 2.5:
-                    _marker_lepton.append(1)
-                else :
-                    _marker_lepton.append(0)
-            marker_lepton.append(np.asanyarray(_marker_lepton, dtype=object))
-        marker_lepton = np.asanyarray(marker_lepton, dtype=object)
-        print("Start event marking.")
-        for i in tqdm.trange(len(jet.pt)):
-            if np.sum(marker_jet[i] == 1) >= 4 and np.sum(marker_btag[i] == 1) >= 2 and np.sum(marker_lepton[i] ==1) == 1 and len(marker_lepton[i]) == 1:
-                marker_event.append(1)
-            else:
-                marker_event.append(0)
-        marker_event = np.asanyarray(marker_event, dtype=object)
-        passed = np.where(marker_event == 1)[0]
-        del marker_jet, marker_btag, marker_lepton, marker_event
+    if MODEL == 'ttbar_lep_left' or MODEL == "ttbar_lep_right":
+        marker_event, marker_jet, marker_btag = event_selection(MODEL, 
+                                                                    pt=jet.pt, 
+                                                                    eta=jet.eta, 
+                                                                    phi=jet.phi,
+                                                                    btag=jet.btag,
+                                                                    electron_pt=electron.pt,
+                                                                    electron_eta=electron.eta,
+                                                                    electron_phi=electron.phi,
+                                                                    muon_pt=muon.pt,
+                                                                    muon_eta=muon.eta,
+                                                                    muon_phi=muon.phi,
+                                                                    )
+    else:
+        marker_event, marker_jet, marker_btag = event_selection(MODEL, pt=jet.pt, eta=jet.eta, btag=jet.btag)
+    del marker_jet, marker_btag
+    passed = np.where(marker_event == 1)[0]
     print("+------------------------------------------------------------------------------------------------------+")
     print("Jet selection done. {0} events has been selected.".format(len(passed)))
     print("+------------------------------------------------------------------------------------------------------+")
