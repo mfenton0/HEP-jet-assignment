@@ -16,7 +16,7 @@ import h5py, sys, traceback, os, tqdm, time
 from script.utilize import delta_R, deltaPhi, pdgid, quark_finder, deltaPhi, particle_tracing, chi_square_minimizer
 import multiprocessing as mp
 
-def chi2_from_npz(INPUT_FILE, OUTPUT_FILE, MODEL, SINGLE, PROCESS,EXTRA):
+def chi2_from_npz(INPUT_FILE, OUTPUT_FILE, MODEL, PROCESS, EXTRA, SINGLE=True):
     if MODEL == "ttbar":
         """
         Barcode system
