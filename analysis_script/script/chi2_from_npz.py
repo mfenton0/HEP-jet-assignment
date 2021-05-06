@@ -283,6 +283,7 @@ def chi2_from_npz(INPUT_FILE, OUTPUT_FILE, MODEL, PROCESS, EXTRA, SINGLE=True):
                             jet_phi=jet_phi,
                             jet_mass=jet_mass,
                             jet_btag=jet_btag,
+                            jet_num_of_jets=jet_num_of_jets,
                             parton_jet_index=parton_jet_index,
                             parton_jet_index_chi2=parton_jet_index_chi2,
                             parton_pdgid=parton_pdgid,
