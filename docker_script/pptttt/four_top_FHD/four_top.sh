@@ -1,0 +1,20 @@
+# Set up environment
+source ~/.bash_profile;
+cd ~/MG5_aMC_v2_7_2;
+pip3 install h5py tqdm;
+
+# Copy over all of the necessary files to run the script
+/bin/cp -f /workplace/HEP-jet-assignment/madgraph/delphes_card_ATLAS.tcl ~/MG5_aMC_v2_7_2/Delphes/cards/;
+/bin/cp -avr /workplace/HEP-jet-assignment/madgraph/four_top_preparation/* ./;
+
+# Set Seed
+SEED=$(cat /home/david/seed.txt)
+awk -v seedval=$SEED -F"=" 'BEGIN{OFS=FS} $1=="set iseed "{$2=" "seedval}1' pptttt.txt > pptttt2.txt && mv -f pptttt2.txt pptttt.txt
+awk -v seedval=$SEED -F"=" 'BEGIN{OFS=FS} $1=="set iseed "{$2=" "seedval}1' pptttt_first_round.txt > pptttt_first_round2.txt && mv -f pptttt_first_round2.txt pptttt_first_round.txt
+
+# Create output directory and log our config
+mkdir -p /home/david/mass_generation;
+/bin/cp pptttt.txt /home/david/mass_generation/
+
+# Start the simulation
+./run_pptttt.sh
