@@ -1,3 +1,4 @@
+set nb_core 1
 generate p p > t t~ t t~ QED=0, (t > W+ b, W+ > j j), (t~ > w- b~, w- > j j )
 output /home/david/pptttt
 launch /home/david/pptttt
