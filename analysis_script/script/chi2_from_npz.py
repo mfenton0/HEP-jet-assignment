@@ -102,7 +102,7 @@ def chi2_from_npz(INPUT_FILE, OUTPUT_FILE, MODEL, PROCESS, EXTRA, SINGLE=True):
             jet_phi=file['jet_phi'][:]
             jet_mass=file['jet_mass'][:]
             jet_btag=file['jet_btag'][:]
-            jet_num_of_jets=file['jet_num_of_jets'][:]
+#             jet_num_of_jets=file['jet_num_of_jets'][:]
             parton_jet_index=file['parton_jet_index'][:]
             parton_pdgid=file['parton_pdgid'][:]
             parton_barcode=file['parton_barcode'][:]
@@ -112,7 +112,7 @@ def chi2_from_npz(INPUT_FILE, OUTPUT_FILE, MODEL, PROCESS, EXTRA, SINGLE=True):
             parton_mass=file['parton_mass'][:]
             N_match_top_in_event=file['N_match_top_in_event'][:]
     else :
-        files = os.listdir(INPUT_FILE)
+        files = sorted(os.listdir(INPUT_FILE))
         num_of_files = len(files)
         pbar = tqdm.tqdm(total=num_of_files)
         for i in range(len(files)):
@@ -127,7 +127,7 @@ def chi2_from_npz(INPUT_FILE, OUTPUT_FILE, MODEL, PROCESS, EXTRA, SINGLE=True):
                         jet_phi=file['jet_phi'][:]
                         jet_mass=file['jet_mass'][:]
                         jet_btag=file['jet_btag'][:]
-                        jet_num_of_jets=file['jet_num_of_jets'][:]
+#                         jet_num_of_jets=file['jet_num_of_jets'][:]
                         parton_jet_index=file['parton_jet_index'][:]
                         parton_pdgid=file['parton_pdgid'][:]
                         parton_barcode=file['parton_barcode'][:]
@@ -147,7 +147,7 @@ def chi2_from_npz(INPUT_FILE, OUTPUT_FILE, MODEL, PROCESS, EXTRA, SINGLE=True):
                         jet_phi=np.concatenate((jet_phi,file['jet_phi'][:]))
                         jet_mass=np.concatenate((jet_mass,file['jet_mass'][:]))
                         jet_btag=np.concatenate((jet_btag,file['jet_btag'][:]))
-                        jet_num_of_jets=np.concatenate((jet_num_of_jets,file['jet_num_of_jets'][:]))
+#                         jet_num_of_jets=np.concatenate((jet_num_of_jets,file['jet_num_of_jets'][:]))
                         parton_jet_index=np.concatenate((parton_jet_index,file['parton_jet_index'][:]))
                         parton_pdgid=np.concatenate((parton_pdgid,file['parton_pdgid'][:]))
                         parton_barcode=np.concatenate((parton_barcode,file['parton_barcode'][:]))
@@ -160,7 +160,7 @@ def chi2_from_npz(INPUT_FILE, OUTPUT_FILE, MODEL, PROCESS, EXTRA, SINGLE=True):
                     pbar.update(1)
             except:
                 print('Please check input file path.')
-        
+    jet_num_of_jets = np.array([len(x) for x in jet_pt])
     print("+------------------------------------------------------------------------------------------------------+")
     print("Starting chi-square matching.")
     print("+------------------------------------------------------------------------------------------------------+")
@@ -173,9 +173,9 @@ def chi2_from_npz(INPUT_FILE, OUTPUT_FILE, MODEL, PROCESS, EXTRA, SINGLE=True):
         _result_chi2 = p.starmap(chi_square_minimizer, _src_chi2)
         p.close()
         p.join()
+    print("Multiprocessing done.")
     _result_chi2 = np.array(_result_chi2)
-    
-    min_chi2_value = _result_chi2[:, 0]
+    min_chi2_value = np.array([x for x in _result_chi2[:, 0]])
     parton_jet_index_chi2 = np.array([ x for x in _result_chi2[:, 1]])
     jet_parton_index_chi2 = np.array([ x for x in _result_chi2[:, 2]])
     smallest_10_chi2_candidate = np.array([ x for x in _result_chi2[:, 3]])
