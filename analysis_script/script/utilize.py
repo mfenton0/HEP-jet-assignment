@@ -952,7 +952,7 @@ def chi_square_minimizer( jet_pt_chi2, jet_eta_chi2, jet_phi_chi2, jet_btag_chi2
             
             chi2_tmp = chi2_part_1/(2*(sigma_t**2)) + chi2_part_2/sigma_W**2 + chi2_part_3/sigma_W**2 + (chi2_part_4)/sigma_h**2
             
-            _cand_record.append(list([b_1_idx, j_1_idx, j_2_idx, b_2_idx, j_3_idx, j_4_idx]))
+            _cand_record.append(list([b_1_idx, j_1_idx, j_2_idx, b_2_idx, j_3_idx, j_4_idx, bjet_3, bjet_4]))
             _chi2_value.append(chi2_tmp)
 
         _chi2_value = np.array(_chi2_value)
@@ -1029,7 +1029,8 @@ def chi_square_minimizer( jet_pt_chi2, jet_eta_chi2, jet_phi_chi2, jet_btag_chi2
 
                         jet_index_candidate.append(_jet_index_candidate)
             else: 
-                pass 
+                jet_index_candidate = np.zeros(100000000)
+                
         elif num_of_btag != 4:
             
             require_num_bjet = 4
@@ -1076,7 +1077,7 @@ def chi_square_minimizer( jet_pt_chi2, jet_eta_chi2, jet_phi_chi2, jet_btag_chi2
                                 _jet_index_candidate.append(jet[j][7])
                                 jet_index_candidate.append(_jet_index_candidate)
                     else: 
-                        pass 
+                        jet_index_candidate = np.zeros(100000000) 
                     
             elif lack_of_bjet < 0:
 
@@ -1120,7 +1121,7 @@ def chi_square_minimizer( jet_pt_chi2, jet_eta_chi2, jet_phi_chi2, jet_btag_chi2
                             _jet_index_candidate.append(jet[j][7])
                             jet_index_candidate.append(_jet_index_candidate)
                 else: 
-                    pass 
+                    jet_index_candidate = np.zeros(100000000)
 
         if len(jet_index_candidate) < 1e+5 and len(b_jet) < 1e+4:
             _cand_record  = []
@@ -1173,7 +1174,7 @@ def chi_square_minimizer( jet_pt_chi2, jet_eta_chi2, jet_phi_chi2, jet_btag_chi2
 
                 chi2_tmp =  chi2_part_1/sigma_t**2 + chi2_part_2/sigma_t**2  + chi2_part_3/sigma_W**2 + chi2_part_4/sigma_W**2 +  chi2_part_5/sigma_t**2 + chi2_part_6/sigma_t**2  + chi2_part_7/sigma_W**2 + chi2_part_8/sigma_W**2
 
-                _cand_record.append(list([b_1_idx, j_1_idx, j_2_idx, b_2_idx, j_3_idx, j_4_idx]))
+                _cand_record.append(list([b_1_idx, j_1_idx, j_2_idx, b_2_idx, j_3_idx, j_4_idx, b_3_idx, jet_5, jet_6, b_4_idx, jet_7, jet_8]))
                 _chi2_value.append(chi2_tmp)
 
             _chi2_value = np.array(_chi2_value)
