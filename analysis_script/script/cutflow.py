@@ -275,7 +275,7 @@ def cutflow(INPUT_FILE, OUTPUT_FILE, MODEL, CONFIG, SINGLE):
 
         if num_of_cuts == 1:
             x = np.linspace(0,2,3)
-            plt.figure(figsize=(8,6))
+            plt.figure(figsize=(10,10))
             plt.step(x, cutflow)
             plt.xlabel("Cuts")
             plt.ylabel("# of events")
@@ -284,11 +284,11 @@ def cutflow(INPUT_FILE, OUTPUT_FILE, MODEL, CONFIG, SINGLE):
             y0, ymax = plt.ylim()
             data_width = xmax - x0
             data_height = ymax - y0
-            plt.text(data_width*0.6,data_height*0.75,"C1: {0} jets and {1} bjets passing pt>25 GeV and |eta| < 2.5".format(jet_C1, bjet_C1))
+#             plt.text(data_width*0.6,data_height*0.75,"C1: {0} jets and {1} bjets passing pt>25 GeV and |eta| < 2.5".format(jet_C1, bjet_C1))
             plt.savefig(OUTPUT_FILE)
         elif num_of_cuts == 2:
             x = np.linspace(0,3,4)
-            plt.figure(figsize=(8,6))
+            plt.figure(figsize=(10,10))
             plt.step(x, cutflow)
             plt.xlabel("Cuts")
             plt.ylabel("# of events")
@@ -297,11 +297,11 @@ def cutflow(INPUT_FILE, OUTPUT_FILE, MODEL, CONFIG, SINGLE):
             y0, ymax = plt.ylim()
             data_width = xmax - x0
             data_height = ymax - y0
-            plt.text(data_width*0.6,data_height*0.75,"C1: {0} jets and {1} bjets passing pt>25 GeV and |eta| < 2.5\nC2: {2} jets and {3} bjets passing pt>25 GeV and |eta| < 2.5\n".format(jet_C1, bjet_C1, jet_C2, bjet_C2))
+#             plt.text(data_width*0.6,data_height*0.75,"C1: {0} jets and {1} bjets passing pt>25 GeV and |eta| < 2.5\nC2: {2} jets and {3} bjets passing pt>25 GeV and |eta| < 2.5\n".format(jet_C1, bjet_C1, jet_C2, bjet_C2))
             plt.savefig(OUTPUT_FILE)
         elif num_of_cuts == 3:
             x = np.linspace(0,4,5)
-            plt.figure(figsize=(8,6))
+            plt.figure(figsize=(10,10))
             plt.step(x, cutflow)
             plt.xlabel("Cuts")
             plt.ylabel("# of events")
@@ -310,11 +310,11 @@ def cutflow(INPUT_FILE, OUTPUT_FILE, MODEL, CONFIG, SINGLE):
             y0, ymax = plt.ylim()
             data_width = xmax - x0
             data_height = ymax - y0
-            plt.text(data_width*0.6,data_height*0.75,"C1: {0} jets and {1} bjets passing pt>25 GeV and |eta| < 2.5\nC2: {2} jets and {3} bjets passing pt>25 GeV and |eta| < 2.5\nC3: {4} jets and {5} bjets passing pt>25 GeV and |eta| < 2.5\n".format(jet_C1, bjet_C1, jet_C2, bjet_C2, jet_C3, bjet_C3))
+#             plt.text(data_width*0.6,data_height*0.75,"C1: {0} jets and {1} bjets passing pt>25 GeV and |eta| < 2.5\nC2: {2} jets and {3} bjets passing pt>25 GeV and |eta| < 2.5\nC3: {4} jets and {5} bjets passing pt>25 GeV and |eta| < 2.5\n".format(jet_C1, bjet_C1, jet_C2, bjet_C2, jet_C3, bjet_C3))
             plt.savefig(OUTPUT_FILE)
         elif num_of_cuts == 4:
             x = np.linspace(0,5,6)
-            plt.figure(figsize=(8,6))
+            plt.figure(figsize=(10,10))
             plt.step(x, cutflow)
             plt.xlabel("Cuts")
             plt.ylabel("# of events")
@@ -323,11 +323,11 @@ def cutflow(INPUT_FILE, OUTPUT_FILE, MODEL, CONFIG, SINGLE):
             y0, ymax = plt.ylim()
             data_width = xmax - x0
             data_height = ymax - y0
-            plt.text(data_width*0.6,data_height*0.75,"C1: {0} jets and {1} bjets passing pt>25 GeV and |eta| < 2.5\nC2: {2} jets and {3} bjets passing pt>25 GeV and |eta| < 2.5\nC3: {4} jets and {5} bjets passing pt>25 GeV and |eta| < 2.5\nC4: {6} jets with {7} bjet passing pt>25 GeV and |eta| < 2.5\n".format(jet_C1, bjet_C1, jet_C2, bjet_C2, jet_C3, bjet_C3, jet_C4, bjet_C4))
+#             plt.text(data_width*0.6,data_height*0.75,"C1: {0} jets and {1} bjets passing pt>25 GeV and |eta| < 2.5\nC2: {2} jets and {3} bjets passing pt>25 GeV and |eta| < 2.5\nC3: {4} jets and {5} bjets passing pt>25 GeV and |eta| < 2.5\nC4: {6} jets with {7} bjet passing pt>25 GeV and |eta| < 2.5\n".format(jet_C1, bjet_C1, jet_C2, bjet_C2, jet_C3, bjet_C3, jet_C4, bjet_C4))
             plt.savefig(OUTPUT_FILE)
         elif num_of_cuts == 5:
             x = np.linspace(0,6,7)
-            plt.figure(figsize=(8,6))
+            plt.figure(figsize=(10,10))
             plt.step(x, cutflow)
             plt.xlabel("Cuts")
             plt.ylabel("# of events")
@@ -336,7 +336,7 @@ def cutflow(INPUT_FILE, OUTPUT_FILE, MODEL, CONFIG, SINGLE):
             y0, ymax = plt.ylim()
             data_width = xmax - x0
             data_height = ymax - y0
-            plt.text(data_width*0.6,data_height*0.75, "C1: {0} jets and {1} bjets passing pt>25 GeV and |eta| < 2.5\nC2: {2} jets and {3} bjets passing pt>25 GeV and |eta| < 2.5\nC3: {4} jets and {5} bjets passing pt>25 GeV and |eta| < 2.5\nC4: {6} jets with {7} bjet passing pt>25 GeV and |eta| < 2.5\nC5: {8} jet with {9} bjets passing pt>25 GeV and |eta| < 2.5".format(jet_C1, bjet_C1, jet_C2, bjet_C2, jet_C3, bjet_C3, jet_C4, bjet_C4, jet_C5, bjet_C5))
+#             plt.text(data_width*0.6,data_height*0.75, "C1: {0} jets and {1} bjets passing pt>25 GeV and |eta| < 2.5\nC2: {2} jets and {3} bjets passing pt>25 GeV and |eta| < 2.5\nC3: {4} jets and {5} bjets passing pt>25 GeV and |eta| < 2.5\nC4: {6} jets with {7} bjet passing pt>25 GeV and |eta| < 2.5\nC5: {8} jet with {9} bjets passing pt>25 GeV and |eta| < 2.5".format(jet_C1, bjet_C1, jet_C2, bjet_C2, jet_C3, bjet_C3, jet_C4, bjet_C4, jet_C5, bjet_C5))
             plt.savefig(OUTPUT_FILE)
             
         else:
@@ -548,7 +548,7 @@ def cutflow(INPUT_FILE, OUTPUT_FILE, MODEL, CONFIG, SINGLE):
 
         if num_of_cuts == 1:
             x = np.linspace(0,2,3)
-            plt.figure(figsize=(8,6))
+            plt.figure(figsize=(10,10))
             plt.step(x, cutflow)
             plt.xlabel("Cuts")
             plt.ylabel("# of events")
@@ -561,7 +561,7 @@ def cutflow(INPUT_FILE, OUTPUT_FILE, MODEL, CONFIG, SINGLE):
             plt.savefig(OUTPUT_FILE)
         elif num_of_cuts == 2:
             x = np.linspace(0,3,4)
-            plt.figure(figsize=(8,6))
+            plt.figure(figsize=(10,10))
             plt.step(x, cutflow)
             plt.xlabel("Cuts")
             plt.ylabel("# of events")
@@ -574,7 +574,7 @@ def cutflow(INPUT_FILE, OUTPUT_FILE, MODEL, CONFIG, SINGLE):
             plt.savefig(OUTPUT_FILE)
         elif num_of_cuts == 3:
             x = np.linspace(0,4,5)
-            plt.figure(figsize=(8,6))
+            plt.figure(figsize=(10,10))
             plt.step(x, cutflow)
             plt.xlabel("Cuts")
             plt.ylabel("# of events")
@@ -587,7 +587,7 @@ def cutflow(INPUT_FILE, OUTPUT_FILE, MODEL, CONFIG, SINGLE):
             plt.savefig(OUTPUT_FILE)
         elif num_of_cuts == 4:
             x = np.linspace(0,5,6)
-            plt.figure(figsize=(8,6))
+            plt.figure(figsize=(10,10))
             plt.step(x, cutflow)
             plt.xlabel("Cuts")
             plt.ylabel("# of events")
@@ -600,7 +600,7 @@ def cutflow(INPUT_FILE, OUTPUT_FILE, MODEL, CONFIG, SINGLE):
             plt.savefig(OUTPUT_FILE)
         elif num_of_cuts == 5:
             x = np.linspace(0,6,7)
-            plt.figure(figsize=(8,6))
+            plt.figure(figsize=(10,10))
             plt.step(x, cutflow)
             plt.xlabel("Cuts")
             plt.ylabel("# of events")
