@@ -1174,7 +1174,7 @@ def chi_square_minimizer( jet_pt_chi2, jet_eta_chi2, jet_phi_chi2, jet_btag_chi2
 
                 chi2_tmp =  chi2_part_1/sigma_t**2 + chi2_part_2/sigma_t**2  + chi2_part_3/sigma_W**2 + chi2_part_4/sigma_W**2 +  chi2_part_5/sigma_t**2 + chi2_part_6/sigma_t**2  + chi2_part_7/sigma_W**2 + chi2_part_8/sigma_W**2
 
-                _cand_record.append(list([b_1_idx, j_1_idx, j_2_idx, b_2_idx, j_3_idx, j_4_idx, b_3_idx, jet_5, jet_6, b_4_idx, jet_7, jet_8]))
+                _cand_record.append(list([b_1_idx, j_1_idx, j_2_idx, b_2_idx, j_3_idx, j_4_idx, b_3_idx, j_5_idx, j_6_idx, b_4_idx, j_7_idx, j_8_idx]))
                 _chi2_value.append(chi2_tmp)
 
             _chi2_value = np.array(_chi2_value)
