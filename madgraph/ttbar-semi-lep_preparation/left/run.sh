@@ -6,7 +6,7 @@ export MKL_NUM_THREADS=1
 export NUMEXPR_NUM_THREADS=1
 export OMP_NUM_THREADS=1
 
-mkdir -p /home/david/mass_generation_lep
+mkdir -p /home/david/mass_generation
 
 ANALYSIS_SCRIPT_PATH='/workplace/HEP-jet-assignment/analysis_script'
 ROOT_FILE_PATH='/home/david/pptt_lep_left/Events'
