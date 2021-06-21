@@ -115,7 +115,7 @@ def event_selection(MODEL, **kargs):
             else:
                 marker_event.append(0)
         marker_event = np.asanyarray(marker_event, dtype=object)
-
+        return marker_event, marker_jet, marker_btag
     elif MODEL == "ttH":
 
         print("Start jet marking.")
@@ -146,6 +146,7 @@ def event_selection(MODEL, **kargs):
             else:
                 marker_event.append(0)
         marker_event = np.asanyarray(marker_event, dtype=object)
+        return marker_event, marker_jet, marker_btag
     elif MODEL == "four_top":
 
         print("Start jet marking.")
@@ -175,28 +176,77 @@ def event_selection(MODEL, **kargs):
             else:
                 marker_event.append(0)
         marker_event = np.asanyarray(marker_event, dtype=object)
+        return marker_event, marker_jet, marker_btag
     elif MODEL == 'ttbar_lep_left' or MODEL == "ttbar_lep_right":
         PHI = kargs['phi']
 
-        ELECTRON_PT = kargs['electron_pt']
-        ELECTRON_ETA = kargs['electron_eta']
-        ELECTRON_PHI = kargs['electron_phi']
+        ELECTRON_PT = [ list(x) if x.size>=2 else x.item() if x.size==1 else 99999 for x in kargs['electron_pt']]
+        ELECTRON_ETA = [ list(x) if x.size>=2 else x.item() if x.size==1 else 99999 for x in kargs['electron_eta']]
+        ELECTRON_PHI = [ list(x) if x.size>=2 else x.item() if x.size==1 else 99999 for x in kargs['electron_phi']]
 
-        MUON_PT = kargs['muon_pt']
-        MUON_ETA = kargs['muon_eta']
-        MUON_PHI = kargs['muon_phi']
-
+        MUON_PT = [ list(x) if x.size>=2 else x.item() if x.size==1 else 99999 for x in kargs['muon_pt']]
+        MUON_ETA = [ list(x) if x.size>=2 else x.item() if x.size==1 else 99999 for x in kargs['muon_eta']]
+        MUON_PHI = [ list(x) if x.size>=2 else x.item() if x.size==1 else 99999 for x in kargs['muon_phi']]
+        
         marker_lepton = []
         LEPTON_PT = []
-        LEPTON_PT.append(ELECTRON_PT)
-        LEPTON_PT.append(MUON_PT)
         LEPTON_ETA = []
-        LEPTON_ETA.append(ELECTRON_ETA)
-        LEPTON_ETA.append(MUON_ETA)
         LEPTON_PHI = []
-        LEPTON_PHI.append(ELECTRON_PHI)
-        LEPTON_PHI.append(MUON_PHI)
-
+        for a,b in zip(ELECTRON_PT, MUON_PT):
+            _tmp = []
+            if isinstance(a, float) or isinstance(a, int):
+                _tmp.append(a)
+            elif isinstance(a, list):
+                for c in a:
+                    _tmp.append(c)
+            else: 
+                print('error', type(a))
+            
+            if isinstance(b, float) or isinstance(b, int):
+                _tmp.append(b)
+            elif isinstance(b, list):
+                for c in b:
+                    _tmp.append(c)
+            else: 
+                print('error', type(b))
+            LEPTON_PT.append(_tmp)
+            
+        for a,b in zip(ELECTRON_ETA, MUON_ETA):
+            _tmp = []
+            if isinstance(a, float) or isinstance(a, int):
+                _tmp.append(a)
+            elif isinstance(a, list):
+                for c in a:
+                    _tmp.append(c)
+            else: 
+                print('error', type(a))
+            
+            if isinstance(b, float) or isinstance(b, int):
+                _tmp.append(b)
+            elif isinstance(b, list):
+                for c in b:
+                    _tmp.append(c)
+            else: 
+                print('error', type(b))
+            LEPTON_ETA.append(_tmp)
+        for a,b in zip(ELECTRON_PHI, MUON_PHI):
+            _tmp = []
+            if isinstance(a, float) or isinstance(a, int):
+                _tmp.append(a)
+            elif isinstance(a, list):
+                for c in a:
+                    _tmp.append(c)
+            else: 
+                print('error', type(a))
+            
+            if isinstance(b, float) or isinstance(b, int):
+                _tmp.append(b)
+            elif isinstance(b, list):
+                for c in b:
+                    _tmp.append(c)
+            else: 
+                print('error', type(b))
+            LEPTON_PHI.append(_tmp)
         print("Start jet marking.")
         for i in tqdm.trange(len(PT)):
             _marker_event = []
@@ -219,13 +269,11 @@ def event_selection(MODEL, **kargs):
         marker_btag = np.asanyarray(marker_btag, dtype=object)
         
         #Remove electron from jets catogary
-        for i in range(len(PT)):
-            
+        for i in tqdm.trange(len(PT)):
             for j in range(len(PT[i])):
                 for k in range(len(LEPTON_PT[i])):
                     if delta_R(ETA[i][j], PHI[i][j], LEPTON_ETA[i][k], LEPTON_PHI[i][k]) < 0.4:
                         marker_jet[i][j] = 0
-                        
                     else : pass 
         
         for i in tqdm.trange(len(LEPTON_PT)):
@@ -239,16 +287,14 @@ def event_selection(MODEL, **kargs):
         marker_lepton = np.asanyarray(marker_lepton, dtype=object)
         print("Start event marking.")
         for i in tqdm.trange(len(PT)):
-            if np.sum(marker_jet[i] == 1) >= 4 and np.sum(marker_btag[i] == 1) >= 2 and np.sum(marker_lepton[i] ==1) == 1 and len(marker_lepton[i]) == 1:
+            if np.sum(marker_jet[i] == 1) >= 4 and np.sum(marker_btag[i] == 1) >= 2 and np.sum(marker_lepton[i] ==1) == 1 and (np.array(LEPTON_PT[i]) != 99999).sum() == 1:
                 marker_event.append(1)
             else:
                 marker_event.append(0)
         marker_event = np.asanyarray(marker_event, dtype=object)
-
+        return marker_event, marker_jet, marker_btag, marker_lepton
     else:
         print("Please select a correct mode. The mode available:\n1. ttbar.\n2. ttH\n3. four_top")
-    
-    return marker_event, marker_jet, marker_btag
 
 def shifted_particle_tracing(dataset, PID_daughter, idx):
     """
