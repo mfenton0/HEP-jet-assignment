@@ -151,7 +151,7 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, PROCESS, GENERATOR, SINGLE=True):
     print("+------------------------------------------------------------------------------------------------------+")
 
     if MODEL == 'ttbar_lep_left' or MODEL == "ttbar_lep_right":
-        marker_event, marker_jet, marker_btag = event_selection(MODEL, 
+        marker_event, marker_jet, marker_btag, marker_lepton = event_selection(MODEL, 
                                                                     pt=jet.pt, 
                                                                     eta=jet.eta, 
                                                                     phi=jet.phi,
@@ -165,7 +165,7 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, PROCESS, GENERATOR, SINGLE=True):
                                                                     )
     else:
         marker_event, marker_jet, marker_btag = event_selection(MODEL, pt=jet.pt, eta=jet.eta, btag=jet.btag)
-    del marker_jet, marker_btag
+    del marker_jet, marker_btag, marker_lepton
     passed = np.where(marker_event == 1)[0]
     print("+------------------------------------------------------------------------------------------------------+")
     print("Jet selection done. {0} events has been selected.".format(len(passed)))
@@ -659,7 +659,7 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, PROCESS, GENERATOR, SINGLE=True):
         print("+------------------------------------------------------------------------------------------------------+")
         lepton_delta_R_result = np.zeros(len(simulation_lepton_pt))
         for i in range(len(simulation_lepton_pt)):
-            _delta_R = delta_R(simulation_lepton_eta[i], simulation_lepton_phi[i], lepton_eta[i][0], lepton_phi[i][0])
+            _delta_R = delta_R(simulation_lepton_eta[i], simulation_lepton_phi[i], lepton_eta[i], lepton_phi[i])
             if _delta_R < 0.4:
                 lepton_delta_R_result[i] = 1
             else : 
