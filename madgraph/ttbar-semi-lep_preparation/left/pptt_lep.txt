@@ -1,3 +1,4 @@
+set nb_core 1
 launch /home/david/pptt_lep_left/
 shower=Pythia8
 detector=Delphes

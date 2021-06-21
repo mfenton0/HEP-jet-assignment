@@ -1,3 +1,4 @@
+set nb_core 1
 generate p p > t t~ QED=0, (t > W+ b, W+ > l+ vl), (t~ > W- b~, W- > j j)
 output /home/david/pptt_lep_left
 launch /home/david/pptt_lep_left
@@ -5,7 +6,7 @@ shower=Pythia8
 detector=Delphes
 analysis=OFF
 done
-set nevents = 100000
+set nevents = 10000
 set iseed = 100
 Delphes/cards/delphes_card_ATLAS.tcl
 done
