@@ -22,5 +22,5 @@ do
 		-v $HOME/workplace:/workplace \
 		-v $HOME/docker_$j:/home/david \
 		alan200276/centos:SVJsimulation \
-		/bin/bash -c /workplace/HEP-jet-assignment/docker_script/pptt/ttbar_lep_right/ttbar_lep_right.sh
+		/bin/bash -c /workplace/HEP-jet-assignment/docker_script/pptt/ttbar_lep/ttbar_lep_right/ttbar_lep_right.sh
 done

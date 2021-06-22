@@ -14,7 +14,7 @@ awk -v seedval=$SEED -F"=" 'BEGIN{OFS=FS} $1=="set iseed "{$2=" "seedval}1' pptt
 
 # Create output directory and log our config
 mkdir -p /home/david/mass_generation;
-/bin/cp pptt.txt /home/david/mass_generation/
+/bin/cp pptt_lep.txt /home/david/mass_generation/
 
 # Start the simulation
 ./run.sh
