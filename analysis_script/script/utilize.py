@@ -6,6 +6,7 @@ Mail: davidho@gapp.nthu.edu.tw
 import numpy as np
 import itertools, uproot, sys, os, tqdm
 import pandas as pd
+from typing import Union
 
 class pdgid():
     """
@@ -44,7 +45,7 @@ class pdgid():
 
 PID = pdgid()
 
-def deltaPhi(phi1,phi2):
+def deltaPhi(phi1: float,phi2: float) -> float:
     """
     This is a function deltaPhi value between two target.
     phi1: phi value from target one. 
@@ -55,7 +56,7 @@ def deltaPhi(phi1,phi2):
     while phi < -np.pi: phi += np.pi*2.
     return phi
 
-def delta_R(eta1, phi1, eta2, phi2):
+def delta_R(eta1: float, phi1: float, eta2: float, phi2: float) -> np.float64:
     """
     This is a function delta_R value between two target.
     phi1: phi value from target one. 
@@ -63,18 +64,9 @@ def delta_R(eta1, phi1, eta2, phi2):
     phi2: phi value from target two. 
     eta2: eta value from target two. 
     """
-    return np.sqrt(deltaPhi(phi1,phi2)**2+(eta1-eta2)**2)
+    return np.sqrt(deltaPhi(phi1,phi2)**2+(eta1-eta2)**2).astype(np.float64)
 
-def gaussian_fit(target):
-    mean = np.average(target)
-    _sigma = 0
-    for i in range(len(target)):
-        _sigma += (target[i] - mean)**2
-    sigma = np.sqrt(_sigma/len(target))
-
-    return mean, sigma 
-
-def event_selection(MODEL, **kargs):
+def event_selection(MODEL: str, **kargs) -> np.ndarray:
     marker_event = []
     marker_jet = []
     marker_btag = []
@@ -115,7 +107,7 @@ def event_selection(MODEL, **kargs):
             else:
                 marker_event.append(0)
         marker_event = np.asanyarray(marker_event, dtype=object)
-        return marker_event, marker_jet, marker_btag
+        return marker_event
     elif MODEL == "ttH":
 
         print("Start jet marking.")
@@ -146,7 +138,7 @@ def event_selection(MODEL, **kargs):
             else:
                 marker_event.append(0)
         marker_event = np.asanyarray(marker_event, dtype=object)
-        return marker_event, marker_jet, marker_btag
+        return marker_event
     elif MODEL == "four_top":
 
         print("Start jet marking.")
@@ -176,7 +168,7 @@ def event_selection(MODEL, **kargs):
             else:
                 marker_event.append(0)
         marker_event = np.asanyarray(marker_event, dtype=object)
-        return marker_event, marker_jet, marker_btag
+        return marker_event
     elif MODEL == 'ttbar_lep_left' or MODEL == "ttbar_lep_right":
         PHI = kargs['phi']
 
@@ -292,18 +284,18 @@ def event_selection(MODEL, **kargs):
             else:
                 marker_event.append(0)
         marker_event = np.asanyarray(marker_event, dtype=object)
-        return marker_event, marker_jet, marker_btag, marker_lepton
+        return marker_event
     else:
         print("Please select a correct mode. The mode available:\n1. ttbar.\n2. ttH\n3. four_top")
 
-def shifted_particle_tracing(dataset, PID_daughter, idx):
+def shifted_particle_tracing(dataset: pd.core.frame.DataFrame, PID_daughter: int, idx: int) -> int:
     """
     This is a frunction tracing the on-flying particle. 
     """
     if (dataset.iloc[idx,6] == PID_daughter):
-        return dataset.iloc[idx,4]
+        return int(dataset.iloc[idx,4])
 
-def particle_tracing(dataset, PID, STATUS, MODEL):
+def particle_tracing(dataset: pd.core.frame.DataFrame, PID: int, STATUS: str, MODEL: str):
     """
     This is a function finding the daughter of origin particle.
     """
