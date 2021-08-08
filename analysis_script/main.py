@@ -4,7 +4,9 @@ Institute: National Tsing Hua university, Department of Physics, Hsinchu, Taiwan
 Mail: davidho@gapp.nthu.edu.tw
 """
 #Import packages
-from script import cutflow, parse, chi2, chi2_from_npz, fitting 
+# from script import cutflow
+from script import parse
+from script import chi2
 import h5py, sys, traceback, os, tqdm
 from argparse import ArgumentParser
 import multiprocessing as mp
@@ -22,28 +24,24 @@ def main():
     parser.add_argument("-e", "--exrta_option", dest="extra", default="normal", help="Extra option for used.")
     parser.add_argument("-t", "--target_file", dest="target", help="target file for computing purity")
     parser.add_argument("-g", "--shower-generator", dest="generator", default="py8", help="type of generator.")
-
+    parser.add_argument("--compute-chi-square", dest="ccs", default=False, help="type of generator.")
+    
     args = parser.parse_args()
     
     if args.single == str(False):
         args.single = False
     else: 
         args.single = True
-
-    if args.usage == "cutflow":
-        cutflow(args.input, args.output, args.model, args.config, args.single)
-    elif args.usage == "parse":
-        parse(args.input, args.output, args.model, args.process, args.generator, args.single)
+        
+    if args.ccs == str(True):
+        args.ccs = True
+    else: 
+        args.ccs = False
+    
+    if args.usage == "parse":
+        parse(args.input, args.output, args.model, args.process, args.generator, args.single, args.ccs, EXTRA=args.extra)
     elif args.usage == "chi2":
         chi2(args.input, args.output, args.model, args.process, args.extra, args.generator, args.single)
-    elif args.usage == "chi2_from_npz":
-        chi2_from_npz(args.input, args.output, args.model, args.process, args.extra, args.single)
-    # elif args.usage == "purity":
-    #     purity(args.input, args.target, args.output, args.model, args.single)
-    elif args.usage == "fitting":
-        fitting(args.input, args.output, args.model, args.single)
-    # elif args.usage == 'background':
-    #     background(args.input, args.output, args.model, args.single, args.process, args.extra, args.generator)
     else: 
         print("Please select a correct usage.\n1. cutflow\n2. parse")
 
