@@ -12,7 +12,7 @@ from script.MissingET import Missing_ET_properties
 from script.electron import electron_properties
 from script.muon import muon_properties
 import h5py, sys, traceback, os, tqdm, configparser
-from .utilize import delta_R, deltaPhi, pdgid, quark_finder, particle_tracing, deltaR_matching
+from .utilize import delta_R, deltaPhi
 import matplotlib.pyplot as plt 
 
 left, width = .25, .5
