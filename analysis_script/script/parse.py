@@ -1,7 +1,8 @@
 """
-Author: David Ho
-Institute: National Tsing Hua university, Department of Physics, Hsinchu, Taiwan 
-Mail: davidho@gapp.nthu.edu.tw
+Author: David Ho^1, Hideki Okawa^2
+Institute1: National Tsing Hua university, Department of Physics, Hsinchu, Taiwan 
+Institute2: Fudan University, Shanghai, China
+Mail: davidho@gapp.nthu.edu.tw, hideki.okawa@cern.ch
 """
 #Import packages
 import uproot
@@ -17,7 +18,7 @@ faulthandler.enable()
 def parse(INPUT_FILE, OUTPUT_FILE, MODEL, PROCESS, GENERATOR, SINGLE=True, COMPUTE_CHI2=False, **kargs):
 
     PID = pdgid()
-    require_lepton = ["ttbar_lep_left", "ttbar_lep_right"]
+    require_lepton = ["ttbar_lep", "ttbar_lep_left", "ttbar_lep_right"]
     # Setting `STATUS_CODE` for different shower generator.
     if GENERATOR == 'py8':
         STATUS_CODE = 22
@@ -41,6 +42,19 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, PROCESS, GENERATOR, SINGLE=True, COMPU
         """
         barcode = np.array([34, 40, 40, 17, 20, 20])
         NUM_OF_PARTON = 6
+        NUM_OF_DAUGHTER = 6
+    elif MODEL == "ttbar_lep":
+        """
+        Barcode system
+        t t~ W+ W- b b~
+        0 0  0  0  0 0
+        daughter of top/anti-top and leptonic W: 101000 ----> 40
+        b on the leptonic side: 101000 ----> 34
+        daughter of top/anti-top and hadronic W: 100100 ----> 20
+        b on the hadronic side: 100001 ----> 17
+        """
+        barcode = np.array([34, 40, 40, 17, 20, 20])
+        NUM_OF_PARTON = 4
         NUM_OF_DAUGHTER = 6
     elif MODEL == "ttbar_lep_left":
         """
@@ -155,7 +169,25 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, PROCESS, GENERATOR, SINGLE=True, COMPU
     print("+------------------------------------------------------------------------------------------------------+")
     #Particle tracing and daughter finding section
     if int(PROCESS) == 1:
-        if MODEL == 'ttbar' or MODEL == 'ttbar_lep_left' or MODEL =='ttbar_lep_right':
+
+        if MODEL == 'ttbar_lep':
+            daughter_t1 = [process_methods.lephad_finder(helper.to_dataframe(dataset["particle"], i), PID.top, 1, MODEL) for i in tqdm.tqdm(passed, total=len(passed), desc='Finding daughters of leptonic top quark.')]
+            daughter_t2 = [process_methods.lephad_finder(helper.to_dataframe(dataset["particle"], i), PID.top, 2, MODEL) for i in tqdm.tqdm(passed, total=len(passed), desc='Finding daughters of hadronic top quark.')] # we don't care the sign of PID for lephad_finder
+            daughter_t1_W = [process_methods.lephad_finder(helper.to_dataframe(dataset["particle"], passed[i]), PID.w_plus, 1, MODEL) for i in tqdm.trange(len(passed), desc='Finding daughters of leptonic W boson.')]
+            daughter_t2_W = [process_methods.lephad_finder(helper.to_dataframe(dataset["particle"], passed[i]), PID.w_plus, 2, MODEL) for i in tqdm.trange(len(passed), desc='Finding daughters of hadronic W boson.')] # we don't care the sign of PID for lephad_finder
+            daughter_t1_W_idx = np.array([[ dic[item] for item in dic if item in ["daughter_1_idx", "daughter_2_idx"]] for dic in daughter_t1_W])
+            daughter_t2_W_idx = np.array([[ dic[item] for item in dic if item in ["daughter_1_idx", "daughter_2_idx"]] for dic in daughter_t2_W])
+
+            daughter_t1_W_1 = daughter_t1_W_idx[:,0]
+            daughter_t1_W_2 = daughter_t1_W_idx[:,1]
+            daughter_t1_b = np.array([a["daughter_2_idx"] for a in daughter_t1])
+
+            daughter_t2_W_1 = daughter_t2_W_idx[:,0]
+            daughter_t2_W_2 = daughter_t2_W_idx[:,1]
+            daughter_t2_b = np.array([a["daughter_1_idx"] for a in daughter_t2])
+
+ 
+        elif MODEL == 'ttbar' or MODEL == 'ttbar_lep_left' or MODEL =='ttbar_lep_right':
             daughter_t1 = [process_methods.daughter_finder(helper.to_dataframe(dataset["particle"], i), PID.top, MODEL) for i in tqdm.tqdm(passed, total=len(passed), desc='Finding daughters of top quark.')]
             daughter_t2 = [process_methods.daughter_finder(helper.to_dataframe(dataset["particle"], i), PID.anti_top, MODEL) for i in tqdm.tqdm(passed, total=len(passed), desc='Finding daughters of anti-top quark.')]
             daughter_t1_W = [process_methods.daughter_finder(helper.to_dataframe(dataset["particle"], passed[i]), PID.w_plus, MODEL) for i in tqdm.trange(len(passed), desc='Finding daughters of W+ boson.')]
@@ -170,6 +202,7 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, PROCESS, GENERATOR, SINGLE=True, COMPU
             daughter_t2_W_1 = daughter_t2_W_idx[:,0]
             daughter_t2_W_2 = daughter_t2_W_idx[:,1]
             daughter_t2_b = np.array([a["daughter_1_idx"] for a in daughter_t2])
+
         elif MODEL == 'ttH':
             daughter_t1 = [process_methods.daughter_finder(helper.to_dataframe(dataset["particle"], i), PID.top, MODEL) for i in tqdm.tqdm(passed, total=len(passed), desc='Finding daughters of top quark.')]
             daughter_t2 = [process_methods.daughter_finder(helper.to_dataframe(dataset["particle"], i), PID.anti_top, MODEL) for i in tqdm.tqdm(passed, total=len(passed), desc='Finding daughters of anti-top quark.')]
@@ -210,7 +243,7 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, PROCESS, GENERATOR, SINGLE=True, COMPU
             daughter_t4_W_2 = daughter_anti_t_W_idx[:,3]
             daughter_t3_b = np.array([a["daughter_1_2_idx"] for a in daughter_anti_t])
             daughter_t4_b = np.array([a["daughter_2_2_idx"] for a in daughter_anti_t])
-    else:
+    else: ### MULTIPROCESSING not yet implemented for ttbar_lep
         if MODEL == 'ttbar' or MODEL == 'ttbar_lep_left' or MODEL =='ttbar_lep_right':
             mp_src_top_1 = [[helper.to_dataframe(dataset["particle"], i), PID.top, MODEL] for i in tqdm.tqdm(passed, total=len(passed), desc='preparing data for multiprocessing.(1/4)')]
             mp_src_top_2 = [[helper.to_dataframe(dataset["particle"], i), PID.anti_top, MODEL] for i in tqdm.tqdm(passed, total=len(passed), desc='preparing data for multiprocessing.(2/4)')]
@@ -229,14 +262,17 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, PROCESS, GENERATOR, SINGLE=True, COMPU
                     p.close()
                     p.join()
             print(f"Multiprocessing complete. Cost: {time.time() - start:.3f} s")
+
             daughter_t1_W_idx = np.array([[ dic[item] for item in dic if item in ["daughter_1_idx", "daughter_2_idx"]] for dic in result["result_t1_W"]])
             daughter_t2_W_idx = np.array([[ dic[item] for item in dic if item in ["daughter_1_idx", "daughter_2_idx"]] for dic in result["result_t2_W"]])
+
             daughter_t1_W_1 = daughter_t1_W_idx[:,0]
             daughter_t1_W_2 = daughter_t1_W_idx[:,1]
             daughter_t2_W_1 = daughter_t2_W_idx[:,0]
             daughter_t2_W_2 = daughter_t2_W_idx[:,1]
             daughter_t1_b = np.array([a["daughter_2_idx"] for a in result["result_t1"]])
             daughter_t2_b = np.array([a["daughter_1_idx"] for a in result["result_t2"]])
+
         elif MODEL == 'ttH':
             mp_src_top_1 = [[helper.to_dataframe(dataset["particle"], i), PID.top, MODEL] for i in tqdm.tqdm(passed, total=len(passed), desc='preparing data for multiprocessing.(1/5)')]
             mp_src_top_2 = [[helper.to_dataframe(dataset["particle"], i), PID.anti_top, MODEL] for i in tqdm.tqdm(passed, total=len(passed), desc='preparing data for multiprocessing.(2/5)')]
@@ -326,7 +362,7 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, PROCESS, GENERATOR, SINGLE=True, COMPU
     for a in dataset.keys():
         for b in dataset[a].keys():
             dataset[a][b] = dataset[a][b][passed]
-    if MODEL == 'ttbar_lep_left':
+    if MODEL == 'ttbar_lep' or MODEL == 'ttbar_lep_left':
         parton_masks = parton_barcode != 40
     elif MODEL == "ttbar_lep_right":
         parton_masks = parton_barcode != 20
@@ -439,7 +475,7 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, PROCESS, GENERATOR, SINGLE=True, COMPU
         print("+------------------------------------------------------------------------------------------------------+")
         print("Chi-square matching finished.")
         print("+------------------------------------------------------------------------------------------------------+")
-    if MODEL == 'ttbar_lep_left' or MODEL == "ttbar_lep_right":
+    if MODEL == 'ttbar_lep' or MODEL == 'ttbar_lep_left' or MODEL == "ttbar_lep_right":
         lepton_pt = np.array([float(a) if len(a) != 0 else float(b) for a, b in zip(dataset['muon']['pt'], dataset['electron']['pt'])])
         lepton_eta = np.array([float(a) if len(a) != 0 else float(b) for a, b in zip(dataset['muon']['eta'], dataset['electron']['eta'])])
         lepton_phi = np.array([float(a) if len(a) != 0 else float(b) for a, b in zip(dataset['muon']['phi'], dataset['electron']['phi'])])
@@ -456,7 +492,7 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, PROCESS, GENERATOR, SINGLE=True, COMPU
         print("+------------------------------------------------------------------------------------------------------+")
         print("Starting lepton and neutrino matching.")
         print("+------------------------------------------------------------------------------------------------------+")
-        if MODEL == 'ttbar_lep_left':
+        if MODEL == 'ttbar_lep' or MODEL == 'ttbar_lep_left':
             lepton_delta_R_result = np.zeros(len(passed))
             met_delta_phi_result = np.zeros(len(passed))
             for i in tqdm.trange(len(passed), desc='Computing delta R for leptons'):

@@ -1,7 +1,8 @@
 """
-Author: David Ho
-Institute: National Tsing Hua university, Department of Physics, Hsinchu, Taiwan 
-Mail: davidho@gapp.nthu.edu.tw
+Author: David Ho^1, Hideki Okawa^2
+Institute1: National Tsing Hua university, Department of Physics, Hsinchu, Taiwan
+Institute2: Fudan University, Shanghai, China
+Mail: davidho@gapp.nthu.edu.tw, hideki.okawa@cern.ch
 """
 import numpy as np
 import itertools, uproot, sys, os, tqdm
@@ -59,7 +60,7 @@ class IO_module:
         self.path = PATH
         self.multi = MULTI
         self.model = MODEL
-        self.require_lepton = ["ttbar_lep_left", "ttbar_lep_right"]
+        self.require_lepton = ["ttbar_lep", "ttbar_lep_left", "ttbar_lep_right"]
         self.kargs = kargs
     def read_ROOT(self) -> dict:
         # If loading multi-root files, using this function to concatenate dataset.
@@ -273,6 +274,11 @@ class IO_module:
                 ("third_target", ["b", "q1", "q2"]),
                 ("fourth_target", ["b", "q1", "q2"]),
             ))
+        elif self.model == 'ttbar_lep':
+            jet_index_dict_name = OrderedDict((
+                ("left_target", ["b", "neutrino", "lepton"]),
+                ("right_target", ["b", "q1", "q2"]),
+            ))
         elif self.model == 'ttbar_lep_left':
             jet_index_dict_name = OrderedDict((
                 ("left_target", ["b", "neutrino", "lepton"]),
@@ -388,12 +394,13 @@ class process_methods:
             "ttbar": [2, 6],
             "ttH": [2, 8],
             "four_top": [2, 12],
+            "ttbar_lep": [2, 4],
             "ttbar_lep_left": [2, 4],
             "ttbar_lep_right": [2, 4], 
             "ZH": [2, 6],
         }     
         
-        if MODEL != 'ttbar_lep_left' and MODEL != "ttbar_lep_right":
+        if MODEL != 'ttbar_lep' and MODEL != 'ttbar_lep_left' and MODEL != "ttbar_lep_right":
             for i in tqdm.trange(len(PT), desc="Marking jets"):
                 try:
                     __marker_jet, __marker_bjet = process_methods.__jet_marker(np.array(PT[i]), np.array(ETA[i]), np.array(BTAG[i]))
@@ -597,6 +604,117 @@ class process_methods:
                 }
         return _result
 
+    @staticmethod
+    def lephad_finder(dataset: pd.core.frame.DataFrame, PID: int, LEPHAD: int, MODEL: str, not_stable_FSP=True) -> dict:
+
+    ## PID: only accepts top and W here. The sign does not matter. 
+    ## LEPHAD: 1 for leptonic, 2 for hadronic 
+
+        # Extract W+ info 
+        mother_idx = np.array(dataset[dataset["PID"] == 24]["Index"])[-1]
+        D1 = np.array(dataset[dataset["PID"] == 24]["Daughter_1"])[-1]
+        D2 = np.array(dataset[dataset["PID"] == 24]["Daughter_2"])[-1]
+        # Extract W- info
+        mother_idx_m = np.array(dataset[dataset["PID"] == -24]["Index"])[-1]
+        D1m = np.array(dataset[dataset["PID"] == -24]["Daughter_1"])[-1]
+        D2m = np.array(dataset[dataset["PID"] == -24]["Daughter_2"])[-1]
+        
+        print("W+ daughter 1 PID", dataset["PID"][int(D1)])
+        print("W+ daughter 2 PID", dataset["PID"][int(D2)])
+        print("W- daughter 1 PID", dataset["PID"][int(D1m)])
+        print("W- daughter 2 PID", dataset["PID"][int(D2m)])
+
+	# Extract top info 
+        mother_idx_t = np.array(dataset[dataset["PID"] == 6]["Index"])[-1]
+        D1t = np.array(dataset[dataset["PID"] == 6]["Daughter_1"])[-1]
+        D2t = np.array(dataset[dataset["PID"] == 6]["Daughter_2"])[-1]
+        # Extract anti-top info
+        mother_idx_at = np.array(dataset[dataset["PID"] == -6]["Index"])[-1]
+        D1at = np.array(dataset[dataset["PID"] == -6]["Daughter_1"])[-1]
+        D2at = np.array(dataset[dataset["PID"] == -6]["Daughter_2"])[-1]
+
+        print("t daughter 1 PID", dataset["PID"][int(D1t)])
+        print("t daughter 2 PID", dataset["PID"][int(D2t)])
+        print("t~ daughter 1 PID", dataset["PID"][int(D1at)])
+        print("t~ daughter 2 PID", dataset["PID"][int(D2at)])
+
+        if abs(PID)==24: 
+            if LEPHAD ==1 and abs(dataset["PID"][int(D1)]) > 10 : #record leptonic W & its daughters
+                if dataset["PID"][int(D1)] < dataset["PID"][int(D2)]:
+                    D1, D2 = D2, D1
+                _result = {
+                    "mother_idx": mother_idx,
+                    "daughter_1_idx": D1,
+                    "daughter_2_idx": D2,
+                }
+
+            elif LEPHAD ==1 and abs(dataset["PID"][int(D1m)]) > 10 : #record leptonic W & its daughters
+                if dataset["PID"][int(D1m)] < dataset["PID"][int(D2m)]:
+                    D1m, D2m = D2m, D1m
+                _result = {
+                    "mother_idx": mother_idx_m,
+                    "daughter_1_idx": D1m,
+                    "daughter_2_idx": D2m,
+                }
+
+            elif LEPHAD ==2 and abs(dataset["PID"][int(D1)]) < 10 : #record hadronic W & its daughters
+                if dataset["PID"][int(D1)] < dataset["PID"][int(D2)]:
+                    D1, D2 = D2, D1
+                _result = {
+                    "mother_idx": mother_idx,
+                    "daughter_1_idx": D1,
+                    "daughter_2_idx": D2,
+                }
+
+            elif LEPHAD ==2 and abs(dataset["PID"][int(D1m)]) < 10 : #record hadronic W & its daughters
+                if dataset["PID"][int(D1m)] < dataset["PID"][int(D2m)]:
+                    D1m, D2m = D2m, D1m
+                _result = {
+                    "mother_idx": mother_idx_m,
+                    "daughter_1_idx": D1m,
+                    "daughter_2_idx": D2m,
+                }
+
+        elif abs(PID)==6: 
+            if LEPHAD ==1 and abs(dataset["PID"][int(D1)]) > 10 : #record leptonic top, using D1 to check W+ decay
+                if dataset["PID"][int(D1t)] < dataset["PID"][int(D2t)]:
+                    D1t, D2t = D2t, D1t
+                _result = {
+                    "mother_idx": mother_idx_t,
+                    "daughter_1_idx": D1t,
+                    "daughter_2_idx": D2t,
+                }   
+
+            elif LEPHAD ==1 and abs(dataset["PID"][int(D1m)]) > 10 : #record leptonic top, using D1m to check W- decay
+                if dataset["PID"][int(D1at)] < dataset["PID"][int(D2at)]:
+                    D1at, D2at = D2at, D1at
+                _result = {
+                    "mother_idx": mother_idx_at,
+                    "daughter_1_idx": D1at,
+                    "daughter_2_idx": D2at,
+                }
+
+            elif LEPHAD ==2 and abs(dataset["PID"][int(D1)]) < 10 : #record hadronic top, using D1 to check W+ decay
+                if dataset["PID"][int(D1t)] < dataset["PID"][int(D2t)]:
+                    D1t, D2t = D2t, D1t
+                _result = {
+                    "mother_idx": mother_idx_t,
+                    "daughter_1_idx": D1t,
+                    "daughter_2_idx": D2t,
+                }
+
+            elif LEPHAD ==2 and abs(dataset["PID"][int(D1m)]) < 10 : #record hadronic top, using D1m to check W- decay
+                if dataset["PID"][int(D1at)] < dataset["PID"][int(D2at)]:
+                    D1at, D2at = D2at, D1at
+                _result = {
+                    "mother_idx": mother_idx_at,
+                    "daughter_1_idx": D1at,
+                    "daughter_2_idx": D2at,
+                }
+
+        return _result
+
+
     #tracing the daughters
     #Input two daughter of top/top_bar and find their daughter
     @staticmethod
@@ -648,6 +766,7 @@ class process_methods:
                 "W_dauthter_2_idx": daughter_2_idx,
             }
         return  _result
+
     
 class helper:
     @staticmethod
@@ -717,12 +836,12 @@ def old_deltaR_matching(NUM_OF_PARTON, NUM_OF_JET, PARTON_ETA, PARTON_PHI, JET_E
     for k in range(NUM_OF_PARTON, NUM_OF_JET):
         _parton_to_jet_list[k] = 'Nan'
     
-    if MODEL != 'ttbar_lep_left' and MODEL != 'ttbar_lep_right':
+    if MODEL != 'ttbar_lep' and MODEL != 'ttbar_lep_left' and MODEL != 'ttbar_lep_right':
         for j in range(len(JET_ETA)):
             for k in range(NUM_OF_JET):
                 if _parton_to_jet_list[j] == k:
                     _parton_jet_index[k] = int(_jet_to_parton_list[j])                    
-    elif MODEL == 'ttbar_lep_left' or MODEL == 'ttbar_lep_right':
+    elif MODEL == 'ttbar_lep' or MODEL == 'ttbar_lep_left' or MODEL == 'ttbar_lep_right':
         for j in range(len(JET_ETA)):
             if _parton_to_jet_list[j] == 0 :
                 _parton_jet_index[0] = int(_jet_to_parton_list[j])
