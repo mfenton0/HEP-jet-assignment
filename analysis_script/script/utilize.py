@@ -1,8 +1,8 @@
 """
-Author: David Ho^1, Hideki Okawa^2
-Institute1: National Tsing Hua university, Department of Physics, Hsinchu, Taiwan
-Institute2: Fudan University, Shanghai, China
-Mail: davidho@gapp.nthu.edu.tw, hideki.okawa@cern.ch
+Author: David Ho
+Institute: National Tsing Hua university, Department of Physics, Hsinchu, Taiwan
+Mail: davidho@gapp.nthu.edu.tw
+Modified by Hideki Okawa (Fudan U, hideki.okawa@cern.ch) and Mike Fenton (UCI, m.fenton@uci.edu)
 """
 import numpy as np
 import itertools, uproot, sys, os, tqdm

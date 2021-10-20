@@ -1,0 +1,13 @@
+set nb_core 1
+generate p p > t t~ QED=0, (t > W+ b, W+ > l+ vl), (t~ > W- b~, W- > j j)
+add process p p > t t~ QED=0, (t > W+ b, W+ > j j), (t~ > W- b~, W- > l- vl~)
+output ###YOUR_AREA###/HEP-jet-assignment/output/pptt_lep
+launch ###YOUR_AREA###/HEP-jet-assignment/output/pptt_lep
+shower=Pythia8
+detector=Delphes
+analysis=OFF
+done
+set nevents = 10000
+set iseed = 123
+done
+exit

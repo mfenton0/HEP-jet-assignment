@@ -1,8 +1,8 @@
 """
-Author: David Ho^1, Hideki Okawa^2
-Institute1: National Tsing Hua university, Department of Physics, Hsinchu, Taiwan 
-Institute2: Fudan University, Shanghai, China
-Mail: davidho@gapp.nthu.edu.tw, hideki.okawa@cern.ch
+Author: David Ho
+Institute: National Tsing Hua university, Department of Physics, Hsinchu, Taiwan 
+Mail: davidho@gapp.nthu.edu.tw
+Modified by Hideki Okawa (Fudan U, hideki.okawa@cern.ch) and Mike Fenton (UCI, m.fenton@uci.edu)
 """
 #Import packages
 import uproot
@@ -546,7 +546,7 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, PROCESS, GENERATOR, SINGLE=True, COMPU
         pass
     else:
         OUTPUT_FILE = OUTPUT_FILE+".h5"
-    if MODEL == 'ttbar' or MODEL in require_lepton:
+    if MODEL == 'ttbar' or MODEL == 'ttbar_lep_right':
         targets = OrderedDict((
             ("left_target", parton_jet_index.T[:3]),
             ("right_target", parton_jet_index.T[3:]),
@@ -554,6 +554,15 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, PROCESS, GENERATOR, SINGLE=True, COMPU
         masks = OrderedDict((
             ("left_target",  np.any(parton_jet_index[:,:3] < 0, 1)),
             ("right_target",  np.any(parton_jet_index[:,3:] < 0, 1)),
+        ))
+    elif MODEL == 'ttbar_lep' or MODEL == 'ttbar_lep_left':
+        targets = OrderedDict((
+            ("left_target", parton_jet_index.T[:1]),
+            ("right_target", parton_jet_index.T[1:]),
+        ))
+        masks = OrderedDict((
+            ("left_target",  np.any(parton_jet_index[:,:1] < 0, 1)),
+            ("right_target",  np.any(parton_jet_index[:,1:] < 0, 1)),
         ))
     elif MODEL == 'ttH':
         targets = OrderedDict((

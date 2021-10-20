@@ -73,7 +73,7 @@ def cutflow(INPUT_FILE, OUTPUT_FILE, MODEL, CONFIG, SINGLE):
         data = uproot.open(INPUT_FILE)['Delphes']
         particle = particle_properties(data)
         jet = jet_properties(data)
-        if MODEL == 'ttbar_lep_left' or MODEL == "ttbar_lep_right":
+        if MODEL == 'ttbar_lep' or MODEL == 'ttbar_lep_left' or MODEL == "ttbar_lep_right":
             electron = electron_properties(data)
             muon = muon_properties(data)
             missing_et = Missing_ET_properties(data)
@@ -365,7 +365,7 @@ def cutflow(INPUT_FILE, OUTPUT_FILE, MODEL, CONFIG, SINGLE):
             PATH.append(os.path.join(INPUT_FILE, a))
         particle = particle_properties(PATH, single=False)
         jet = jet_properties(PATH, single=False)
-        if MODEL == 'ttbar_lep_left' or MODEL == "ttbar_lep_right":
+        if MODEL == 'ttbar_lep' or MODEL == 'ttbar_lep_left' or MODEL == "ttbar_lep_right":
             electron = electron_properties(PATH, single=False)
             muon = muon_properties(PATH, single=False)
             missing_et = Missing_ET_properties(PATH, single=False)

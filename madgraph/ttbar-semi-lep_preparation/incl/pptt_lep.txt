@@ -1,0 +1,10 @@
+set nb_core 1
+launch ###YOUR_AREA###/HEP-jet-assignment/output/pptt_lep
+shower=Pythia8
+detector=Delphes
+analysis=OFF
+done
+set nevents = 10000
+set iseed = 260
+done
+exit
