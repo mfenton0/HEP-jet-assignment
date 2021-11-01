@@ -461,12 +461,12 @@ module Merger GenMissingET {
 module FastJetFinder GenJetFinder {
   set InputArray NeutrinoFilter/filteredParticles
   set OutputArray  jets
-  set Exclusive exclusive
+  #set Exclusive exclusive
 
   # algorithm: 1 CDFJetClu, 2 MidPoint, 3 SIScone, 4 kt, 5 Cambridge/Aachen, 6 antikt
   set JetAlgorithm 9
   set ParameterR 1.5
-  set NumberOfJet 2
+  #set NumberOfJet 2
   set JetPTMin  0.0
 }
 
@@ -476,10 +476,10 @@ module FastJetFinder GenJetFinder {
 module FastJetFinder FastJetFinder {
   set InputArray EFlowMerger/eflow
   set OutputArray jets
-  set Exclusive exclusive
+  #set Exclusive exclusive
   # algorithm: 1 CDFJetClu, 2 MidPoint, 3 SIScone, 4 kt, 5 Cambridge/Aachen, 6 antikt, ..., 9 ee-kt
   set JetAlgorithm 9 
-  set NumberOfJet 2
+  #set NumberOfJet 2
   set JetPTMin 0.0
 }
 
