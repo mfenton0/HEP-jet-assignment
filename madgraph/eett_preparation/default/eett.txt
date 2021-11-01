@@ -6,7 +6,8 @@ analysis=OFF
 done
 set nevents = 10000
 set iseed = 2
-Delphes/cards/delphes_card_CEPC_eektexclusive_evdijet.tcl
-###YOUR AREA###/HEP-jet-assignment/madgraph/eett_preparation/run_card.dat
+set ebeam1 = 180
+set ebeam2 = 180
+###YOUR AREA###/Delphes/cards/delphes_card_CEPC_eektR13exclusive_ttallhad.tcl
 done
 exit
