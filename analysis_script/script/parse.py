@@ -385,7 +385,7 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, PROCESS, GENERATOR, SINGLE=True, COMPU
     print("+------------------------------------------------------------------------------------------------------+")
     print("Starting parton-jet matching.")
     print("+------------------------------------------------------------------------------------------------------+")
-    truth_matching_result = [deltaR_matching(NUM_OF_PARTON, 
+    truth_matching_result = [deltaR_matching(NUM_OF_DAUGHTER,  
                       dataset['jet']['num_of_jets'][i], 
                       parton_features["eta"][i], 
                       parton_features["phi"][i], 

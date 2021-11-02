@@ -6,5 +6,6 @@ analysis=OFF
 done
 set nevents = 10000
 set iseed = 260
+Delphes/cards/delphes_card_ATLAS.tcl
 done
 exit
