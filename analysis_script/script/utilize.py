@@ -137,10 +137,12 @@ class IO_module:
                         _muon_pt = _data[i].array('Muon.PT')
                         _muon_eta = _data[i].array('Muon.Eta')
                         _muon_phi = _data[i].array('Muon.Phi')
-                        
+                        _muon_charge = _data[i].array('Muon.Charge')        
+    
                         _electron_pt = _data[i].array('Electron.PT')
                         _electron_eta = _data[i].array('Electron.Eta')
                         _electron_phi = _data[i].array('Electron.Phi')
+                        _electron_charge = _data[i].array('Electron.Charge')
                     else: 
                         _missing_et_met = np.concatenate((_missing_et_met, _data[i].array('MissingET.MET')))
                         _missing_et_eta = np.concatenate((_missing_et_eta, _data[i].array('MissingET.Eta')))
@@ -149,11 +151,12 @@ class IO_module:
                         _muon_pt = np.concatenate((_muon_pt, _data[i].array('Muon.PT')))
                         _muon_eta = np.concatenate((_muon_eta, _data[i].array('Muon.Eta')))
                         _muon_phi = np.concatenate((_muon_phi, _data[i].array('Muon.Phi')))
-                        
+                        _muon_charge = np.concatenate((_muon_charge, _data[i].array('Muon.Charge')))
+
                         _electron_pt = np.concatenate((_electron_pt, _data[i].array('Electron.PT')))
                         _electron_eta = np.concatenate((_electron_eta, _data[i].array('Electron.Eta')))
                         _electron_phi = np.concatenate((_electron_phi, _data[i].array('Electron.Phi')))
-
+                        _electron_charge = np.concatenate((_electron_charge, _data[i].array('Electron.Charge')))
         else:
             _data = uproot.open(self.path)['Delphes']
             
@@ -194,12 +197,14 @@ class IO_module:
                 _muon_pt = _data.array('Muon.PT')
                 _muon_eta = _data.array('Muon.Eta')
                 _muon_phi = _data.array('Muon.Phi')
+                _muon_charge = _data.array('Muon.Charge')
 
                 print("Loading electron information.")
                 _electron_pt = _data.array('Electron.PT')
                 _electron_eta = _data.array('Electron.Eta')
                 _electron_phi = _data.array('Electron.Phi')
-        
+                _electron_charge = _data.array('Electron.Charge')        
+
         jet_dataset = {
             "event": _jet_event, 
             "pt": _jet_pt, 
@@ -231,11 +236,13 @@ class IO_module:
                 "pt": _muon_pt, 
                 "eta": _muon_eta, 
                 "phi": _muon_phi, 
+                "charge": _muon_charge,
             }
             electron_dataset = {
                 "pt": _electron_pt, 
                 "eta": _electron_eta, 
                 "phi": _electron_phi, 
+                "charge": _electron_charge,
             }
             MissingET_dataset = {
                 "MET": _missing_et_met, 
@@ -619,10 +626,10 @@ class process_methods:
         D1m = np.array(dataset[dataset["PID"] == -24]["Daughter_1"])[-1]
         D2m = np.array(dataset[dataset["PID"] == -24]["Daughter_2"])[-1]
         
-        print("W+ daughter 1 PID", dataset["PID"][int(D1)])
-        print("W+ daughter 2 PID", dataset["PID"][int(D2)])
-        print("W- daughter 1 PID", dataset["PID"][int(D1m)])
-        print("W- daughter 2 PID", dataset["PID"][int(D2m)])
+        #print("W+ daughter 1 PID", dataset["PID"][int(D1)])
+        #print("W+ daughter 2 PID", dataset["PID"][int(D2)])
+        #print("W- daughter 1 PID", dataset["PID"][int(D1m)])
+        #print("W- daughter 2 PID", dataset["PID"][int(D2m)])
 
 	# Extract top info 
         mother_idx_t = np.array(dataset[dataset["PID"] == 6]["Index"])[-1]
@@ -633,10 +640,10 @@ class process_methods:
         D1at = np.array(dataset[dataset["PID"] == -6]["Daughter_1"])[-1]
         D2at = np.array(dataset[dataset["PID"] == -6]["Daughter_2"])[-1]
 
-        print("t daughter 1 PID", dataset["PID"][int(D1t)])
-        print("t daughter 2 PID", dataset["PID"][int(D2t)])
-        print("t~ daughter 1 PID", dataset["PID"][int(D1at)])
-        print("t~ daughter 2 PID", dataset["PID"][int(D2at)])
+        #print("t daughter 1 PID", dataset["PID"][int(D1t)])
+        #print("t daughter 2 PID", dataset["PID"][int(D2t)])
+        #print("t~ daughter 1 PID", dataset["PID"][int(D1at)])
+        #print("t~ daughter 2 PID", dataset["PID"][int(D2at)])
 
         if abs(PID)==24: 
             if LEPHAD ==1 and abs(dataset["PID"][int(D1)]) > 10 : #record leptonic W & its daughters

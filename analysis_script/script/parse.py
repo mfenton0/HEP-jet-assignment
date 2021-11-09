@@ -479,10 +479,16 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, PROCESS, GENERATOR, SINGLE=True, COMPU
         lepton_pt = np.array([float(a) if len(a) != 0 else float(b) for a, b in zip(dataset['muon']['pt'], dataset['electron']['pt'])])
         lepton_eta = np.array([float(a) if len(a) != 0 else float(b) for a, b in zip(dataset['muon']['eta'], dataset['electron']['eta'])])
         lepton_phi = np.array([float(a) if len(a) != 0 else float(b) for a, b in zip(dataset['muon']['phi'], dataset['electron']['phi'])])
+        lepton_charge = np.array([int(a) if len(a) != 0 else int(b) for a, b in zip(dataset['muon']['charge'], dataset['electron']['charge'])])
+        lepton_pid = np.array([int(13) if len(a) != 0 else int(11) for a, b in zip(dataset['muon']['pt'], dataset['electron']['pt'])])
+        lepton_mass = np.array([float(0.1056583745) if len(a) != 0 else float(0.0005109989461) for a, b in zip(dataset['muon']['pt'], dataset['electron']['pt'])])
         lepton_features = OrderedDict((
             ("pt", lepton_pt),
             ("eta", lepton_eta),
             ("phi", lepton_phi),
+            ("charge", lepton_charge),
+            ("pid", lepton_pid),
+            ("mass", lepton_mass),
         ))
         MET_features = OrderedDict((
             ("MET", np.array([x for x in dataset['MissingET']['MET']])),
