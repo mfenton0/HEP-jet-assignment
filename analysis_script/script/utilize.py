@@ -647,7 +647,7 @@ class process_methods:
 
         if abs(PID)==24: 
             if LEPHAD ==1 and abs(dataset["PID"][int(D1)]) > 10 : #record leptonic W & its daughters
-                if dataset["PID"][int(D1)] < dataset["PID"][int(D2)]:
+                if abs(dataset["PID"][int(D1)]) < abs(dataset["PID"][int(D2)]):
                     D1, D2 = D2, D1
                 _result = {
                     "mother_idx": mother_idx,
@@ -656,7 +656,7 @@ class process_methods:
                 }
 
             elif LEPHAD ==1 and abs(dataset["PID"][int(D1m)]) > 10 : #record leptonic W & its daughters
-                if dataset["PID"][int(D1m)] < dataset["PID"][int(D2m)]:
+                if abs(dataset["PID"][int(D1m)]) < abs(dataset["PID"][int(D2m)]):
                     D1m, D2m = D2m, D1m
                 _result = {
                     "mother_idx": mother_idx_m,
@@ -665,7 +665,7 @@ class process_methods:
                 }
 
             elif LEPHAD ==2 and abs(dataset["PID"][int(D1)]) < 10 : #record hadronic W & its daughters
-                if dataset["PID"][int(D1)] < dataset["PID"][int(D2)]:
+                if abs(dataset["PID"][int(D1)]) < abs(dataset["PID"][int(D2)]):
                     D1, D2 = D2, D1
                 _result = {
                     "mother_idx": mother_idx,
@@ -674,7 +674,7 @@ class process_methods:
                 }
 
             elif LEPHAD ==2 and abs(dataset["PID"][int(D1m)]) < 10 : #record hadronic W & its daughters
-                if dataset["PID"][int(D1m)] < dataset["PID"][int(D2m)]:
+                if abs(dataset["PID"][int(D1m)]) < abs(dataset["PID"][int(D2m)]):
                     D1m, D2m = D2m, D1m
                 _result = {
                     "mother_idx": mother_idx_m,
