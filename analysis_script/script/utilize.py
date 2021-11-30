@@ -684,7 +684,7 @@ class process_methods:
 
         elif abs(PID)==6: 
             if LEPHAD ==1 and abs(dataset["PID"][int(D1)]) > 10 : #record leptonic top, using D1 to check W+ decay
-                if dataset["PID"][int(D1t)] < dataset["PID"][int(D2t)]:
+                if abs(dataset["PID"][int(D1t)]) < abs(dataset["PID"][int(D2t)]):
                     D1t, D2t = D2t, D1t
                 _result = {
                     "mother_idx": mother_idx_t,
@@ -693,7 +693,7 @@ class process_methods:
                 }   
 
             elif LEPHAD ==1 and abs(dataset["PID"][int(D1m)]) > 10 : #record leptonic top, using D1m to check W- decay
-                if dataset["PID"][int(D1at)] < dataset["PID"][int(D2at)]:
+                if abs(dataset["PID"][int(D1at)]) < abs(dataset["PID"][int(D2at)]):
                     D1at, D2at = D2at, D1at
                 _result = {
                     "mother_idx": mother_idx_at,
@@ -702,7 +702,7 @@ class process_methods:
                 }
 
             elif LEPHAD ==2 and abs(dataset["PID"][int(D1)]) < 10 : #record hadronic top, using D1 to check W+ decay
-                if dataset["PID"][int(D1t)] < dataset["PID"][int(D2t)]:
+                if abs(dataset["PID"][int(D1t)]) < abs(dataset["PID"][int(D2t)]):
                     D1t, D2t = D2t, D1t
                 _result = {
                     "mother_idx": mother_idx_t,
@@ -711,7 +711,7 @@ class process_methods:
                 }
 
             elif LEPHAD ==2 and abs(dataset["PID"][int(D1m)]) < 10 : #record hadronic top, using D1m to check W- decay
-                if dataset["PID"][int(D1at)] < dataset["PID"][int(D2at)]:
+                if abs(dataset["PID"][int(D1at)]) < abs(dataset["PID"][int(D2at)]):
                     D1at, D2at = D2at, D1at
                 _result = {
                     "mother_idx": mother_idx_at,

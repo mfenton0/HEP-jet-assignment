@@ -184,7 +184,7 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, PROCESS, GENERATOR, SINGLE=True, COMPU
 
             daughter_t2_W_1 = daughter_t2_W_idx[:,0]
             daughter_t2_W_2 = daughter_t2_W_idx[:,1]
-            daughter_t2_b = np.array([a["daughter_1_idx"] for a in daughter_t2])
+            daughter_t2_b = np.array([a["daughter_2_idx"] for a in daughter_t2])
 
  
         elif MODEL == 'ttbar' or MODEL == 'ttbar_lep_left' or MODEL =='ttbar_lep_right':
