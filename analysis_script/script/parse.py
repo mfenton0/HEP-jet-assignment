@@ -563,12 +563,12 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, PROCESS, GENERATOR, SINGLE=True, COMPU
         ))
     elif MODEL == 'ttbar_lep' or MODEL == 'ttbar_lep_left':
         targets = OrderedDict((
-            ("left_target", parton_jet_index.T[:1]),
-            ("right_target", parton_jet_index.T[1:]),
+            ("left_target", parton_jet_index.T[:3]),
+            ("right_target", parton_jet_index.T[3:]),
         ))
         masks = OrderedDict((
-            ("left_target",  np.any(parton_jet_index[:,:1] < 0, 1)),
-            ("right_target",  np.any(parton_jet_index[:,1:] < 0, 1)),
+            ("left_target",  np.any(parton_jet_index[:,:3] < 0, 1)),
+            ("right_target",  np.any(parton_jet_index[:,3:] < 0, 1)),
         ))
     elif MODEL == 'ttH':
         targets = OrderedDict((
