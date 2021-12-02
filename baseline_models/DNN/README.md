@@ -1,4 +1,4 @@
-Implements the permutation-based DQN model described here. 
+Implements the permutation-based DNN model described here. 
 https://arxiv.org/pdf/1907.11181.pdf
 
 #Requirements
