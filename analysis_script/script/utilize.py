@@ -882,7 +882,7 @@ def old_deltaR_matching(NUM_OF_PARTON, NUM_OF_JET, PARTON_ETA, PARTON_PHI, JET_E
     return _jet_parton_index, _parton_jet_index
 
 @nb.jit(nopython=True)
-def deltaR_matching(NUM_OF_DAUGHTER, NUM_OF_JET, PARTON_ETA, PARTON_PHI, JET_ETA, JET_PHI, CUTS, MODEL):
+def deltaR_matching(NUM_OF_DAUGHTER, NUM_OF_JET, PARTON_ETA, PARTON_PHI, PARTON_PID, JET_ETA, JET_PHI, CUTS, MODEL):
     """
     This is a function for doing delta R matching.
     PARTON_ETA: Array, a list of partons's eta in a event.
@@ -902,7 +902,10 @@ def deltaR_matching(NUM_OF_DAUGHTER, NUM_OF_JET, PARTON_ETA, PARTON_PHI, JET_ETA
     b = 0
     while a < len(PARTON_ETA) :
         for b in range( NUM_OF_JET ):
-            _dR_between_parton_jet.append(delta_R(PARTON_ETA[a], PARTON_PHI[a], JET_ETA[b], JET_PHI[b]))
+            if abs(PARTON_PID[a]) < 6 :
+               _dR_between_parton_jet.append(delta_R(PARTON_ETA[a], PARTON_PHI[a], JET_ETA[b], JET_PHI[b]))
+            else :
+               _dR_between_parton_jet.append(10.) # exclude leptons by assigning large dR
             j +=1
         a += 1 
     src_array = np.array(_dR_between_parton_jet)
