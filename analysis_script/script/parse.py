@@ -522,7 +522,7 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, PROCESS, GENERATOR, SINGLE=True, COMPU
                                     "met_met": met_met,
                                     "met_eta": met_eta,
                                     "met_phi": met_phi, 
-                                    "sumet": sumeti)
+                                    "sumet": sumet)
                                     #"jet_pt": jet_pt, "n": MAX_NUM_OF_JETS})
 
         lepton_features = OrderedDict((
