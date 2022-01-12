@@ -9,6 +9,7 @@ import uproot
 import pandas as pd 
 import numpy as np 
 import numba as nb
+import awkward as ak
 import h5py, sys, traceback, os, tqdm, time
 from script.utilize import IO_module, chi_square_minimizer, helper, pdgid, deltaR_matching, process_methods, delta_R, deltaPhi
 import multiprocessing as mp
@@ -476,13 +477,54 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, PROCESS, GENERATOR, SINGLE=True, COMPU
         print("+------------------------------------------------------------------------------------------------------+")
         print("Chi-square matching finished.")
         print("+------------------------------------------------------------------------------------------------------+")
+    treefile = uproot.recreate(OUTPUT_FILE+"_KLFinput.root")
+    treefile["nominal"] = uproot.newtree({"lepton_pt": float, 
+                                          "lepton_eta": float,  
+                                          "lepton_cl_eta": float,
+                                          "lepton_phi": float,
+                                          "lepton_mass": float,
+                                          "lepton_is_e": int,
+                                          "lepton_is_mu": int,
+                                          "lepton_charge": int,
+                                          "met_met": float, 
+                                          "met_eta": float,
+                                          "met_phi": float, 
+                                          "sumet": float,
+                                          #"jet_pt": np.dtype("float64"))
+                                        })
+
     if MODEL == 'ttbar_lep' or MODEL == 'ttbar_lep_left' or MODEL == "ttbar_lep_right":
         lepton_pt = np.array([float(a) if len(a) != 0 else float(b) for a, b in zip(dataset['muon']['pt'], dataset['electron']['pt'])])
         lepton_eta = np.array([float(a) if len(a) != 0 else float(b) for a, b in zip(dataset['muon']['eta'], dataset['electron']['eta'])])
         lepton_phi = np.array([float(a) if len(a) != 0 else float(b) for a, b in zip(dataset['muon']['phi'], dataset['electron']['phi'])])
         lepton_charge = np.array([int(a) if len(a) != 0 else int(b) for a, b in zip(dataset['muon']['charge'], dataset['electron']['charge'])])
         lepton_pid = np.array([int(13) if len(a) != 0 else int(11) for a, b in zip(dataset['muon']['pt'], dataset['electron']['pt'])])
+        lepton_is_e = np.array([int(0) if len(a) != 0 else int(1) for a, b in zip(dataset['muon']['pt'], dataset['electron']['pt'])])
+        lepton_is_mu = np.array([int(1) if len(a) != 0 else int(0) for a, b in zip(dataset['muon']['pt'], dataset['electron']['pt'])])
         lepton_mass = np.array([float(0.1056583745) if len(a) != 0 else float(0.0005109989461) for a, b in zip(dataset['muon']['pt'], dataset['electron']['pt'])])
+
+        met_met = np.array([x for x in dataset['MissingET']['MET']])
+        met_eta = np.array([x for x in dataset['MissingET']['eta']])
+        met_phi = np.array([x for x in dataset['MissingET']['phi']])
+        sumet = np.array([x for x in dataset['MissingET']['sumet']])
+
+        #jet_pt = np.array([np.pad(np.array(x, dtype=np.float64), (0, MAX_NUM_OF_JETS - len(x)), 'constant', constant_values=(0, -999)).astype(np.float64).tolist() for x in dataset['jet']['pt']]) #np.array([x for x in dataset['jet']['pt']])
+        #jet_pt = np.array([x for x in jet_pt_all])
+
+        treefile["nominal"].extend({"lepton_pt": lepton_pt,
+                                    "lepton_eta": lepton_eta,
+                                    "lepton_cl_eta": lepton_eta,
+                                    "lepton_phi": lepton_phi,
+                                    "lepton_mass": lepton_mass,
+                                    "lepton_is_e": lepton_is_e,
+                                    "lepton_is_mu": lepton_is_mu,
+                                    "lepton_charge": lepton_charge,
+                                    "met_met": met_met,
+                                    "met_eta": met_eta,
+                                    "met_phi": met_phi, 
+                                    "sumet": sumeti)
+                                    #"jet_pt": jet_pt, "n": MAX_NUM_OF_JETS})
+
         lepton_features = OrderedDict((
             ("pt", lepton_pt),
             ("eta", lepton_eta),

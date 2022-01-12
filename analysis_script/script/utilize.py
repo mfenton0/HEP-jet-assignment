@@ -133,7 +133,8 @@ class IO_module:
                         _missing_et_met = _data[i].array('MissingET.MET')
                         _missing_et_eta = _data[i].array('MissingET.Eta')
                         _missing_et_phi = _data[i].array('MissingET.Phi')
-                        
+                        _sumet = _data[i].array('ScalarHT.HT') 
+
                         _muon_pt = _data[i].array('Muon.PT')
                         _muon_eta = _data[i].array('Muon.Eta')
                         _muon_phi = _data[i].array('Muon.Phi')
@@ -147,6 +148,7 @@ class IO_module:
                         _missing_et_met = np.concatenate((_missing_et_met, _data[i].array('MissingET.MET')))
                         _missing_et_eta = np.concatenate((_missing_et_eta, _data[i].array('MissingET.Eta')))
                         _missing_et_phi = np.concatenate((_missing_et_phi, _data[i].array('MissingET.Phi')))
+                        _sumet = np.concatenate((_sumet, _data[i].array('ScalarHT.HT')))
                         
                         _muon_pt = np.concatenate((_muon_pt, _data[i].array('Muon.PT')))
                         _muon_eta = np.concatenate((_muon_eta, _data[i].array('Muon.Eta')))
@@ -192,6 +194,7 @@ class IO_module:
                 _missing_et_met = _data.array('MissingET.MET')
                 _missing_et_eta = _data.array('MissingET.Eta')
                 _missing_et_phi = _data.array('MissingET.Phi')
+                _sumet = _data.array('ScalarHT.HT')
 
                 print("Loading muon information.")
                 _muon_pt = _data.array('Muon.PT')
@@ -248,6 +251,7 @@ class IO_module:
                 "MET": _missing_et_met, 
                 "eta": _missing_et_eta, 
                 "phi": _missing_et_phi, 
+                "sumet": _sumet,
             }
             dataset = {
                 "particle": particle_dataset,
