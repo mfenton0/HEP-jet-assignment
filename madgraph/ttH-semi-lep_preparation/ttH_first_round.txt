@@ -1,0 +1,13 @@
+generate p p > t t~ h , (t > W+ b, W+ > l+ vl), (t~ > W- b~, W- > j j), (h > b b~ )
+add process p p > t t~ h , (t > W+ b, W+ > j j), (t~ > W- b~, W- > l- vl~), (h > b b~ )
+output ###YOUR_AREA###/HEP-jet-assignment/output/ppttH_lep
+launch ###YOUR_AREA###/HEP-jet-assignment/output/ppttH_lep
+shower=Pythia8
+detector=Delphes
+analysis=OFF
+done
+set nevents = 10000
+set iseed = 1
+Delphes/cards/delphes_card_CMS.tcl
+done
+exit

@@ -1,0 +1,10 @@
+launch ###YOUR_AREA###/HEP-jet-assignment/output/ppttH_lep
+shower=Pythia8
+detector=Delphes
+analysis=OFF
+done
+set nevents = 10000
+set iseed = 1
+Delphes/cards/delphes_card_CMS.tcl
+done
+exit

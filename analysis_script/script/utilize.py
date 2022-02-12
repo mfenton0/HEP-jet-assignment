@@ -60,7 +60,8 @@ class IO_module:
         self.path = PATH
         self.multi = MULTI
         self.model = MODEL
-        self.require_lepton = ["ttbar_lep", "ttbar_lep_left", "ttbar_lep_right"]
+        self.require_lepton = ["ttbar_lep", "ttbar_lep_left", "ttbar_lep_right","ttH_lep"]
+        self.require_lepton_ttbar = ["ttbar_lep", "ttbar_lep_left", "ttbar_lep_right"]
         self.kargs = kargs
     def read_ROOT(self) -> dict:
         # If loading multi-root files, using this function to concatenate dataset.
@@ -133,7 +134,8 @@ class IO_module:
                         _missing_et_met = _data[i].array('MissingET.MET')
                         _missing_et_eta = _data[i].array('MissingET.Eta')
                         _missing_et_phi = _data[i].array('MissingET.Phi')
-                        
+                        _sumet = _data[i].array('ScalarHT.HT') 
+
                         _muon_pt = _data[i].array('Muon.PT')
                         _muon_eta = _data[i].array('Muon.Eta')
                         _muon_phi = _data[i].array('Muon.Phi')
@@ -147,6 +149,7 @@ class IO_module:
                         _missing_et_met = np.concatenate((_missing_et_met, _data[i].array('MissingET.MET')))
                         _missing_et_eta = np.concatenate((_missing_et_eta, _data[i].array('MissingET.Eta')))
                         _missing_et_phi = np.concatenate((_missing_et_phi, _data[i].array('MissingET.Phi')))
+                        _sumet = np.concatenate((_sumet, _data[i].array('ScalarHT.HT')))
                         
                         _muon_pt = np.concatenate((_muon_pt, _data[i].array('Muon.PT')))
                         _muon_eta = np.concatenate((_muon_eta, _data[i].array('Muon.Eta')))
@@ -192,6 +195,7 @@ class IO_module:
                 _missing_et_met = _data.array('MissingET.MET')
                 _missing_et_eta = _data.array('MissingET.Eta')
                 _missing_et_phi = _data.array('MissingET.Phi')
+                _sumet = _data.array('ScalarHT.HT')
 
                 print("Loading muon information.")
                 _muon_pt = _data.array('Muon.PT')
@@ -248,6 +252,7 @@ class IO_module:
                 "MET": _missing_et_met, 
                 "eta": _missing_et_eta, 
                 "phi": _missing_et_phi, 
+                "sumet": _sumet,
             }
             dataset = {
                 "particle": particle_dataset,
@@ -295,6 +300,12 @@ class IO_module:
             jet_index_dict_name = OrderedDict((
                 ("left_target", ["b", "q1", "q2"]),
                 ("right_target", ["b", "lepton", "neutrino"]),
+            ))
+        elif self.model == 'ttH_lep':
+            jet_index_dict_name = OrderedDict((
+                ("left_target", ["b", "neutrino", "lepton"]),
+                ("right_target", ["b", "q1", "q2"]),
+                ("higgs_target", ["b1", "b2"]),
             ))
         else:
             print("Please select a correct model.")
@@ -404,10 +415,11 @@ class process_methods:
             "ttbar_lep": [2, 4],
             "ttbar_lep_left": [2, 4],
             "ttbar_lep_right": [2, 4], 
+            "ttH_lep": [2, 6],
             "ZH": [2, 6],
         }     
         
-        if MODEL != 'ttbar_lep' and MODEL != 'ttbar_lep_left' and MODEL != "ttbar_lep_right":
+        if MODEL != 'ttbar_lep' and MODEL != 'ttbar_lep_left' and MODEL != "ttbar_lep_right" and MODEL != "ttH_lep":
             for i in tqdm.trange(len(PT), desc="Marking jets"):
                 try:
                     __marker_jet, __marker_bjet = process_methods.__jet_marker(np.array(PT[i]), np.array(ETA[i]), np.array(BTAG[i]))
