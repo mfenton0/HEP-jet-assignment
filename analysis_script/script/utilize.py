@@ -60,7 +60,8 @@ class IO_module:
         self.path = PATH
         self.multi = MULTI
         self.model = MODEL
-        self.require_lepton = ["ttbar_lep", "ttbar_lep_left", "ttbar_lep_right"]
+        self.require_lepton = ["ttbar_lep", "ttbar_lep_left", "ttbar_lep_right","ttH_lep"]
+        self.require_lepton_ttbar = ["ttbar_lep", "ttbar_lep_left", "ttbar_lep_right"]
         self.kargs = kargs
     def read_ROOT(self) -> dict:
         # If loading multi-root files, using this function to concatenate dataset.
@@ -300,6 +301,12 @@ class IO_module:
                 ("left_target", ["b", "q1", "q2"]),
                 ("right_target", ["b", "lepton", "neutrino"]),
             ))
+        elif self.model == 'ttH_lep':
+            jet_index_dict_name = OrderedDict((
+                ("left_target", ["b", "neutrino", "lepton"]),
+                ("right_target", ["b", "q1", "q2"]),
+                ("higgs_target", ["b1", "b2"]),
+            ))
         else:
             print("Please select a correct model.")
         parton_features = self.kargs['parton_features']
@@ -408,10 +415,11 @@ class process_methods:
             "ttbar_lep": [2, 4],
             "ttbar_lep_left": [2, 4],
             "ttbar_lep_right": [2, 4], 
+            "ttH_lep": [2, 6],
             "ZH": [2, 6],
         }     
         
-        if MODEL != 'ttbar_lep' and MODEL != 'ttbar_lep_left' and MODEL != "ttbar_lep_right":
+        if MODEL != 'ttbar_lep' and MODEL != 'ttbar_lep_left' and MODEL != "ttbar_lep_right" and MODEL != "ttH_lep":
             for i in tqdm.trange(len(PT), desc="Marking jets"):
                 try:
                     __marker_jet, __marker_bjet = process_methods.__jet_marker(np.array(PT[i]), np.array(ETA[i]), np.array(BTAG[i]))

@@ -6,10 +6,12 @@ Modified by Hideki Okawa (Fudan U, hideki.okawa@cern.ch) and Mike Fenton (UCI, m
 """
 #Import packages
 import uproot
+import uproot3
 import pandas as pd 
 import numpy as np 
 import numba as nb
 import awkward as ak
+import awkward0 as ak0
 import h5py, sys, traceback, os, tqdm, time
 from script.utilize import IO_module, chi_square_minimizer, helper, pdgid, deltaR_matching, process_methods, delta_R, deltaPhi
 import multiprocessing as mp
@@ -19,7 +21,8 @@ faulthandler.enable()
 def parse(INPUT_FILE, OUTPUT_FILE, MODEL, PROCESS, GENERATOR, SINGLE=True, COMPUTE_CHI2=False, **kargs):
 
     PID = pdgid()
-    require_lepton = ["ttbar_lep", "ttbar_lep_left", "ttbar_lep_right"]
+    require_lepton = ["ttbar_lep", "ttbar_lep_left", "ttbar_lep_right", "ttH_lep"]
+    require_lepton_ttbar = ["ttbar_lep", "ttbar_lep_left", "ttbar_lep_right"]
     # Setting `STATUS_CODE` for different shower generator.
     if GENERATOR == 'py8':
         STATUS_CODE = 22
@@ -96,6 +99,20 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, PROCESS, GENERATOR, SINGLE=True, COMPU
         """
         barcode = np.array([68, 80, 80, 34, 40, 40, 1, 1])
         NUM_OF_PARTON = 8
+        NUM_OF_DAUGHTER = 8
+    elif MODEL == "ttH_lep":
+        """
+        Barcode system
+        t t~ W+ W- b b~ H
+        0 0  0  0  0 0  0
+        b from leptonic top = 1000100  ----> 68
+        daughter of t and leptonic W = 1010000 ----> 80
+        daughter of t and hadronic W = 0101000 ----> 34
+        b from hadronic top = 0100010 ----> 40
+        daughter of H = 0000001 ----> 1
+        """
+        barcode = np.array([68, 80, 80, 34, 34, 40, 1, 1])
+        NUM_OF_PARTON = 6
         NUM_OF_DAUGHTER = 8
     elif MODEL == "four_top":
         """
@@ -223,6 +240,27 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, PROCESS, GENERATOR, SINGLE=True, COMPU
             daughter_h = [process_methods.daughter_finder(helper.to_dataframe(dataset["particle"], i), PID.higgs, MODEL) for i in tqdm.tqdm(passed, total=len(passed), desc='Finding daughters of higgs boson.')]
             daughter_h_b_1 = np.array([a["daughter_1_idx"] for a in daughter_h])
             daughter_h_b_2 = np.array([a["daughter_2_idx"] for a in daughter_h])
+
+        elif MODEL == 'ttH_lep':
+            daughter_t1 = [process_methods.lephad_finder(helper.to_dataframe(dataset["particle"], i), PID.top, 1, MODEL) for i in tqdm.tqdm(passed, total=len(passed), desc='Finding daughters of leptonic top quark.')]
+            daughter_t2 = [process_methods.lephad_finder(helper.to_dataframe(dataset["particle"], i), PID.top, 2, MODEL) for i in tqdm.tqdm(passed, total=len(passed), desc='Finding daughters of hadronic top quark.')] # we don't care the sign of PID for lephad_finder
+            daughter_t1_W = [process_methods.lephad_finder(helper.to_dataframe(dataset["particle"], passed[i]), PID.w_plus, 1, MODEL) for i in tqdm.trange(len(passed), desc='Finding daughters of leptonic W boson.')]
+            daughter_t2_W = [process_methods.lephad_finder(helper.to_dataframe(dataset["particle"], passed[i]), PID.w_plus, 2, MODEL) for i in tqdm.trange(len(passed), desc='Finding daughters of hadronic W boson.')] # we don't care the sign of PID for lephad_finder
+            daughter_t1_W_idx = np.array([[ dic[item] for item in dic if item in ["daughter_1_idx", "daughter_2_idx"]] for dic in daughter_t1_W])
+            daughter_t2_W_idx = np.array([[ dic[item] for item in dic if item in ["daughter_1_idx", "daughter_2_idx"]] for dic in daughter_t2_W])
+
+            daughter_t1_W_1 = daughter_t1_W_idx[:,0]
+            daughter_t1_W_2 = daughter_t1_W_idx[:,1]
+            daughter_t1_b = np.array([a["daughter_2_idx"] for a in daughter_t1])
+
+            daughter_t2_W_1 = daughter_t2_W_idx[:,0]
+            daughter_t2_W_2 = daughter_t2_W_idx[:,1]
+            daughter_t2_b = np.array([a["daughter_2_idx"] for a in daughter_t2])
+
+            daughter_h = [process_methods.daughter_finder(helper.to_dataframe(dataset["particle"], i), PID.higgs, MODEL) for i in tqdm.tqdm(passed, total=len(passed), desc='Finding daughters of higgs boson.')]
+            daughter_h_b_1 = np.array([a["daughter_1_idx"] for a in daughter_h])
+            daughter_h_b_2 = np.array([a["daughter_2_idx"] for a in daughter_h])
+
         elif MODEL == 'four_top':
             daughter_t = [process_methods.daughter_finder(helper.to_dataframe(dataset["particle"], i), PID.top, MODEL) for i in tqdm.tqdm(passed, total=len(passed), desc='Finding daughters of top quark')]
             daughter_anti_t = [process_methods.daughter_finder(helper.to_dataframe(dataset["particle"], i), PID.anti_top, MODEL) for i in tqdm.tqdm(passed, total=len(passed), desc='Finding daughters of anti-top quark')]
@@ -244,7 +282,7 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, PROCESS, GENERATOR, SINGLE=True, COMPU
             daughter_t4_W_2 = daughter_anti_t_W_idx[:,3]
             daughter_t3_b = np.array([a["daughter_1_2_idx"] for a in daughter_anti_t])
             daughter_t4_b = np.array([a["daughter_2_2_idx"] for a in daughter_anti_t])
-    else: ### MULTIPROCESSING not yet implemented for ttbar_lep
+    else: ### MULTIPROCESSING not yet implemented for ttbar_lep and ttH_lep
         if MODEL == 'ttbar' or MODEL == 'ttbar_lep_left' or MODEL =='ttbar_lep_right':
             mp_src_top_1 = [[helper.to_dataframe(dataset["particle"], i), PID.top, MODEL] for i in tqdm.tqdm(passed, total=len(passed), desc='preparing data for multiprocessing.(1/4)')]
             mp_src_top_2 = [[helper.to_dataframe(dataset["particle"], i), PID.anti_top, MODEL] for i in tqdm.tqdm(passed, total=len(passed), desc='preparing data for multiprocessing.(2/4)')]
@@ -340,9 +378,9 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, PROCESS, GENERATOR, SINGLE=True, COMPU
     print("+------------------------------------------------------------------------------------------------------+")
     print("Recording the kinematics variables of partons and jets in the selected event.")
     print("+------------------------------------------------------------------------------------------------------+")
-    if MODEL == 'ttbar' or MODEL in require_lepton:
+    if MODEL == 'ttbar' or MODEL in require_lepton_ttbar:
         parton_idx = np.stack((daughter_t1_b, daughter_t1_W_1, daughter_t1_W_2, daughter_t2_b, daughter_t2_W_1, daughter_t2_W_2), axis=1)
-    elif MODEL == 'ttH':
+    elif MODEL == 'ttH' or MODEL == 'ttH_lep':
         parton_idx = np.stack((daughter_t1_b, daughter_t1_W_1, daughter_t1_W_2, daughter_t2_b, daughter_t2_W_1, daughter_t2_W_2, daughter_h_b_1, daughter_h_b_2), axis=1)
     elif MODEL == 'four_top':
         parton_idx = np.stack((daughter_t1_b, daughter_t1_W_1, daughter_t1_W_2, 
@@ -367,6 +405,8 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, PROCESS, GENERATOR, SINGLE=True, COMPU
         parton_masks = parton_barcode != 40
     elif MODEL == "ttbar_lep_right":
         parton_masks = parton_barcode != 20
+    elif MODEL == "ttH_lep":
+        parton_masks = parton_barcode != 80
     else :
         parton_masks = parton_barcode != 0
 
@@ -477,23 +517,8 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, PROCESS, GENERATOR, SINGLE=True, COMPU
         print("+------------------------------------------------------------------------------------------------------+")
         print("Chi-square matching finished.")
         print("+------------------------------------------------------------------------------------------------------+")
-    treefile = uproot.recreate(OUTPUT_FILE+"_KLFinput.root")
-    treefile["nominal"] = uproot.newtree({"lepton_pt": float, 
-                                          "lepton_eta": float,  
-                                          "lepton_cl_eta": float,
-                                          "lepton_phi": float,
-                                          "lepton_mass": float,
-                                          "lepton_is_e": int,
-                                          "lepton_is_mu": int,
-                                          "lepton_charge": int,
-                                          "met_met": float, 
-                                          "met_eta": float,
-                                          "met_phi": float, 
-                                          "sumet": float,
-                                          #"jet_pt": np.dtype("float64"))
-                                        })
 
-    if MODEL == 'ttbar_lep' or MODEL == 'ttbar_lep_left' or MODEL == "ttbar_lep_right":
+    if MODEL == 'ttbar_lep' or MODEL == 'ttbar_lep_left' or MODEL == "ttbar_lep_right" or MODEL == 'ttH_lep':
         lepton_pt = np.array([float(a) if len(a) != 0 else float(b) for a, b in zip(dataset['muon']['pt'], dataset['electron']['pt'])])
         lepton_eta = np.array([float(a) if len(a) != 0 else float(b) for a, b in zip(dataset['muon']['eta'], dataset['electron']['eta'])])
         lepton_phi = np.array([float(a) if len(a) != 0 else float(b) for a, b in zip(dataset['muon']['phi'], dataset['electron']['phi'])])
@@ -502,28 +527,6 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, PROCESS, GENERATOR, SINGLE=True, COMPU
         lepton_is_e = np.array([int(0) if len(a) != 0 else int(1) for a, b in zip(dataset['muon']['pt'], dataset['electron']['pt'])])
         lepton_is_mu = np.array([int(1) if len(a) != 0 else int(0) for a, b in zip(dataset['muon']['pt'], dataset['electron']['pt'])])
         lepton_mass = np.array([float(0.1056583745) if len(a) != 0 else float(0.0005109989461) for a, b in zip(dataset['muon']['pt'], dataset['electron']['pt'])])
-
-        met_met = np.array([x for x in dataset['MissingET']['MET']])
-        met_eta = np.array([x for x in dataset['MissingET']['eta']])
-        met_phi = np.array([x for x in dataset['MissingET']['phi']])
-        sumet = np.array([x for x in dataset['MissingET']['sumet']])
-
-        #jet_pt = np.array([np.pad(np.array(x, dtype=np.float64), (0, MAX_NUM_OF_JETS - len(x)), 'constant', constant_values=(0, -999)).astype(np.float64).tolist() for x in dataset['jet']['pt']]) #np.array([x for x in dataset['jet']['pt']])
-        #jet_pt = np.array([x for x in jet_pt_all])
-
-        treefile["nominal"].extend({"lepton_pt": lepton_pt,
-                                    "lepton_eta": lepton_eta,
-                                    "lepton_cl_eta": lepton_eta,
-                                    "lepton_phi": lepton_phi,
-                                    "lepton_mass": lepton_mass,
-                                    "lepton_is_e": lepton_is_e,
-                                    "lepton_is_mu": lepton_is_mu,
-                                    "lepton_charge": lepton_charge,
-                                    "met_met": met_met,
-                                    "met_eta": met_eta,
-                                    "met_phi": met_phi, 
-                                    "sumet": sumet})
-                                    #"jet_pt": jet_pt, "n": MAX_NUM_OF_JETS})
 
         lepton_features = OrderedDict((
             ("pt", lepton_pt),
@@ -537,9 +540,10 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, PROCESS, GENERATOR, SINGLE=True, COMPU
             ("MET", np.array([x for x in dataset['MissingET']['MET']])),
             ("eta", np.array([x for x in dataset['MissingET']['eta']])),
             ("phi", np.array([x for x in dataset['MissingET']['phi']])),
+            ("sumet", np.array([x for x in dataset['MissingET']['sumet']])),
         ))
         print("+------------------------------------------------------------------------------------------------------+")
-        print("Starting lepton and neutrino matching.")
+        print("Starting lepton and neutrino matching.")   ## not yet implemented for ttH
         print("+------------------------------------------------------------------------------------------------------+")
         if MODEL == 'ttbar_lep' or MODEL == 'ttbar_lep_left':
             lepton_delta_R_result = np.zeros(len(passed))
@@ -613,7 +617,7 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, PROCESS, GENERATOR, SINGLE=True, COMPU
             ("left_target",  np.any(parton_jet_index[:,:3] < 0, 1)),
             ("right_target",  np.any(parton_jet_index[:,3:] < 0, 1)),
         ))
-    elif MODEL == 'ttH':
+    elif MODEL == 'ttH' or MODEL == 'ttH_lep':
         targets = OrderedDict((
             ("left_target", parton_jet_index.T[:3]),
             ("right_target", parton_jet_index.T[3:6]),
