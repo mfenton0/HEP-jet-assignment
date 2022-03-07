@@ -1,5 +1,5 @@
 set nb_core 1
-launch ###YOUR_AREA###/HEP-jet-assignment/output/ppttbb_lep_cms
+launch ###YOUR_AREA###/HEP-jet-assignment/output/ppttbb_lep
 shower=Pythia8
 detector=Delphes
 analysis=OFF
