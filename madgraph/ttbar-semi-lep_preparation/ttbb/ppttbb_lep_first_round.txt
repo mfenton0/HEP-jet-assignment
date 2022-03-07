@@ -1,0 +1,19 @@
+set nb_core 1
+generate p p > t t~ b b~ QED=0, (t > W+ b, W+ > l+ vl), (t~ > W- b~, W- > j j)
+add process p p > t t~ b b~ QED=0, (t > W+ b, W+ > j j), (t~ > W- b~, W- > l- vl~)
+output ###YOUR_AREA###/HEP-jet-assignment/output/ppttbb_lep_cms
+launch ###YOUR_AREA###/HEP-jet-assignment/output/ppttbb_lep_cms
+shower=Pythia8
+detector=Delphes
+analysis=OFF
+done
+set nevents = 10000
+set iseed = 1
+set ptb = 20.0
+set etab = 5.0
+set drbb = 0.4
+set drbj = 0.4
+set drbl = 0.4 
+Delphes/cards/delphes_card_CMS.tcl
+done
+exit
