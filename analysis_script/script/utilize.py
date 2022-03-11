@@ -311,6 +311,7 @@ class IO_module:
             print("Please select a correct model.")
         parton_features = self.kargs['parton_features']
         jet_features = self.kargs['jet_features']
+        event_features = self.kargs['event_features']
         if self.model in self.require_lepton:
             lepton_features = self.kargs['lepton_features']
             met_features = self.kargs['MET_features']
@@ -331,11 +332,13 @@ class IO_module:
                 file.create_dataset(f"parton_features/{key}", data=value)
             for key, value in jet_features.items():
                 file.create_dataset(f"jet_features/{key}", data=value)  
+            for key, value in event_features.items():
+                file.create_dataset(f"event_features/{key}", data=value)
             if self.model in self.require_lepton:
                 for key, value in lepton_features.items():
                     file.create_dataset(f"lepton_features/{key}", data=value)  
                 for key, value in met_features.items():
-                    file.create_dataset(f"met_features/{key}", data=value)  
+                    file.create_dataset(f"met_features/{key}", data=value) 
             if self.kargs['usage'] == 'parse':
                 for key, value in jet_index_dict_name.items():
                     target = targets[key]

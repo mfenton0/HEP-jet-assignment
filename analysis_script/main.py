@@ -25,6 +25,9 @@ def main():
     parser.add_argument("-t", "--target_file", dest="target", help="target file for computing purity")
     parser.add_argument("-g", "--shower-generator", dest="generator", default="py8", help="type of generator.")
     parser.add_argument("--compute-chi-square", dest="ccs", default=False, help="type of generator.")
+    parser.add_argument("--top-mass", dest="mt", default=173, help="true top mass")
+    parser.add_argument("--resonance-mass", dest="mx", default=0, help="true resonance mass if any")
+  
     
     args = parser.parse_args()
     
@@ -39,7 +42,7 @@ def main():
         args.ccs = False
     
     if args.usage == "parse":
-        parse(args.input, args.output, args.model, args.process, args.generator, args.single, args.ccs, EXTRA=args.extra)
+        parse(args.input, args.output, args.model, args.process, args.generator, args.single, args.ccs, args.mt, args.mx, EXTRA=args.extra)
     elif args.usage == "chi2":
         chi2(args.input, args.output, args.model, args.process, args.extra, args.generator, args.single)
     else: 

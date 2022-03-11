@@ -18,7 +18,7 @@ import multiprocessing as mp
 from collections import OrderedDict
 import faulthandler
 faulthandler.enable()
-def parse(INPUT_FILE, OUTPUT_FILE, MODEL, PROCESS, GENERATOR, SINGLE=True, COMPUTE_CHI2=False, **kargs):
+def parse(INPUT_FILE, OUTPUT_FILE, MODEL, PROCESS, GENERATOR, SINGLE=True, COMPUTE_CHI2=False, TOPMASS=float(173.), RESMASS=float(0.), **kargs):
 
     PID = pdgid()
     require_lepton = ["ttbar_lep", "ttbar_lep_left", "ttbar_lep_right", "ttH_lep"]
@@ -542,6 +542,10 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, PROCESS, GENERATOR, SINGLE=True, COMPU
             ("phi", np.array([x for x in dataset['MissingET']['phi']])),
             ("sumet", np.array([x for x in dataset['MissingET']['sumet']])),
         ))
+        event_features = OrderedDict((
+            ("mt", np.array([float(TOPMASS) for x in dataset['MissingET']['MET']])), ##MissingET just for placeholder
+            ("mx", np.array([float(RESMASS) for x in dataset['MissingET']['MET']])), ##MissingET just for placeholder
+        ))
         print("+------------------------------------------------------------------------------------------------------+")
         print("Starting lepton and neutrino matching.")   ## not yet implemented for ttH
         print("+------------------------------------------------------------------------------------------------------+")
@@ -655,6 +659,7 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, PROCESS, GENERATOR, SINGLE=True, COMPU
             parton_features=parton_features, 
             jet_features=jet_features, 
             MET_features=MET_features,
+            event_features=event_features,
             lepton_features=lepton_features,
             usage='parse',
             contain_chi_square=False,
