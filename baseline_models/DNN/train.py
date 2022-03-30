@@ -25,7 +25,7 @@ OPTIONS_4_JETS = {
 OPTIONS_5_JETS = {
     "dataset": "./data/baseline/semi_leptonic_CMS_permutation_5_jets.h5",
     "train_test_split": 0.8,
-    "batch_size": 60_000,
+    "batch_size": 30_000,
 
     "hidden_dims": [512, 256, 128, 64, 32, 16],
     "learning_rate": 0.01,
@@ -36,7 +36,7 @@ OPTIONS_5_JETS = {
 OPTIONS_6_JETS = {
     "dataset": "./data/baseline/semi_leptonic_CMS_permutation_6_jets.h5",
     "train_test_split": 0.8,
-    "batch_size": 60_000,
+    "batch_size": 30_000,
 
     "hidden_dims": [512, 256, 128, 64, 32],
     "learning_rate": 0.01,
@@ -64,16 +64,24 @@ class Network(nn.Sequential):
 
 # noinspection PyAbstractClass
 class PermutationDataModule(pl.LightningDataModule):
-    def __init__(self, options):
+    def __init__(self, options, num_workers):
         super().__init__()
         self.options = options
+        self.num_workers = num_workers
         self.dataset = options["dataset"]
         self.batch_size = options["batch_size"]
         self.train_test_split = options["train_test_split"]
+        self.testing_file = options.get("testing_file", None)
+
+        with h5py.File(self.dataset, 'r') as file:
+            self.context_jets, self.jet_features = file["jets"].shape[1:]
+            self.lepton_features = file["leptons"].shape[1]
+            self.flat_features = self.context_jets * self.jet_features + self.lepton_features
 
     def setup(self, stage=None):
         with h5py.File(self.dataset, 'r') as file:
             jets = file["jets"][:]
+            leptons = file["leptons"][:]
             barcodes = file["barcodes"][:]
             targets = file["targets"][:]
             event_index = file["event_index"][:]
@@ -85,15 +93,17 @@ class PermutationDataModule(pl.LightningDataModule):
 
         # noinspection PyAttributeOutsideInit
         self.training_dataset = TensorDataset(
-            torch.from_numpy(jets[:permutation_train_idx]),
+            torch.from_numpy(jets[:permutation_train_idx]).float(),
+            torch.from_numpy(leptons[:permutation_train_idx]).float(),
             torch.from_numpy(barcodes[:permutation_train_idx]),
             torch.from_numpy(targets[:permutation_train_idx]),
             torch.from_numpy(event_index[:permutation_train_idx])
         )
 
         # noinspection PyAttributeOutsideInit
-        self.testing_dataset = TensorDataset(
-            torch.from_numpy(jets[permutation_train_idx:]),
+        self.validation_dataset = TensorDataset(
+            torch.from_numpy(jets[permutation_train_idx:]).float(),
+            torch.from_numpy(leptons[permutation_train_idx:]).float(),
             torch.from_numpy(barcodes[permutation_train_idx:]),
             torch.from_numpy(targets[permutation_train_idx:]),
             torch.from_numpy(event_index[permutation_train_idx:])
@@ -105,35 +115,43 @@ class PermutationDataModule(pl.LightningDataModule):
             batch_size=self.batch_size,
             shuffle=True,
             pin_memory=self.options["gpus"] > 0,
-            num_workers=8
+            num_workers=self.num_workers,
+            persistent_workers=True
         )
 
     def val_dataloader(self):
         return DataLoader(
-            self.testing_dataset,
+            self.validation_dataset,
             batch_size=self.batch_size,
             pin_memory=self.options["gpus"] > 0,
-            num_workers=8
+            num_workers=self.num_workers,
+            persistent_workers=True
         )
 
 
 # noinspection PyAbstractClass
 class PermutationNetworkModule(pl.LightningModule):
-    def __init__(self, options):
+    def __init__(self, options, data_module: PermutationDataModule):
         super(PermutationNetworkModule, self).__init__()
 
         self.options = options
         self.save_hyperparameters(options)
 
-        self.network = Network(4 * 5, options["hidden_dims"], options["dropout"])
+        self.network = Network(
+            data_module.flat_features,
+            options["hidden_dims"],
+            options["dropout"]
+        )
 
         self.loss = nn.BCEWithLogitsLoss()
 
     def training_step(self, batch, batch_idx):
-        data, barcodes, targets, event_index = batch
+        data, leptons, barcodes, targets, event_index = batch
         data = data.view(data.shape[0], -1)
+        leptons = leptons.view(data.shape[0], -1)
+        features = torch.cat((leptons, data), dim=-1)
 
-        predictions = self.network(data)
+        predictions = self.network(features)
 
         loss = self.loss(predictions.squeeze(), targets.float())
         accuracy = ((predictions > 0) == targets).float().mean()
@@ -144,10 +162,12 @@ class PermutationNetworkModule(pl.LightningModule):
         return loss
 
     def validation_step(self, batch, batch_idx):
-        data, barcodes, targets, event_index = batch
+        data, leptons, barcodes, targets, event_index = batch
         data = data.view(data.shape[0], -1)
+        leptons = leptons.view(data.shape[0], -1)
+        features = torch.cat((leptons, data), dim=-1)
 
-        predictions = self.network(data)
+        predictions = self.network(features)
 
         loss = self.loss(predictions.squeeze(), targets.float())
         accuracy = ((predictions > 0) == targets).float().mean()
@@ -174,6 +194,7 @@ def parse_arguments():
     parser.add_argument("--logdir", type=str, default="baseline_logs")
     parser.add_argument("--name", type=str, default=None)
     parser.add_argument("--epochs", type=int, default=1_000)
+    parser.add_argument("--num_workers", type=int, default=8)
 
     return parser.parse_args()
 
@@ -184,7 +205,8 @@ def main(
         name: Optional[str],
         gpus: int,
         batch_size: Optional[int],
-        epochs: int
+        epochs: int,
+        num_workers: int
 ):
     if "4_jets" in dataset:
         print("Training on >= 4 jets.")
@@ -204,8 +226,8 @@ def main(
     if batch_size is not None:
         options["batch_size"] = batch_size
 
-    data_module = PermutationDataModule(options)
-    network_module = PermutationNetworkModule(options)
+    data_module = PermutationDataModule(options, num_workers)
+    network_module = PermutationNetworkModule(options, data_module)
 
     logger = TensorBoardLogger(save_dir=logdir, name=name)
 
@@ -213,7 +235,8 @@ def main(
         logger=logger,
         gpus=gpus,
         weights_summary='full',
-        max_epochs=epochs
+        max_epochs=epochs,
+        strategy="ddp" if gpus > 1 else None
     )
 
     trainer.fit(network_module, data_module)

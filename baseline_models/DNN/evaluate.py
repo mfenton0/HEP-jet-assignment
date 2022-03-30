@@ -4,9 +4,9 @@ from argparse import ArgumentParser
 
 import numpy as np
 import torch
+torch.multiprocessing.set_sharing_strategy("file_system")
 
 from numba import jit, prange
-
 from train import PermutationNetworkModule, PermutationDataModule
 
 
@@ -19,8 +19,8 @@ def load_checkpoint(log_dir: str, cuda: bool):
     options = checkpoint["hyper_parameters"]
     options["gpus"] = int(cuda)
 
-    network_module = PermutationNetworkModule(options)
-    data_module = PermutationDataModule(options)
+    data_module = PermutationDataModule(options, 8)
+    network_module = PermutationNetworkModule(options, data_module)
     network_module.load_state_dict(checkpoint["state_dict"])
 
     network_module.eval()
@@ -42,12 +42,15 @@ def evaluate_testing_dataset(network_module, data_module, cuda):
     event_indices = []
 
     for batch in tqdm(data_module.val_dataloader()):
-        data, barcode, target, event_index = batch
+        data, leptons, barcode, target, event_index = batch
+        data = data.view(data.shape[0], -1)
+        leptons = leptons.view(data.shape[0], -1)
+        features = torch.cat((leptons, data), dim=-1)
 
         if cuda:
-            data = data.cuda()
+            features = features.cuda()
 
-        prediction = network_module.network(data.reshape(data.shape[0], -1)).cpu()
+        prediction = network_module.network(features).cpu()
 
         barcodes.append(barcode)
         predictions.append(prediction.reshape(-1))
@@ -82,7 +85,8 @@ def evaluate_testing_dataset(network_module, data_module, cuda):
 @jit("int64[:, ::1](int64[:, ::1], float32[::1], int64[::1], int64[::1])", nopython=True, parallel=True)
 def extract_event_predictions_loop(barcodes, predictions, event_indices, bounds):
     num_events = bounds.shape[0] - 1
-    predicted_barcodes = np.zeros((num_events, 4), dtype=np.int64)
+    context_jets = barcodes.shape[1]
+    predicted_barcodes = np.zeros((num_events, context_jets), dtype=np.int64)
 
     for i in prange(num_events):
         lower = bounds[i]
@@ -113,8 +117,17 @@ def main(log_dir: str, cuda: bool):
     barcodes, predictions, event_indices = evaluate_testing_dataset(network_module, data_module, cuda)
     predicted_barcodes = extract_event_predictions(barcodes, predictions, event_indices)
 
-    target_barcode = torch.tensor([[17, 34, 40, 40]])
-    accuracies = predicted_barcodes == target_barcode
+    uniform_target_barcode = torch.tensor([[1, 2, 3, 3]])
+    uniform_accuracies = predicted_barcodes[:, :4] == uniform_target_barcode
+
+    left_target_barcode = torch.tensor([[17, 34, 40, 40]])
+    left_accuracies = predicted_barcodes[:, :4] == left_target_barcode
+
+    right_target_barcode = torch.tensor([[34, 17, 20, 20]])
+    right_accuracies = predicted_barcodes[:, :4] == right_target_barcode
+
+    accuracies = left_accuracies | right_accuracies | uniform_accuracies
+
     all_accuracy = accuracies.all(1).float().mean().item()
     b_lep_accuracy = accuracies[:, 0].float().mean().item()
     b_had_accuracy = accuracies[:, 1].float().mean().item()
@@ -124,6 +137,8 @@ def main(log_dir: str, cuda: bool):
     print(f"Leptonic b Quark Accuracy: {100 * b_lep_accuracy:.2f}%.")
     print(f"Hadronic b Quark Accuracy: {100 * b_had_accuracy:.2f}%.")
     print(f"W Boson Accuracy: {100 * W_accuracy:.2f}%.")
+
+    torch.save([event_indices, accuracies], "accuracies.torch")
 
 
 if __name__ == '__main__':

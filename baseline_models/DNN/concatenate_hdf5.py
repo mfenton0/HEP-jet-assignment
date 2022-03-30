@@ -1,6 +1,7 @@
 from glob import glob
 from typing import List, Optional
 from argparse import ArgumentParser
+from random import shuffle
 
 import h5py
 import numpy as np
@@ -28,22 +29,27 @@ def concatenate(head, *tail, path: Optional[List[str]] = None):
     for key in head:
         new_path = path + [key]
         print(f"Concatenating: {'/'.join(new_path)}")
-        database[key] = concatenate(head[key], *[d[key] for d in tail], path=new_path)
+        try:
+            database[key] = concatenate(head[key], *[d[key] for d in tail], path=new_path)
+        except KeyError:
+            print(f"Skipping: {'/'.join(new_path)}")
+            continue
 
     return database
 
 
-def write(input_file, output_file, path: Optional[List[str]] = None):
+def write(input_file, output_file, path: Optional[List[str]] = None, verbose: bool = True):
     if path is None:
         path = []
 
     for key, value in input_file.items():
         current_subpath = path + [key]
         if isinstance(value, np.ndarray):
-            print(f"Creating {'/'.join(current_subpath)}: Shape {value.shape}")
+            if verbose:
+                print(f"Creating {'/'.join(current_subpath)}: Shape {value.shape}")
             output_file.create_dataset("/".join(current_subpath), data=value)
         else:
-            write(input_file[key], output_file, current_subpath)
+            write(input_file[key], output_file, current_subpath, verbose=verbose)
 
 
 def main(input_folder: str, output_file: str):
@@ -51,7 +57,9 @@ def main(input_folder: str, output_file: str):
     print(f"Reading in files from {input_folder}")
     print("-" * 40)
     global_file = []
-    for filename in glob(f"{input_folder}/*.h5"):
+    all_files = list(glob(f"{input_folder}/*.h5"))
+    shuffle(all_files)
+    for filename in all_files: 
         print(f"Reading: {filename}")
         with h5py.File(filename, 'r') as file:
             global_file.append(extract(file))
