@@ -134,6 +134,9 @@ class IO_module:
                         _missing_et_met = _data[i].array('MissingET.MET')
                         _missing_et_eta = _data[i].array('MissingET.Eta')
                         _missing_et_phi = _data[i].array('MissingET.Phi')
+                        _gen_missing_et_met = _data[i].array('GenMissingET.MET')
+                        _gen_missing_et_eta = _data[i].array('GenMissingET.Eta')
+                        _gen_missing_et_phi = _data[i].array('GenMissingET.Phi')
                         _sumet = _data[i].array('ScalarHT.HT') 
 
                         _muon_pt = _data[i].array('Muon.PT')
@@ -149,6 +152,9 @@ class IO_module:
                         _missing_et_met = np.concatenate((_missing_et_met, _data[i].array('MissingET.MET')))
                         _missing_et_eta = np.concatenate((_missing_et_eta, _data[i].array('MissingET.Eta')))
                         _missing_et_phi = np.concatenate((_missing_et_phi, _data[i].array('MissingET.Phi')))
+                        _gen_missing_et_met = np.concatenate((_gen_missing_et_met, _data[i].array('GenMissingET.MET')))
+                        _gen_missing_et_eta = np.concatenate((_gen_missing_et_eta, _data[i].array('GenMissingET.Eta')))
+                        _gen_missing_et_phi = np.concatenate((_gen_missing_et_phi, _data[i].array('GenMissingET.Phi')))
                         _sumet = np.concatenate((_sumet, _data[i].array('ScalarHT.HT')))
                         
                         _muon_pt = np.concatenate((_muon_pt, _data[i].array('Muon.PT')))
@@ -195,6 +201,9 @@ class IO_module:
                 _missing_et_met = _data.array('MissingET.MET')
                 _missing_et_eta = _data.array('MissingET.Eta')
                 _missing_et_phi = _data.array('MissingET.Phi')
+                _gen_missing_et_met = _data.array('GenMissingET.MET')
+                _gen_missing_et_eta = _data.array('GenMissingET.Eta')
+                _gen_missing_et_phi = _data.array('GenMissingET.Phi')
                 _sumet = _data.array('ScalarHT.HT')
 
                 print("Loading muon information.")
@@ -251,7 +260,10 @@ class IO_module:
             MissingET_dataset = {
                 "MET": _missing_et_met, 
                 "eta": _missing_et_eta, 
-                "phi": _missing_et_phi, 
+                "phi": _missing_et_phi,
+                "genMET": _gen_missing_et_met,
+                "geneta": _gen_missing_et_eta,
+                "genphi": _gen_missing_et_phi, 
                 "sumet": _sumet,
             }
             dataset = {

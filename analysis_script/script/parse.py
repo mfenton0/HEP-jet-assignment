@@ -540,6 +540,9 @@ def parse(INPUT_FILE, OUTPUT_FILE, MODEL, PROCESS, GENERATOR, SINGLE=True, COMPU
             ("MET", np.array([x for x in dataset['MissingET']['MET']])),
             ("eta", np.array([x for x in dataset['MissingET']['eta']])),
             ("phi", np.array([x for x in dataset['MissingET']['phi']])),
+            ("genMET", np.array([x for x in dataset['MissingET']['genMET']])),
+            ("geneta", np.array([x for x in dataset['MissingET']['geneta']])),
+            ("genphi", np.array([x for x in dataset['MissingET']['genphi']])),
             ("sumet", np.array([x for x in dataset['MissingET']['sumet']])),
         ))
         event_features = OrderedDict((
