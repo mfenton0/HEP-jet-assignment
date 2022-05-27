@@ -1,0 +1,20 @@
+set nb_core 1
+import model VPrime_UFO
+generate p p > zp > t t~, (t > W+ b, W+ > l+ vl), (t~ > W- b~, W- > j j)
+add process p p > zp > t t~, (t > W+ b, W+ > j j), (t~ > W- b~, W- > l- vl~)
+output  ###YOUR_AREA###/HEP-jet-assignment/output/ppZptt_lep
+launch  ###YOUR_AREA###/HEP-jet-assignment/output/ppZptt_lep
+shower=Pythia8
+detector=Delphes
+analysis=OFF
+done
+set MZp 400
+set MWp 400
+set WZp 4
+set WWp 4
+set nevents = 10000
+set iseed = 123
+###YOUR_DELPHES_AREA###/cards/delphes_card_CMS.tcl
+done
+exit
+
