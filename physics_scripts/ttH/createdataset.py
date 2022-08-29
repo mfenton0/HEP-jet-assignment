@@ -1,3 +1,4 @@
+from fileinput import filename
 from math import cos, fabs, sin
 from select import select
 from traceback import print_tb
@@ -7,10 +8,16 @@ import numpy as np
 import ROOT
 import math
 
-trainsize=790000
+trainsize=173114
 testsize=30000
+nosig = 0
+filename = 'tth_with_spanet_with_signal.h5'
+if nosig == 1:
+  trainsize=173108
+  filename = 'tth_with_spanet_no_signal.h5'
 
-with h5py.File('tth_with_spanet_frozen_signal.h5', 'r') as file:
+print(filename)
+with h5py.File(filename, 'r') as file:
     # Load in the raw data
     pt = file["jet_features"]["pt"][:trainsize].astype(np.float32)
     eta = file["jet_features"]["eta"][:trainsize].astype(np.float32)
@@ -34,6 +41,10 @@ with h5py.File('tth_with_spanet_frozen_signal.h5', 'r') as file:
     b2index = file["spanet"]["higgs_target"]["b2"][:trainsize]
 
     flags = file["spanet"]["signal"]["target"][:trainsize]
+    spanet_probability = file["spanet"]["signal"]["probability"][:trainsize]
+    assignment_probability = file["spanet"]["higgs_target"]["assignment_probability"][:trainsize]
+    detection_probability = file["spanet"]["higgs_target"]["detection_probability"][:trainsize]
+    marginal_probability = file["spanet"]["higgs_target"]["marginal_probability"][:trainsize]
 
 
     Ravgbb=np.zeros(trainsize)
@@ -196,14 +207,18 @@ DATA_STRUCTURE = np.dtype(
         ("Rhtlep", "f4"),
         ("Rhbhad", "f4"),
         ("flags", "f4"),
+        ("spanet_probability", "f4"),
+        ("assignment_probability", "f4"),
+        ("detection_probability", "f4"),
+        ("marginal_probability", "f4"),
         ("eventnumber", "f4"),
     ]
 )
 
-spanet_data = np.zeros(72236, dtype=DATA_STRUCTURE)
+spanet_data = np.zeros(28780, dtype=DATA_STRUCTURE)
 sel = 0
 for fill in range(trainsize):
-    if (bjetnum[fill]>3) & (jetcounts[fill]==6):
+    if (bjetnum[fill]>0) & (jetcounts[fill]==8) :
       spanet_data[sel]["higgsm"] = higgsm[fill]
       spanet_data[sel]["Ravgbb"] = Ravgbb[fill]
       spanet_data[sel]["Rmaxptbb"] = Rmaxptbb[fill]
@@ -219,12 +234,16 @@ for fill in range(trainsize):
       spanet_data[sel]["Rhtlep"] = Rhtlep[fill]
       spanet_data[sel]["Rhbhad"] = Rhbhad[fill]
       spanet_data[sel]["flags"] = flags[fill]
+      spanet_data[sel]["spanet_probability"] = spanet_probability[fill]
+      spanet_data[sel]["assignment_probability"] = assignment_probability[fill]
+      spanet_data[sel]["detection_probability"] = detection_probability[fill]
+      spanet_data[sel]["marginal_probability"] = marginal_probability[fill]
       spanet_data[sel]["eventnumber"] = fill
       
       sel = sel + 1
-      if flags[fill]==1:
-        if b1index[fill]==b2index[fill] :
-            print("Error in prediction") 
+      #if flags[fill]==1:
+      #  if b1index[fill]==b2index[fill] :
+      #      print("Error in prediction") 
     
 
 with h5py.File("spanet_features.h5", "w") as file:
