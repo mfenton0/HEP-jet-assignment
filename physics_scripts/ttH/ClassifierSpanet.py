@@ -4,6 +4,7 @@ import h5py
 import xgboost as xgb
 import pandas as pd
 import matplotlib.pyplot as plt
+from scipy.stats import wasserstein_distance
 from sklearn.metrics import roc_curve, roc_auc_score
 
 DATA_STRUCTURE = np.dtype(
@@ -24,7 +25,7 @@ DATA_STRUCTURE = np.dtype(
         ("Rhbhad", "f4"),
     ]
 )
-sig_event = pd.DataFrame(columns=['hi','Ra','Rm','et','mb','mj','Nb','HT','Rb','mh','rhb','rht','rlep','rhbh'])
+sig_event = pd.DataFrame(columns=['hi','Ra','Rm','et','mb','mj','Nb','HT','Rb','mh','rhb','rht','rlep','rhbh', 'ap', 'dp', 'mp'])
 with h5py.File("spanet_features.h5",'r') as file:
     data_sig = file["events"]["Nbbhiggs30"][:]
     
@@ -42,6 +43,11 @@ with h5py.File("spanet_features.h5",'r') as file:
     sig_event['rht'] = file["events"]["Rhtt"][:]
     sig_event['rlep'] = file["events"]["Rhtlep"][:]
     sig_event['rhbh'] = file["events"]["Rhbhad"][:]
+    #sig_event['pr'] = file["events"]["spanet_probability"][:]
+    sig_event['ap'] = file["events"]["assignment_probability"][:]
+    sig_event['dp'] = file["events"]["detection_probability"][:]
+    sig_event['mp'] = file["events"]["marginal_probability"][:]
+
 
     flags = file["events"]["flags"][:]
 
@@ -57,23 +63,29 @@ xparams['eval_metric'] = 'auc'
 #xparams['nthread'] = 8
 xparams=list(xparams.items())
 
-num_trees = 700
+num_trees = 7000
 
+#spliting trainning & evaluating
+trainningcut = round(len(sig_event)*0.7)
+sig_event_train = sig_event[:trainningcut]
+sig_event_evaluate = sig_event[(trainningcut+1):]
+flags_train = flags[:trainningcut]
+flags_evaluate = flags[(trainningcut+1):]
 # trainning 
-dmatrix0 = xgb.DMatrix(data=sig_event, label=flags) # trainning
-#dmatrixodd  = xgb.DMatrix(data=data_odd, label=flag_odd) #testing
+dmatrix0 = xgb.DMatrix(data=sig_event_train, label=flags_train) # trainning
+dmatrix1  = xgb.DMatrix(data=sig_event_evaluate, label=flags_evaluate) #testing
 
 booster = xgb.train(xparams, dmatrix0, num_boost_round=num_trees)
-trainingpredictionsx = booster.predict(dmatrix0)
+trainingpredictionsx = booster.predict(dmatrix1)
 print(trainingpredictionsx[1:10])
 
 sig_pred, bkg_pred = [], []
 plt.figure()
 plt.title("Classifier Output")
-for i in range(len(flags)):
-    if flags[i] == 0:
+for i in range(len(flags_evaluate)):
+    if flags_evaluate[i] == 0:
         bkg_pred.append(trainingpredictionsx[i])
-    elif flags[i] == 1:
+    elif flags_evaluate[i] == 1:
         sig_pred.append(trainingpredictionsx[i])
     else:
         print("ERROR, CHECK YOUR FLAGS")
@@ -97,12 +109,13 @@ plt.legend()
 plt.savefig("classifieroutput_abs_spanet.png")
 
 plt.figure()
-plt.title("Classifier Output from SPANet")    
+plt.title("Classifier Output: ==7jets & >=4bjets")    
 ntot=sum(n)
 mtot=sum(m)
 
-plt.hist(bincentres, bins=bins, weights=n/ntot,alpha=0.5, label='ttbar Test')
-plt.hist(bincentres, bins=bins, weights=m/mtot,alpha=0.5, label='ttH Test')
+metric=wasserstein_distance(sig_pred, bkg_pred)
+plt.hist(bincentres, bins=bins, weights=n/ntot,alpha=0.5, label='ttbar SPANet')
+plt.hist(bincentres, bins=bins, weights=m/mtot,alpha=0.5, label='ttH SPANet, metric = '+str(round(metric,4)))
 
 plt.errorbar(bincentres, n/ntot, np.sqrt(n)/ntot, fmt='none', ecolor='b')
 plt.errorbar(bincentres, m/mtot, np.sqrt(m)/mtot, fmt='none', ecolor='orange')
@@ -112,9 +125,11 @@ plt.savefig("classifieroutput_normalized_spanet.png")
 
 plt.figure()
 plt.cla()
-auc = roc_auc_score(flags, trainingpredictionsx)
+auc = roc_auc_score(flags_evaluate, trainingpredictionsx)
+
+print(round(auc,3))
     
-fprx, tprx, _ = roc_curve(flags.ravel(), trainingpredictionsx)
+fprx, tprx, _ = roc_curve(flags_evaluate.ravel(), trainingpredictionsx)
     
 plt.plot(tprx, 1-fprx, label='XGBoost, AUC = '+str(round(auc,3)))
 plt.title("ROC curves from SPANet BDT")
@@ -124,5 +139,23 @@ plt.legend()
 
 plt.savefig('roc_spanet.png')
 
+np.save('flag_span_w_sig_8',flags_evaluate)
+np.save('prob_span_w_sig_8',trainingpredictionsx)
+plt.cla()
+
+xgb.plot_importance(booster, grid=False, importance_type='weight', title="Feature Importance: Weight")
+plt.savefig('importance_weight.png')
+plt.cla()
+xgb.plot_importance(booster, grid=False, importance_type='gain', title="Feature Importance: Gain")
+plt.savefig('importance_gain.png')
+plt.cla()
+xgb.plot_importance(booster, grid=False, importance_type='cover', title="Feature Importance: Cover")
+plt.savefig('importance_cover.png')
+plt.cla()
+xgb.plot_importance(booster, grid=False, importance_type='total_gain', title="Feature Importance: Total Gain")
+plt.savefig('importance_total_gain.png')
+plt.cla()
+xgb.plot_importance(booster, grid=False, importance_type='total_cover', title="Feature Importance: Total Cover")
+plt.savefig('importance_total_cover.png')
 # Save the model
 booster.save_model('trainspanet0.xgb')
