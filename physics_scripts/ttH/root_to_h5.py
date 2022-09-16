@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+from ssl import HAS_SNI
+from symbol import star_expr
 import awkward as ak
 import h5py
 import numpy as np
@@ -77,7 +79,7 @@ PARTON_STRUCTURE = np.dtype(
 )
 def get_flattened_eventA(event):
     """Returns event in the specified data structure."""
-    flattened_event = np.zeros(1, dtype=DATA_STRUCTURE)
+    flattened_event = np.zeros(1, dtype=DATA_STRUCTUREA)
 
    
 
@@ -311,11 +313,69 @@ def main():
 
     print(f'Created structured data from input files "{signal_files}".')
 
-    with h5py.File("output_signal.h5", "w") as file:
+    with h5py.File('tth_with_spanet_no_signal.h5', 'r') as fileA:
+        h_assignment_probability = fileA["spanet"]["higgs_target"]["assignment_probability"][:]
+        h_detection_probability = fileA["spanet"]["higgs_target"]["detection_probability"][:]
+        h_marginal_probability = fileA["spanet"]["higgs_target"]["marginal_probability"][:]
+        h_b1 = fileA["spanet"]["higgs_target"]["b1"][:]
+        h_b2 = fileA["spanet"]["higgs_target"]["b2"][:]
+        h_mask = fileA["spanet"]["higgs_target"]["mask"][:]
+
+        l_assignment_probability = fileA["spanet"]["left_target"]["assignment_probability"][:]
+        l_detection_probability = fileA["spanet"]["left_target"]["detection_probability"][:]
+        l_marginal_probability = fileA["spanet"]["left_target"]["marginal_probability"][:]
+        l_b = fileA["spanet"]["left_target"]["b"][:]
+        l_mask = fileA["spanet"]["left_target"]["mask"][:]
+
+        r_assignment_probability = fileA["spanet"]["right_target"]["assignment_probability"][:]
+        r_detection_probability = fileA["spanet"]["right_target"]["detection_probability"][:]
+        r_marginal_probability = fileA["spanet"]["right_target"]["marginal_probability"][:]
+        r_b = fileA["spanet"]["right_target"]["b"][:]
+        r_q1 = fileA["spanet"]["right_target"]["q1"][:]
+        r_q2 = fileA["spanet"]["right_target"]["q2"][:]
+        r_mask = fileA["spanet"]["right_target"]["mask"][:]
+
+        s_prediction = fileA["spanet"]["signal"]["prediction"][:]
+        s_probability = fileA["spanet"]["signal"]["probability"][:]
+        s_target = fileA["spanet"]["signal"]["target"][:]
+
+   
+    
+    with h5py.File("BDT_KLFitter_output.h5", "w") as file:
         g1=file.create_group("klfitter")
         c1=g1.create_group("left_target")
         c2=g1.create_group("right_target")
         c3=g1.create_group("higgs_target")
+        g7=file.create_group("spanet")
+        g71 = g7.create_group("signal")
+        g71["prediction"] = s_prediction
+        g71["probability"] = s_probability
+        g71["target"] = s_target
+
+        g72 = g7.create_group("left_target")
+        g72["assignment_probability"] = l_assignment_probability
+        g72["detection_probability"] =l_detection_probability
+        g72["marginal_probability"] = l_marginal_probability
+        g72["b"] = l_b
+        g72["mask"] = l_mask
+
+        g73 = g7.create_group("right_target")
+        g73["assignment_probability"] = r_assignment_probability
+        g73["detection_probability"] =r_detection_probability
+        g73["marginal_probability"] = r_marginal_probability
+        g73["b"] = r_b
+        g73["q1"] = r_q1
+        g73["q2"] = r_q2
+        g73["mask"] = r_mask
+
+        g74 = g7.create_group("higgs_target")
+        g74["assignment_probability"] = h_assignment_probability
+        g74["detection_probability"] =h_detection_probability
+        g74["marginal_probability"] = h_marginal_probability
+        g74["b"] = h_b1
+        g74["b2"] = h_b2
+        g74["mask"] = h_mask
+
         c2["b"]=signal_data["bhad"]
         c1["b"]=signal_data["blep"]
         c2["q1"]=signal_data["q1"]
@@ -363,7 +423,7 @@ def main():
         p1["mass"]=parton_data["parton_m1"]
         p1["barcode"]=parton_data["parton_barcode1"]
 
-        file.create_dataset("events", data=signal_dataA, dtype=DATA_STRUCTUREA)
+        file.create_dataset("events_BDT_feature", data=signal_dataA, dtype=DATA_STRUCTUREA)
 
 
     print('Wrote structured data to output file "output_signal.h5".')
