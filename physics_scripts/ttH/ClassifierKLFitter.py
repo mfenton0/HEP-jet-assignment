@@ -65,7 +65,7 @@ flag = np.array(b)
 # https://xgboost.readthedocs.io/en/latest/parameter.html
 xparams = {}
 
-xparams['learning_rate'] = 0.01 
+xparams['learning_rate'] = 0.01
 xparams['max_depth'] = 3
 xparams['objective'] = 'binary:logistic'
 xparams['seed'] = 42
@@ -73,7 +73,7 @@ xparams['eval_metric'] = 'auc'
 #xparams['nthread'] = 8
 xparams=list(xparams.items())
 
-num_trees = 7000
+num_trees = 500
 trainningcut = round(len(sig_event)*0.7)
 sig_event_train = sig_event[:trainningcut]
 sig_event_evaluate = sig_event[(trainningcut+1):]
@@ -81,7 +81,7 @@ flag_train = flag[:trainningcut]
 flag_evaluate = flag[(trainningcut+1):]
 # trainning 
 dmatrix0 = xgb.DMatrix(data=sig_event_train, label=flag_train) # trainning
-dmatrix1  = xgb.DMatrix(data=sig_event_evaluate, label=flag_evaluate) #testing
+dmatrix1  = xgb.DMatrix(data=sig_event_train, label=flag_train) #testing
 
 booster = xgb.train(xparams, dmatrix0, num_boost_round=num_trees)
 trainingpredictionsx = booster.predict(dmatrix1)
@@ -134,9 +134,10 @@ plt.savefig("classifieroutput_normalized.png")
 plt.figure()
 plt.cla()
 plt.title("ROC curves from KLFitter BDT")   
-auc = roc_auc_score(flag_evaluate, trainingpredictionsx)
+auc = roc_auc_score(flag_train, trainingpredictionsx)
+print(auc)
     
-fprx, tprx, _ = roc_curve(flag_evaluate.ravel(), trainingpredictionsx)
+fprx, tprx, _ = roc_curve(flag_train.ravel(), trainingpredictionsx)
     
 plt.plot(tprx, 1-fprx, label='XGBoost, AUC = '+str(round(auc,3)))
 plt.xlabel('Signal Efficiency')
@@ -145,7 +146,7 @@ plt.legend()
 
 plt.savefig('roc.png')
 
-np.save('flag_klf_sig',flag)
-np.save('prob_klf_sig',trainingpredictionsx)
+np.save('flag_klf_sig_tr_tr',flag_train)
+np.save('prob_klf_sig_tr_tr',trainingpredictionsx)
 # Save the model
 booster.save_model('trainon0.xgb')

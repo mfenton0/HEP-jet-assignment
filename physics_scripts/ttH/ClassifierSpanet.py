@@ -1,4 +1,6 @@
+import mailbox
 import os
+from unicodedata import name
 import numpy as np
 import h5py
 import xgboost as xgb
@@ -63,7 +65,7 @@ xparams['eval_metric'] = 'auc'
 #xparams['nthread'] = 8
 xparams=list(xparams.items())
 
-num_trees = 7000
+num_trees = 500
 
 #spliting trainning & evaluating
 trainningcut = round(len(sig_event)*0.7)
@@ -83,9 +85,9 @@ sig_pred, bkg_pred = [], []
 plt.figure()
 plt.title("Classifier Output")
 for i in range(len(flags_evaluate)):
-    if flags_evaluate[i] == 0:
+    if flags_train[i] == 0:
         bkg_pred.append(trainingpredictionsx[i])
-    elif flags_evaluate[i] == 1:
+    elif flags_train[i] == 1:
         sig_pred.append(trainingpredictionsx[i])
     else:
         print("ERROR, CHECK YOUR FLAGS")
@@ -109,19 +111,22 @@ plt.legend()
 plt.savefig("classifieroutput_abs_spanet.png")
 
 plt.figure()
-plt.title("Classifier Output: ==7jets & >=4bjets")    
+plt.title("Classifier Output: >=6jets & >=4bjets")    
 ntot=sum(n)
 mtot=sum(m)
 
 metric=wasserstein_distance(sig_pred, bkg_pred)
-plt.hist(bincentres, bins=bins, weights=n/ntot,alpha=0.5, label='ttbar SPANet')
-plt.hist(bincentres, bins=bins, weights=m/mtot,alpha=0.5, label='ttH SPANet, metric = '+str(round(metric,4)))
+nai=833.9*0.288*0.001343*1000*300
+mai=0.5085*0.288*0.1894*1000*300
+#plt.yscale("log")
+plt.hist(bincentres, bins=bins, weights=n*nai/ntot,alpha=0.5, label='ttbar SPANet, L=300 fb-1, integral='+str(sum(n)*nai/ntot))
+plt.hist(bincentres, bins=bins, weights=m*mai/mtot,alpha=0.5, label='ttH SPANet, metric = '+str(round(metric,4))+'integral='+str(sum(m)*mai/mtot))
 
 plt.errorbar(bincentres, n/ntot, np.sqrt(n)/ntot, fmt='none', ecolor='b')
 plt.errorbar(bincentres, m/mtot, np.sqrt(m)/mtot, fmt='none', ecolor='orange')
 
 plt.legend()
-plt.savefig("classifieroutput_normalized_spanet.png")
+plt.savefig("classifieroutput_normalized_spanet_tr_tr.png")
 
 plt.figure()
 plt.cla()
@@ -139,23 +144,29 @@ plt.legend()
 
 plt.savefig('roc_spanet.png')
 
-np.save('flag_span_w_sig_8',flags_evaluate)
-np.save('prob_span_w_sig_8',trainingpredictionsx)
+np.save('flag_span_w_sig_tr_te',flags_evaluate)
+np.save('prob_span_w_sig_tr_te',trainingpredictionsx)
 plt.cla()
 
-xgb.plot_importance(booster, grid=False, importance_type='weight', title="Feature Importance: Weight")
+xgb.plot_importance(booster, grid=False, importance_type='weight', title="Feature Importance: Weight >=6 jets(n_sig)")
 plt.savefig('importance_weight.png')
 plt.cla()
-xgb.plot_importance(booster, grid=False, importance_type='gain', title="Feature Importance: Gain")
+xgb.plot_importance(booster, grid=False, importance_type='gain', title="Feature Importance: Gain >=6 jets(n_sig)")
 plt.savefig('importance_gain.png')
 plt.cla()
-xgb.plot_importance(booster, grid=False, importance_type='cover', title="Feature Importance: Cover")
+xgb.plot_importance(booster, grid=False, importance_type='cover', title="Feature Importance: Cover >=6 jets(n_sig)")
 plt.savefig('importance_cover.png')
 plt.cla()
-xgb.plot_importance(booster, grid=False, importance_type='total_gain', title="Feature Importance: Total Gain")
+xgb.plot_importance(booster, grid=False, importance_type='total_gain', title="Feature Importance: Total Gain >=6 jets(n_sig)")
 plt.savefig('importance_total_gain.png')
 plt.cla()
-xgb.plot_importance(booster, grid=False, importance_type='total_cover', title="Feature Importance: Total Cover")
+xgb.plot_importance(booster, grid=False, importance_type='total_cover', title="Feature Importance: Total Cover >=6 jets(n_sig)")
 plt.savefig('importance_total_cover.png')
+plt.cla()
+plt.hist(bincentres, bins=bins, weights=n*nai/ntot,alpha=0.5, label='ttbar SPANet, L=300 fb-1')
+plt.savefig('ttbar_normalized.png')
+plt.cla()
+plt.hist(bincentres, bins=bins, weights=m*mai/mtot,alpha=0.5, label='ttH SPANet, L=300 fb-1')
+plt.savefig('ttH_normalized.png')
 # Save the model
 booster.save_model('trainspanet0.xgb')
