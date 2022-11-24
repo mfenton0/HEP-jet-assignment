@@ -122,11 +122,14 @@ mai=0.5085*0.288*0.1894*1000*300
 plt.hist(bincentres, bins=bins, weights=n*nai/ntot,alpha=0.5, label='ttbar SPANet, L=300 fb-1, integral='+str(sum(n)*nai/ntot))
 plt.hist(bincentres, bins=bins, weights=m*mai/mtot,alpha=0.5, label='ttH SPANet, metric = '+str(round(metric,4))+'integral='+str(sum(m)*mai/mtot))
 
+np.save('sig_bin',m*mai/mtot)
+np.save('bkg_bin',n*nai/ntot)
+
 plt.errorbar(bincentres, n/ntot, np.sqrt(n)/ntot, fmt='none', ecolor='b')
 plt.errorbar(bincentres, m/mtot, np.sqrt(m)/mtot, fmt='none', ecolor='orange')
 
 plt.legend()
-plt.savefig("classifieroutput_normalized_spanet_tr_tr.png")
+plt.savefig("classifieroutput_normalized_spanet_tr_te.png")
 
 plt.figure()
 plt.cla()

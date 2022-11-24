@@ -81,7 +81,7 @@ flag_train = flag[:trainningcut]
 flag_evaluate = flag[(trainningcut+1):]
 # trainning 
 dmatrix0 = xgb.DMatrix(data=sig_event_train, label=flag_train) # trainning
-dmatrix1  = xgb.DMatrix(data=sig_event_train, label=flag_train) #testing
+dmatrix1  = xgb.DMatrix(data=sig_event_evaluate, label=flag_evaluate) #testing
 
 booster = xgb.train(xparams, dmatrix0, num_boost_round=num_trees)
 trainingpredictionsx = booster.predict(dmatrix1)
@@ -117,13 +117,18 @@ plt.legend()
 plt.savefig("classifieroutput_abs.png")
 
 plt.figure()
-plt.title("Classifier Output: ==8jets & >=4bjets")    
+plt.title("Classifier Output: >=6jets & >=4bjets")    
 ntot=sum(n)
 mtot=sum(m)
 
 metric=wasserstein_distance(sig_pred, bkg_pred)
-plt.hist(bincentres, bins=bins, weights=n/ntot,alpha=0.5, label='ttbar KLFitter')
-plt.hist(bincentres, bins=bins, weights=m/mtot,alpha=0.5, label='ttH KLFitter, metric = '+str(round(metric,4)))
+nai=833.9*0.288*0.001343*1000*300
+mai=0.5085*0.288*0.1894*1000*300
+#plt.yscale("log")
+plt.hist(bincentres, bins=bins, weights=n*nai/ntot,alpha=0.5, label='ttbar KLFitter, L=300 fb-1, integral='+str(sum(n)*nai/ntot))
+plt.hist(bincentres, bins=bins, weights=m*mai/mtot,alpha=0.5, label='ttH KLFitter, metric = '+str(round(metric,4))+'integral='+str(sum(m)*mai/mtot))
+np.save('klf_sig_bin',m*mai/mtot)
+np.save('klf_bkg_bin',n*nai/ntot)
 
 plt.errorbar(bincentres, n/ntot, np.sqrt(n)/ntot, fmt='none', ecolor='b')
 plt.errorbar(bincentres, m/mtot, np.sqrt(m)/mtot, fmt='none', ecolor='orange')
@@ -134,10 +139,10 @@ plt.savefig("classifieroutput_normalized.png")
 plt.figure()
 plt.cla()
 plt.title("ROC curves from KLFitter BDT")   
-auc = roc_auc_score(flag_train, trainingpredictionsx)
+auc = roc_auc_score(flag_evaluate, trainingpredictionsx)
 print(auc)
     
-fprx, tprx, _ = roc_curve(flag_train.ravel(), trainingpredictionsx)
+fprx, tprx, _ = roc_curve(flag_evaluate.ravel(), trainingpredictionsx)
     
 plt.plot(tprx, 1-fprx, label='XGBoost, AUC = '+str(round(auc,3)))
 plt.xlabel('Signal Efficiency')
