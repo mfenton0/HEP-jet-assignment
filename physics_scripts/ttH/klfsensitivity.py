@@ -10,15 +10,20 @@ from pyhf.contrib.viz import brazil
 
 bkg11 = np.load('klf_bkg_bin.npy')
 sig11 = np.load('klf_sig_bin.npy')
+ntot=sum(bkg11)
+mtot = sum(sig11)
+nai=833.9*0.288*0.001343*1000*300
+mai=0.5085*0.288*0.1894*1000*300
 uncer = []
 sig1 = []
 bkg1 = []
 data1 = []
 for i in range(0,len(bkg11)):
-    uncer.append(sqrt(bkg11[i]))
-    sig1.append(sig11[i])
-    bkg1.append(bkg11[i]) 
-    data1.append(bkg11[i])
+    uncer.append(sqrt(bkg11[i])*nai/ntot)
+    sig1.append(sig11[i]*mai/mtot)
+    bkg1.append(bkg11[i]*nai/ntot) 
+    data1.append(bkg11[i]*nai/ntot)
+
 
 pyhf.set_backend("numpy")
 model = pyhf.simplemodels.uncorrelated_background(
