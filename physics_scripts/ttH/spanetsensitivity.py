@@ -31,16 +31,19 @@ model = pyhf.simplemodels.uncorrelated_background(
 data = data1 + model.config.auxdata
 
 poi_vals = np.linspace(0, 0.6, 41)
-results = [
-    pyhf.infer.hypotest(
-        test_poi, data, model, test_stat="qtilde", return_expected_set=True
-    )
-    for test_poi in poi_vals
-]
+
+
+(
+    obs_limit,
+    exp_limits,
+    (poi_tests, tests),
+) = pyhf.infer.intervals.upper_limits.upper_limit(
+    data, model, poi_vals, level=0.05, return_results=True
+)
 
 fig, ax = plt.subplots()
 fig.set_size_inches(7, 5)
-brazil.plot_results(poi_vals, results, ax=ax)
+brazil.plot_results(poi_vals, tests, test_size=0.05, ax=ax)
 fig.show()
 plt.title("SPANet BDT")
 fig.savefig("sense.png")
