@@ -19,7 +19,7 @@ sig1 = []
 bkg1 = []
 data1 = []
 for i in range(0,len(bkg11)):
-    uncer.append(sqrt(bkg11[i])*nai/ntot)
+    uncer.append(0.2*sqrt(bkg11[i])*nai/ntot)
     sig1.append(sig11[i]*mai/mtot)
     bkg1.append(bkg11[i]*nai/ntot) 
     data1.append(bkg11[i]*nai/ntot)
