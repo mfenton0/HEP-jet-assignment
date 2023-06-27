@@ -11,8 +11,8 @@ from pyhf.contrib.viz import brazil
 SMxec = 0.507
 unit = 'pb'
 nbins=5
-bkg11 = np.load('span_bkg_bin_noprob_nbins'+str(nbins)+'.npy')
-sig11 = np.load('span_sig_bin_noprob_nbins'+str(nbins)+'.npy')
+bkg11 = np.load('span_bkg_bin_finetuning_nbin'+str(nbins)+'.npy')
+sig11 = np.load('span_sig_bin_finetuning_nbin'+str(nbins)+'.npy')
 BkgError = sqrt(490*490+210*210+130*130+61*61+27*27+49*49+24*24)
 kttbb = 1
 ntot=sum(bkg11)
@@ -22,10 +22,8 @@ lum = 139
 #mai=0.507*0.288*0.577*0.1894*1000*lum
 nai = 3160 + 1530 + 720 + 215 + 55 + 246 + 55
 mai = 213 + 113 + 59.9 + 13.9 + 3.09 + 35.1 +8.5
-
 BkgError = sqrt(810*810+360*360+180*180+72*72+29*29+120*120+38*38)
 nai = 4350+2100+1000+301+80+470+117
-
 bkgrate = BkgError/nai
 mai = 502
 nai = 4337
@@ -70,10 +68,10 @@ fig, ax = plt.subplots()
 fig.set_size_inches(7, 5)
 brazil.plot_results(poi_vals, tests, test_size=alpha, ax=ax)
 fig.show()
-plt.title("SPANet BDT, expected limits:"+str(np.round(exp_limits[2],3))+" bkg uncertainty: 20% (300fb-1)")
-fig.savefig("SPANetBDT.png")
+plt.title("SPANet finetuning, expected limits:"+str(np.round(exp_limits[2],3))+" bkg uncertainty: 20% (300fb-1)")
+fig.savefig("SPANetfinetuning.png")
 asymp_calc = pyhf.infer.calculators.AsymptoticCalculator(
     data, model, test_stat='qtilde'
 )
 teststat = asymp_calc.teststatistic(poi_test=obs_limit)
-print("SPANetBDT:"+str(np.round(exp_limits[2],3))+" xsec:"+str(np.round((np.round(exp_limits[2],3)*SMxec),3))+"(pb) "+ f'qtilde = {teststat}')
+print("FineTuning:"+str(np.round(exp_limits[2],3))+" xsec:"+str(np.round((np.round(exp_limits[2],3)*SMxec),3))+"(pb) "+ f'qtilde = {teststat}')
